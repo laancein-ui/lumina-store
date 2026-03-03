@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina | Premium E-Commerce</title>
+    <!-- Fonts: Outfit for a modern, sleek tech vibe -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Boxicons for icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" data-link="home">
+                LUMINA<span class="dot">.</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" data-link="home" class="active">Store</a>
+                <a href="#" data-link="orders">My Orders</a>
+                <a href="#" data-link="tracking">Track Order</a>
+            </div>
+            <div class="cart-trigger" id="cart-trigger">
+                <i class='bx bx-shopping-bag'></i>
+                <span id="cart-count">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main SPA Container -->
+    <main id="app-root" class="app-root"></main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <h2>LUMINA.</h2>
+            <p>The Future of Audio and Wearables.</p>
+            <div class="social-links">
+                <i class='bx bxl-instagram'></i>
+                <i class='bx bxl-twitter'></i>
+                <i class='bx bxl-youtube'></i>
+                <i class='bx bx-lock-alt' data-link="admin" style="margin-left: 2rem; opacity: 0.3;"
+                    title="Creator Access"></i>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global UI Overlays -->
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class='bx bxs-check-circle icon'></i>
+        <div class="toast-content" id="toast-message">Action successful</div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+    <div id="checkout-modal" class="modal">
+        <button class="modal-close" id="modal-close"><i class='bx bx-x'></i></button>
+        <div id="modal-content"></div>
+    </div>
+
+    <!-- Application Logic -->
+    <script src="js/app.js" type="module"></script>
+</body>
+
+</html>
