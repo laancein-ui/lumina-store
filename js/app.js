@@ -7,21 +7,21 @@ const defaultProducts = [
     {
         id: 1,
         name: "Laance Pro X ANC",
-        price: 349,
+        price: 29999,
         image: "assets/product_headphones_1772226325362.png",
         desc: "Experience pure audio bliss with industry-leading noise cancellation. Perfect for audiophiles, featuring 40hr battery life, spatial audio, and memory foam earcups."
     },
     {
         id: 2,
         name: "Zenith Health + Titanium",
-        price: 599,
+        price: 49999,
         image: "assets/product_smartwatch_1772226340060.png",
         desc: "A sleek, aerospace-grade titanium smartwatch. Features an ultra-bright OLED display, ECG tracking, 100+ sports modes, and a comfortable silicone strap."
     },
     {
         id: 3,
         name: "Aero Glide Velocity",
-        price: 189,
+        price: 15999,
         image: "assets/product_sneakers_1772226357442.png",
         desc: "Engineered for speed and comfort. These aesthetic white and neon-blue accented minimalist sneakers offer responsive cushioning and a breathable mesh upper."
     }
@@ -148,7 +148,7 @@ function renderHome() {
                         <div class="product-info">
                             <div>
                                 <h3 class="product-title">${p.name}</h3>
-                                <div class="product-price">$${p.price}</div>
+                                <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
@@ -200,7 +200,7 @@ function renderProductDetail(id) {
                 <div class="detail-info">
                     <div style="color: var(--primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; text-transform: uppercase;">Premium Series</div>
                     <h1>${product.name}</h1>
-                    <div class="price">$${product.price}</div>
+                    <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
                     <p class="desc">${product.desc}</p>
                     <div class="detail-actions">
                         <button class="btn add-to-cart-btn-main" data-id="${product.id}" style="width: auto; padding: 1rem 3rem;">
@@ -347,7 +347,7 @@ function renderAdmin() {
                             <input type="text" id="new-item-name" class="input-field" style="width: 100%;" required>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Price ($)</label>
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Price (₹)</label>
                             <input type="number" id="new-item-price" class="input-field" style="width: 100%;" min="1" required>
                         </div>
                         <div>
@@ -371,7 +371,7 @@ function renderAdmin() {
                                 <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
                                 <div style="flex-grow: 1;">
                                     <div style="font-weight: 600;">${p.name}</div>
-                                    <div style="color: var(--primary); font-size: 0.875rem;">$${p.price}</div>
+                                    <div style="color: var(--primary); font-size: 0.875rem;">₹${p.price.toLocaleString('en-IN')}</div>
                                 </div>
                                 <div style="color: var(--text-muted); font-size: 0.75rem;">ID: ${p.id}</div>
                             </div>
@@ -484,7 +484,7 @@ function renderOrders() {
                                 </div>
                                 <div>
                                     <div style="color: var(--text-muted); font-size: 0.875rem;">Total</div>
-                                    <div style="font-weight: 600;">$${order.total}</div>
+                                    <div style="font-weight: 600;">₹${order.total.toLocaleString('en-IN')}</div>
                                 </div>
                                 <div>
                                     <div style="color: var(--text-muted); font-size: 0.875rem;">Scheduled For</div>
@@ -502,7 +502,7 @@ function renderOrders() {
                                 ${order.items.map(item => `
                                     <div style="display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.5rem 0;">
                                         <span>${item.quantity}x ${item.name}</span>
-                                        <span>$${item.price * item.quantity}</span>
+                                        <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -587,16 +587,16 @@ function renderCartContent() {
                     <img src="${item.image}" alt="${item.name}">
                     <div class="cart-item-info flex" style="flex:1;">
                         <h4>${item.name}</h4>
-                        <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × $${item.price}</div>
+                        <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
                     </div>
-                    <div class="price">$${item.price * item.quantity}</div>
+                    <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                 </div>
             `).join('')}
         </div>
         
         <div class="cart-total">
             <span>Total</span>
-            <span style="color: var(--secondary)">$${total}</span>
+            <span style="color: var(--secondary)">₹${total.toLocaleString('en-IN')}</span>
         </div>
         
         <!-- Shipping form before payment -->
@@ -615,7 +615,7 @@ function renderCartContent() {
                 
                 <!-- Cashfree Pay Button -->
                 <button type="submit" id="cashfree-cart-btn" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
-                    <i class='bx bx-lock-alt'></i>&nbsp; Pay Securely via Cashfree ₹${total * 85}
+                    <i class='bx bx-lock-alt'></i>&nbsp; Pay Securely via Cashfree ₹${total.toLocaleString('en-IN')}
                 </button>
                 <p style="text-align:center; color: var(--text-muted); font-size: 0.8rem; margin-top: 0.75rem;">
                     <i class='bx bx-shield-quarter'></i> Secured by Cashfree · UPI · Cards · Netbanking
@@ -652,7 +652,7 @@ async function handleCashfreeCheckout(e, total, items) {
 
     try {
         // 1. Call your real backend to create a Cashfree Order
-        const amountINR = total * 85; // Simple conversion logic
+        const amountINR = total; // Now already in INR
 
         const response = await fetch('/api/create-cashfree-order', {
             method: 'POST',
@@ -764,7 +764,7 @@ function renderOrderNowAddressForm() {
             <img src="${state.orderNowData.item.image}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
             <div class="cart-item-info flex" style="flex:1;">
                 <h4 style="margin:0;">${state.orderNowData.item.name}</h4>
-                <div style="color: var(--text-muted); font-size: 0.875rem;">Total: $${state.orderNowData.item.price}</div>
+                <div style="color: var(--text-muted); font-size: 0.875rem;">Total: ₹${state.orderNowData.item.price.toLocaleString('en-IN')}</div>
             </div>
         </div>
 
@@ -812,7 +812,7 @@ function renderOrderNowPaymentView() {
                     </label>
                 </div>
                 
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order ($${state.orderNowData.item.price})</button>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order (₹${state.orderNowData.item.price.toLocaleString('en-IN')})</button>
             </form>
         </div>
         <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="renderOrderNowAddressForm()">Back to Delivery Details</button>
@@ -846,7 +846,7 @@ function renderOrderNowPaymentView() {
             setTimeout(() => finalizeOrderNow(item, fullAddress, address.email, null, 'cod'), 1000);
         } else {
             // Online Payment via Cashfree
-            const amountINR = item.price * 85;
+            const amountINR = item.price; // Now already in INR
 
             btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Securing Session...";
             btn.disabled = true;
