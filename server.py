@@ -62,7 +62,7 @@ if not os.path.exists(ORDERS_FILE):
         json.dump({}, f, indent=4)
 
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
-    print(f"Lumina Store API Server running on http://localhost:{PORT}")
+    print(f"Laance Store API Server running on http://localhost:{PORT}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

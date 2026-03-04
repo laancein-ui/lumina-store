@@ -1,12 +1,12 @@
 /* =========================================================================
-   LUMINA - SPA Application Logic
+   LAANCE - SPA Application Logic
    ========================================================================= */
 
 // Mock Database & Inventory Management
 const defaultProducts = [
     {
         id: 1,
-        name: "Lumina Pro X ANC",
+        name: "Laance Pro X ANC",
         price: 349,
         image: "assets/product_headphones_1772226325362.png",
         desc: "Experience pure audio bliss with industry-leading noise cancellation. Perfect for audiophiles, featuring 40hr battery life, spatial audio, and memory foam earcups."
@@ -27,10 +27,10 @@ const defaultProducts = [
     }
 ];
 
-let products = JSON.parse(localStorage.getItem('lumina_products')) || defaultProducts;
+let products = JSON.parse(localStorage.getItem('laance_products')) || defaultProducts;
 
 function saveProducts() {
-    localStorage.setItem('lumina_products', JSON.stringify(products));
+    localStorage.setItem('laance_products', JSON.stringify(products));
 }
 
 // App State
@@ -38,10 +38,10 @@ const state = {
     cart: [],
     currentView: 'home',
     currentProductId: null,
-    isAdmin: sessionStorage.getItem('lumina_admin') === 'true',
-    orders: JSON.parse(localStorage.getItem('lumina_orders')) || {
+    isAdmin: sessionStorage.getItem('laance_admin') === 'true',
+    orders: JSON.parse(localStorage.getItem('laance_orders')) || {
         'LUM-84920': {
-            items: [{ name: 'Lumina Pro X ANC', price: 349, quantity: 1 }],
+            items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
             total: 349,
             shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
             timeline: [
@@ -53,7 +53,7 @@ const state = {
 };
 
 function saveOrders() {
-    localStorage.setItem('lumina_orders', JSON.stringify(state.orders));
+    localStorage.setItem('laance_orders', JSON.stringify(state.orders));
 }
 
 // DOM Elements
@@ -135,7 +135,7 @@ function renderHome() {
                 </div>
             </div>
             <div class="hero-image-wrap">
-                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Lumina Premium Devices" class="hero-image">
+                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Laance Premium Devices" class="hero-image">
             </div>
         </div>
 
@@ -392,7 +392,7 @@ function bindAdminEvents() {
                 const code = document.getElementById('admin-password').value;
                 if (code === '640') {
                     state.isAdmin = true;
-                    sessionStorage.setItem('lumina_admin', 'true');
+                    sessionStorage.setItem('laance_admin', 'true');
                     renderView('admin');
                     showToast('Creator Mode Activated');
                 } else {
@@ -407,7 +407,7 @@ function bindAdminEvents() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             state.isAdmin = false;
-            sessionStorage.removeItem('lumina_admin');
+            sessionStorage.removeItem('laance_admin');
             renderView('home');
             showToast('Creator Mode Deactivated');
         });
@@ -688,7 +688,7 @@ function handleCheckout(e) {
                 timeline: [
                     { date: today, title: 'Order Placed', completed: true },
                     { date: today, title: 'Payment Confirmed', completed: true },
-                    { date: 'Pending', title: 'Shipped via Lumina Express', completed: false },
+                    { date: 'Pending', title: 'Shipped via Laance Express', completed: false },
                     { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
                 ]
             };
@@ -839,7 +839,7 @@ function renderOrderNowPaymentView() {
                 timeline: [
                     { date: today, title: 'Order Placed', completed: true },
                     { date: today, title: paymentMethod === 'cod' ? 'Cash on Delivery Requested' : 'Payment Confirmed', completed: true },
-                    { date: 'Pending', title: 'Shipped via Lumina Express', completed: false },
+                    { date: 'Pending', title: 'Shipped via Laance Express', completed: false },
                     { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
                 ]
             };

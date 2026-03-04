@@ -34,5 +34,5 @@ app.post('/api/orders', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Lumina Store API Server running on http://localhost:${PORT}`);
+    console.log(`Laance Store API Server running on http://localhost:${PORT}`);
 });
