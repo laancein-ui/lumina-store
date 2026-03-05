@@ -681,6 +681,8 @@ async function handleCashfreeCheckout(e, total, items) {
 
                 // For demonstration, we'll finalize the order locally
                 // In a production app, you should verify payment on backend
+                const customerName = email.split('@')[0] || 'Customer';
+                saveToGoogleSheets(customerName, email, phone, `${address}, ${city}`, pincode);
                 finalizeCashfreeOrder(items, total, fullAddress, email, data.order_id);
             });
         } else {
@@ -843,7 +845,11 @@ function renderOrderNowPaymentView() {
             // Cash on Delivery — no payment gateway needed
             btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Placing Order...";
             btn.disabled = true;
-            setTimeout(() => finalizeOrderNow(item, fullAddress, address.email, null, 'cod'), 1000);
+            setTimeout(() => {
+                const customerName = address.email.split('@')[0] || 'Customer';
+                saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode);
+                finalizeOrderNow(item, fullAddress, address.email, null, 'cod');
+            }, 1000);
         } else {
             // Online Payment via Cashfree
             const amountINR = item.price; // Now already in INR
@@ -875,6 +881,8 @@ function renderOrderNowPaymentView() {
                                 btn.disabled = false;
                                 return;
                             }
+                            const customerName = address.email.split('@')[0] || 'Customer';
+                            saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode);
                             finalizeOrderNow(item, fullAddress, address.email, data.order_id, 'online');
                         });
                     } else {
@@ -936,6 +944,20 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 // =========================================================================
 // Utilities
 // =========================================================================
+
+function saveToGoogleSheets(name, email, phone, address, pincode) {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyNY6-PWzWvxhRgUSskR8qRFRAAMFuB3wrGnJAsLOc8QPZpCzHELqgXOpGiUcB0zdld/exec';
+
+    const params = new URLSearchParams();
+    params.append('Name', name || '');
+    params.append('Email', email || '');
+    params.append('Phone', phone || '');
+    params.append('Address', address || '');
+    params.append('Pincode', pincode || '');
+
+    fetch(scriptURL, { method: 'POST', body: params })
+        .catch(error => console.error('Error saving to Google Sheets:', error.message));
+}
 
 function showToast(message) {
     toastMessage.textContent = message;
