@@ -946,9 +946,7 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 // =========================================================================
 
 function saveToGoogleSheets(name, email, phone, address, pincode) {
-    // Note: User provided a Library URL which will not work as a Webhook execution URL.
-    // I am updating it but alerting the user that they likely provided the wrong type of URL.
-    const scriptURL = 'https://script.google.com/macros/library/d/1TsyUI6rB-Zifa8QD2ugqLsTahG30gbCr6VgKXYFB9JBd7htJ-o3gN5V6/2';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyKlRqIAHgAN1sjXqoG9pmgGWXfcjUlfNdzlQZokL97iWh90DRb9MUZPUbgWAyqWYwU/exec';
 
     const params = new URLSearchParams();
     params.append('Name', name || '');
