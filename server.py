@@ -124,6 +124,56 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({'success': False, 'message': str(e)}).encode('utf-8'))
+
+        elif self.path == '/api/cashfree-webhook':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                payload = json.loads(post_data.decode('utf-8'))
+                
+                # Extract order_id and status from webhook
+                order_id = None
+                order_status = None
+                
+                if 'data' in payload and 'order' in payload['data']:
+                    order_id = payload['data']['order'].get('order_id')
+                    order_status = payload['data']['order'].get('order_status')
+                
+                if order_id and order_status == 'PAID':
+                    if os.path.exists(ORDERS_FILE):
+                        with open(ORDERS_FILE, 'r') as f:
+                            try:
+                                orders = json.load(f)
+                            except json.JSONDecodeError:
+                                orders = {}
+                        
+                        modified = False
+                        
+                        # Find the corresponding order and update status
+                        if order_id in orders:
+                            orders[order_id]['status'] = 'PAID'
+                            modified = True
+                        else:
+                            # Check if stored as paymentId
+                            for key, order in orders.items():
+                                if isinstance(order, dict) and order.get('paymentId') == order_id:
+                                    orders[key]['status'] = 'PAID'
+                                    modified = True
+                                    break
+                                    
+                        if modified:
+                            with open(ORDERS_FILE, 'w') as f:
+                                json.dump(orders, f, indent=4)
+                                
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"OK")
+            except Exception as e:
+                print("Webhook error:", e)
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(b"Error")
         else:
             super().do_GET() # Use standard GET handler for static files
 
