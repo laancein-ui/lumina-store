@@ -654,7 +654,7 @@ async function handleCashfreeCheckout(e, total, items) {
         // 1. Call your real backend to create a Cashfree Order
         const amountINR = total; // Now already in INR
 
-        const response = await fetch('/api/create-cashfree-order', {
+        const response = await fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -852,7 +852,7 @@ function renderOrderNowPaymentView() {
             btn.disabled = true;
 
             // Call real backend for "Order Now" flow
-            fetch('/api/create-cashfree-order', {
+            fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
