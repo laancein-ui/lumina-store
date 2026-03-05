@@ -1,36 +1,36 @@
 /* =========================================================================
-   LUMINA - SPA Application Logic
+   LAANCE - SPA Application Logic
    ========================================================================= */
 
 // Mock Database & Inventory Management
 const defaultProducts = [
     {
         id: 1,
-        name: "Lumina Pro X ANC",
-        price: 349,
+        name: "Laance Pro X ANC",
+        price: 29999,
         image: "assets/product_headphones_1772226325362.png",
         desc: "Experience pure audio bliss with industry-leading noise cancellation. Perfect for audiophiles, featuring 40hr battery life, spatial audio, and memory foam earcups."
     },
     {
         id: 2,
         name: "Zenith Health + Titanium",
-        price: 599,
+        price: 49999,
         image: "assets/product_smartwatch_1772226340060.png",
         desc: "A sleek, aerospace-grade titanium smartwatch. Features an ultra-bright OLED display, ECG tracking, 100+ sports modes, and a comfortable silicone strap."
     },
     {
         id: 3,
         name: "Aero Glide Velocity",
-        price: 189,
+        price: 15999,
         image: "assets/product_sneakers_1772226357442.png",
         desc: "Engineered for speed and comfort. These aesthetic white and neon-blue accented minimalist sneakers offer responsive cushioning and a breathable mesh upper."
     }
 ];
 
-let products = JSON.parse(localStorage.getItem('lumina_products')) || defaultProducts;
+let products = JSON.parse(localStorage.getItem('laance_products')) || defaultProducts;
 
 function saveProducts() {
-    localStorage.setItem('lumina_products', JSON.stringify(products));
+    localStorage.setItem('laance_products', JSON.stringify(products));
 }
 
 // App State
@@ -38,11 +38,11 @@ const state = {
     cart: [],
     currentView: 'home',
     currentProductId: null,
-    isAdmin: sessionStorage.getItem('lumina_admin') === 'true',
-    orders: JSON.parse(localStorage.getItem('lumina_orders')) || {
+    isAdmin: sessionStorage.getItem('laance_admin') === 'true',
+    orders: JSON.parse(localStorage.getItem('laance_orders')) || {
         'LUM-84920': {
-            items: [{ name: 'Lumina Pro X ANC', price: 349, quantity: 1 }],
-            total: 349,
+            items: [{ name: 'Laance Pro X ANC', price: 29999, quantity: 1 }],
+            total: 29999,
             shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
             timeline: [
                 { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },
@@ -53,7 +53,7 @@ const state = {
 };
 
 function saveOrders() {
-    localStorage.setItem('lumina_orders', JSON.stringify(state.orders));
+    localStorage.setItem('laance_orders', JSON.stringify(state.orders));
 }
 
 // DOM Elements
@@ -135,7 +135,7 @@ function renderHome() {
                 </div>
             </div>
             <div class="hero-image-wrap">
-                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Lumina Premium Devices" class="hero-image">
+                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Laance Premium Devices" class="hero-image">
             </div>
         </div>
 
@@ -148,7 +148,7 @@ function renderHome() {
                         <div class="product-info">
                             <div>
                                 <h3 class="product-title">${p.name}</h3>
-                                <div class="product-price">$${p.price}</div>
+                                <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
@@ -200,7 +200,7 @@ function renderProductDetail(id) {
                 <div class="detail-info">
                     <div style="color: var(--primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; text-transform: uppercase;">Premium Series</div>
                     <h1>${product.name}</h1>
-                    <div class="price">$${product.price}</div>
+                    <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
                     <p class="desc">${product.desc}</p>
                     <div class="detail-actions">
                         <button class="btn add-to-cart-btn-main" data-id="${product.id}" style="width: auto; padding: 1rem 3rem;">
@@ -792,7 +792,7 @@ function renderOrderNowPaymentView() {
                     </label>
                 </div>
                 
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order ($${state.orderNowData.item.price})</button>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order (₹${(state.orderNowData ? state.orderNowData.item.price : 0).toLocaleString('en-IN')})</button>
             </form>
         </div>
         <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="renderOrderNowAddressForm()">Back to Delivery Details</button>

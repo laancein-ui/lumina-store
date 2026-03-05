@@ -96,7 +96,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         "customer_phone": phone
                     },
                     "order_meta": {
-                        "return_url": "http://localhost:3000/#orders"
+                        "return_url": req_data.get('return_url', 'https://www.cashfree.com/devstudio/preview/pg/web/checkout?step=2')
                     }
                 }
 
