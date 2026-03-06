@@ -756,7 +756,7 @@ function finalizeCashfreeOrder(items, total, fullAddress, email, paymentId) {
                 </span>
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=orders]').click();">View Orders</button>
+                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=tracking]').click();">Track Order</button>
                 <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
             </div>
         </div>
@@ -955,7 +955,7 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
                 Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=orders]').click();">View Orders</button>
+                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=tracking]').click();">Track Order</button>
                 <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
             </div>
         </div>
