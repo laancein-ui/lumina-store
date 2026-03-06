@@ -63,6 +63,45 @@ async function saveProducts(newItem) {
     }
 }
 
+async function fetchReviews(productId) {
+    try {
+        if (!supabaseClient) return [];
+        const { data, error } = await supabaseClient
+            .from('reviews')
+            .select('*')
+            .eq('product_id', productId)
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        state.reviews[productId] = data || [];
+        return state.reviews[productId];
+    } catch (err) {
+        console.error('Error fetching reviews:', err);
+        return [];
+    }
+}
+
+async function saveReview(reviewData) {
+    try {
+        if (!supabaseClient) throw new Error("Supabase client not initialized");
+        const { error } = await supabaseClient.from('reviews').insert([
+            {
+                product_id: reviewData.productId,
+                user_name: reviewData.userName,
+                rating: Number(reviewData.rating),
+                comment: reviewData.comment
+            }
+        ]);
+        if (error) throw error;
+        await fetchReviews(reviewData.productId); // Refresh
+        showToast('Review submitted!');
+        return true;
+    } catch (err) {
+        console.error('Error saving review:', err);
+        showToast('Error submitting review');
+        return false;
+    }
+}
+
 // Helper for safe storage access
 const safeStorage = {
     get: (type, key) => {
@@ -106,7 +145,8 @@ const state = {
             console.error('Error parsing orders:', e);
             return {};
         }
-    })()
+    })(),
+    reviews: {} // Map of productId -> reviews[]
 };
 
 function saveOrders() {
@@ -297,6 +337,18 @@ function renderProductDetail(id) {
     const product = products.find(p => p.id === id);
     if (!product) return renderHome();
 
+    // Trigger async review fetch in background without blocking
+    if (!state.reviews[id]) {
+        fetchReviews(id).then(() => {
+            if (state.currentView === 'product' && state.currentProductId === id) {
+                renderView('product', { id });
+            }
+        });
+    }
+
+    state.currentProductId = id;
+    const productReviews = state.reviews[id] || [];
+
     return `
         <div class="section">
             <div class="product-detail-view">
@@ -324,6 +376,63 @@ function renderProductDetail(id) {
                     </div>
                 </div>
             </div>
+
+            <!-- Reviews Section -->
+            <div style="margin-top: 5rem; max-width: 800px;">
+                <h2 style="font-size: 2rem; margin-bottom: 2rem;">Customer Reviews</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
+                    <!-- Review List -->
+                    <div>
+                        ${productReviews.length === 0 ? `
+                            <div style="padding: 2rem; background: var(--bg-surface); border-radius: 20px; text-align: center; color: var(--text-muted);">
+                                No reviews yet. Be the first to share your experience!
+                            </div>
+                        ` : productReviews.map(r => `
+                            <div style="padding: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px; margin-bottom: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <div style="font-weight: 600; color: var(--text-main);">${r.user_name}</div>
+                                    <div style="color: #fbbf24;">
+                                        ${Array(5).fill(0).map((_, i) => `<i class='bx ${i < r.rating ? 'bxs-star' : 'bx-star'}'></i>`).join('')}
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">${r.comment}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Add Review Form -->
+                    <div>
+                        <div style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--primary); border-radius: 24px; box-shadow: 0 0 20px var(--primary-glow);">
+                            <h3 style="margin-bottom: 1.5rem;">Write a Review</h3>
+                            <form id="add-review-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Your Name</label>
+                                    <input type="text" id="review-user-name" class="input-field" placeholder="Enter your name" required style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Rating</label>
+                                    <div id="rating-stars" style="color: #fbbf24; font-size: 1.5rem; cursor: pointer; display: flex; gap: 0.5rem;">
+                                        <i class='bx bxs-star star' data-rating="1"></i>
+                                        <i class='bx bxs-star star' data-rating="2"></i>
+                                        <i class='bx bxs-star star' data-rating="3"></i>
+                                        <i class='bx bxs-star star' data-rating="4"></i>
+                                        <i class='bx bxs-star star' data-rating="5"></i>
+                                    </div>
+                                    <input type="hidden" id="review-rating" value="5">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Feedback</label>
+                                    <textarea id="review-comment" class="input-field" rows="4" placeholder="Share your experience with this product..." required style="width: 100%; border-radius: 15px; resize: none;"></textarea>
+                                </div>
+                                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                                    Submit Review
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -342,6 +451,50 @@ function bindProductEvents() {
         buyBtn.addEventListener('click', (e) => {
             const id = parseInt(e.currentTarget.getAttribute('data-id'));
             startOrderNowFlow(id);
+        });
+    }
+
+    // Rating Star Logic
+    const stars = document.querySelectorAll('#rating-stars .star');
+    const ratingInput = document.getElementById('review-rating');
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const rating = star.getAttribute('data-rating');
+            ratingInput.value = rating;
+            stars.forEach((s, i) => {
+                if (i < rating) {
+                    s.classList.replace('bx-star', 'bxs-star');
+                } else {
+                    s.classList.replace('bxs-star', 'bx-star');
+                }
+            });
+        });
+    });
+
+    // Review Form Submission
+    const reviewForm = document.getElementById('add-review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = reviewForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Submitting...";
+            btn.disabled = true;
+
+            const reviewData = {
+                productId: state.currentProductId,
+                userName: document.getElementById('review-user-name').value,
+                rating: document.getElementById('review-rating').value,
+                comment: document.getElementById('review-comment').value
+            };
+
+            const success = await saveReview(reviewData);
+            if (success) {
+                renderView('product', { id: state.currentProductId }); // Refresh view
+            } else {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
     }
 }
