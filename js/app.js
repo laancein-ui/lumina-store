@@ -63,15 +63,34 @@ async function saveProducts(newItem) {
     }
 }
 
+// Helper for safe storage access
+const safeStorage = {
+    get: (type, key) => {
+        try {
+            return window[type].getItem(key);
+        } catch (e) {
+            console.warn(`Storage access error for ${key}:`, e);
+            return null;
+        }
+    },
+    set: (type, key, value) => {
+        try {
+            window[type].setItem(key, value);
+        } catch (e) {
+            console.error(`Storage save error for ${key}:`, e);
+        }
+    }
+};
+
 // App State
 const state = {
     cart: [],
     currentView: 'home',
     currentProductId: null,
-    isAdmin: sessionStorage.getItem('laance_admin') === 'true',
+    isAdmin: safeStorage.get('sessionStorage', 'laance_admin') === 'true',
     orders: (() => {
+        const raw = safeStorage.get('localStorage', 'laance_orders');
         try {
-            const raw = localStorage.getItem('laance_orders');
             return raw ? JSON.parse(raw) : {
                 'LUM-84920': {
                     items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
@@ -91,7 +110,7 @@ const state = {
 };
 
 function saveOrders() {
-    localStorage.setItem('laance_orders', JSON.stringify(state.orders));
+    safeStorage.set('localStorage', 'laance_orders', JSON.stringify(state.orders));
 }
 
 // DOM Elements
@@ -108,29 +127,38 @@ const toastMessage = document.getElementById('toast-message');
 // Initialize App
 async function init() {
     try {
+        console.log("App Initializing...");
+
+        // Handle Trusted Device Logic
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('trust_device') === 'laance_admin_secure') {
-            localStorage.setItem('laance_device_trusted', 'true');
+            safeStorage.set('localStorage', 'laance_device_trusted', 'true');
             // Clean URL without reloading
             window.history.replaceState({}, document.title, window.location.pathname);
             setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
         }
 
-        // Render immediately with local defaults so the page isn't blank while loading
+        // Setup base dynamic elements
         setupNavigation();
         setupModal();
+
+        // Render Home View Immediately
         renderView('home');
 
-        // Fetch live products in the background
+        // Fetch Live Products
         await fetchProducts();
 
-        // If we are still on the home or admin pages, re-render to show the live database products
+        // Refresh UI with latest products if on home or admin
         if (state.currentView === 'home' || state.currentView === 'admin') {
             renderView(state.currentView);
         }
 
+        console.log("App Successfully Rooted.");
     } catch (e) {
-        document.getElementById('app-root').innerHTML = `<div style="padding:4rem;color:red;"><h1>JS Crash in init:</h1><pre>${e.message}\n${e.stack}</pre></div>`;
+        console.error("Critical Boot Error:", e);
+        if (appRoot) {
+            appRoot.innerHTML = `<div style="padding:4rem;color:red;background:#000;"><h1>System Initialization Failure</h1><p>${e.message}</p><pre style="white-space:pre-wrap;">${e.stack}</pre></div>`;
+        }
     }
 }
 
