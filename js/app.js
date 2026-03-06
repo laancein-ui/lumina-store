@@ -30,16 +30,17 @@ const defaultProducts = [
 // Supabase Initialization
 const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let products = defaultProducts;
 
 async function fetchProducts() {
     try {
-        const { data, error } = await supabase.from('products').select('*');
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient.from('products').select('*');
         if (error) throw error;
         if (data && data.length > 0) {
-            products = data;
+            products = data.map(p => ({ ...p, price: Number(p.price) }));
         }
     } catch (err) {
         console.error('Error fetching products from Supabase:', err);
@@ -48,8 +49,9 @@ async function fetchProducts() {
 
 async function saveProducts(newItem) {
     try {
-        const { error } = await supabase.from('products').insert([
-            { name: newItem.name, price: newItem.price, image: newItem.image, desc: newItem.desc }
+        if (!supabaseClient) throw new Error("Supabase client not initialized");
+        const { error } = await supabaseClient.from('products').insert([
+            { name: newItem.name, price: Number(newItem.price), image: newItem.image, desc: newItem.desc }
         ]);
         if (error) throw error;
 
