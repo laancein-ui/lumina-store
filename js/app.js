@@ -69,6 +69,14 @@ const toastMessage = document.getElementById('toast-message');
 
 // Initialize App
 function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('trust_device') === 'laance_admin_secure') {
+        localStorage.setItem('laance_device_trusted', 'true');
+        // Clean URL without reloading
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
+    }
+
     setupNavigation();
     setupModal();
     renderView('home');
@@ -314,6 +322,19 @@ function bindTrackingEvents() {
 // =========================================================================
 
 function renderAdmin() {
+    if (localStorage.getItem('laance_device_trusted') !== 'true') {
+        return `
+            <div class="section" style="max-width: 500px; margin: 0 auto; text-align: center;">
+                <h1 class="section-title">Access Denied</h1>
+                <div style="background: var(--bg-surface); padding: 3rem 2rem; border-radius: 20px; border: 1px solid var(--border-light);">
+                    <i class='bx bx-mobile-alt' style="font-size: 4rem; margin-bottom: 2rem; color: #ef4444;"></i>
+                    <h3 style="margin-bottom: 1rem; color: white;">Device Not Recognized</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6;">This device is not authorized to manage products. The Creator Dashboard is restricted to your personal phone and laptop.</p>
+                </div>
+            </div>
+        `;
+    }
+
     if (!state.isAdmin) {
         return `
             <div class="section" style="max-width: 500px; margin: 0 auto; text-align: center;">
