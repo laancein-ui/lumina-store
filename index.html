@@ -34,7 +34,33 @@
     </nav>
 
     <!-- Main SPA Container -->
-    <main id="app-root" class="app-root"></main>
+    <main id="app-root" class="app-root">
+        <!-- Initial Content (Hydrated by JS) -->
+        <div class="section hero">
+            <div class="hero-content">
+                <h1>Elevate your daily <br><span>Experience.</span></h1>
+                <p>Discover the perfect intersection of minimalist design and high-end technology. Your next upgrade is
+                    here.</p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="#products-grid" class="btn">Explore Collection</a>
+                </div>
+            </div>
+            <div class="hero-image-wrap">
+                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Laance Premium Devices"
+                    class="hero-image">
+            </div>
+        </div>
+
+        <div class="section" id="products-grid">
+            <h2 class="section-title">Featured Innovation</h2>
+            <div class="products-grid" id="initial-load-grid">
+                <div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">
+                    <i class='bx bx-loader-alt bx-spin' style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>Loading the latest collection...</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <!-- Footer -->
     <footer>
