@@ -69,17 +69,25 @@ const state = {
     currentView: 'home',
     currentProductId: null,
     isAdmin: sessionStorage.getItem('laance_admin') === 'true',
-    orders: JSON.parse(localStorage.getItem('laance_orders')) || {
-        'LUM-84920': {
-            items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
-            total: 349,
-            shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
-            timeline: [
-                { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },
-                { date: 'Oct 28, 10:00 AM', title: 'Out for Delivery', completed: false }
-            ]
+    orders: (() => {
+        try {
+            const raw = localStorage.getItem('laance_orders');
+            return raw ? JSON.parse(raw) : {
+                'LUM-84920': {
+                    items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
+                    total: 349,
+                    shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
+                    timeline: [
+                        { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },
+                        { date: 'Oct 28, 10:00 AM', title: 'Out for Delivery', completed: false }
+                    ]
+                }
+            };
+        } catch (e) {
+            console.error('Error parsing orders:', e);
+            return {};
         }
-    }
+    })()
 };
 
 function saveOrders() {
@@ -99,19 +107,31 @@ const toastMessage = document.getElementById('toast-message');
 
 // Initialize App
 async function init() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('trust_device') === 'laance_admin_secure') {
-        localStorage.setItem('laance_device_trusted', 'true');
-        // Clean URL without reloading
-        window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('trust_device') === 'laance_admin_secure') {
+            localStorage.setItem('laance_device_trusted', 'true');
+            // Clean URL without reloading
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
+        }
+
+        // Render immediately with local defaults so the page isn't blank while loading
+        setupNavigation();
+        setupModal();
+        renderView('home');
+
+        // Fetch live products in the background
+        await fetchProducts();
+
+        // If we are still on the home or admin pages, re-render to show the live database products
+        if (state.currentView === 'home' || state.currentView === 'admin') {
+            renderView(state.currentView);
+        }
+
+    } catch (e) {
+        document.getElementById('app-root').innerHTML = `<div style="padding:4rem;color:red;"><h1>JS Crash in init:</h1><pre>${e.message}\n${e.stack}</pre></div>`;
     }
-
-    await fetchProducts();
-
-    setupNavigation();
-    setupModal();
-    renderView('home');
 }
 
 // =========================================================================
