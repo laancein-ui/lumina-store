@@ -948,14 +948,15 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 function saveToGoogleSheets(name, email, phone, address, pincode) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyKlRqIAHgAN1sjXqoG9pmgGWXfcjUlfNdzlQZokL97iWh90DRb9MUZPUbgWAyqWYwU/exec';
 
-    const params = new URLSearchParams();
-    params.append('Name', name || '');
-    params.append('Email', email || '');
-    params.append('Phone', phone || '');
-    params.append('Address', address || '');
-    params.append('Pincode', pincode || '');
+    const formData = new FormData();
+    formData.append('Name', name || '');
+    formData.append('Email', email || '');
+    formData.append('Phone', phone || '');
+    formData.append('Address', address || '');
+    formData.append('Pincode', pincode || '');
 
-    fetch(scriptURL, { method: 'POST', body: params })
+    fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
+        .then(() => console.log('Successfully saved to Google Sheets'))
         .catch(error => console.error('Error saving to Google Sheets:', error.message));
 }
 
