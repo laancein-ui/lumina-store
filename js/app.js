@@ -102,6 +102,54 @@ async function saveReview(reviewData) {
     }
 }
 
+async function fetchOrdersFromSupabase() {
+    try {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+
+        if (data) {
+            data.forEach(order => {
+                state.orders[order.order_id] = {
+                    items: JSON.parse(order.items),
+                    total: order.total,
+                    paymentId: order.payment_id,
+                    gateway: order.gateway,
+                    shipping: JSON.parse(order.shipping),
+                    timeline: JSON.parse(order.timeline),
+                    customerEmail: order.customer_email
+                };
+            });
+        }
+    } catch (err) {
+        console.error('Error fetching orders:', err);
+    }
+}
+
+async function saveOrderToSupabase(orderId, orderData) {
+    try {
+        if (!supabaseClient) throw new Error("Supabase client not initialized");
+        const { error } = await supabaseClient.from('orders').insert([
+            {
+                order_id: orderId,
+                customer_email: orderData.customerEmail,
+                total: orderData.total,
+                items: JSON.stringify(orderData.items),
+                shipping: JSON.stringify(orderData.shipping),
+                timeline: JSON.stringify(orderData.timeline),
+                payment_id: orderData.paymentId,
+                gateway: orderData.gateway
+            }
+        ]);
+        if (error) throw error;
+    } catch (err) {
+        console.error('Error saving order to Supabase:', err);
+    }
+}
+
 // Helper for safe storage access
 const safeStorage = {
     get: (type, key) => {
@@ -185,10 +233,13 @@ async function init() {
         // Render Home View Immediately
         renderView('home');
 
-        // Fetch Live Products
-        await fetchProducts();
+        // Fetch Live Products and Orders
+        await Promise.all([
+            fetchProducts(),
+            fetchOrdersFromSupabase()
+        ]);
 
-        // Refresh UI with latest products if on home or admin
+        // Refresh UI with latest data if on home or admin
         if (state.currentView === 'home' || state.currentView === 'admin') {
             renderView(state.currentView);
         }
@@ -606,48 +657,75 @@ function renderAdmin() {
         <div class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
                 <h1 class="section-title" style="margin-bottom: 0;">Creator Dashboard</h1>
-                <button id="admin-logout-btn" class="btn btn-secondary" style="padding: 0.5rem 1.5rem;"><i class='bx bx-log-out'></i> Lock</button>
+                <div style="display: flex; gap: 1rem;">
+                     <button id="admin-logout-btn" class="btn btn-secondary" style="padding: 0.5rem 1.5rem;"><i class='bx bx-log-out'></i> Lock</button>
+                </div>
             </div>
             
-            <div style="display: flex; gap: 3rem; flex-wrap: wrap;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
                 <!-- Add Product Form -->
-                <div style="flex: 1; min-width: 300px; background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px; padding: 2rem;">
-                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem;"><i class='bx bx-plus-circle'></i> Add New Item</h2>
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px; padding: 2.5rem;">
+                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class='bx bx-plus-circle' style="color: var(--primary);"></i> Add New Item
+                    </h2>
                     <form id="add-product-form" style="display: flex; flex-direction: column; gap: 1.5rem;">
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Product Name</label>
-                            <input type="text" id="new-item-name" class="input-field" style="width: 100%;" required>
+                            <input type="text" id="new-item-name" class="input-field" style="width: 100%;" placeholder="e.g. Laance Ultra Pods" required>
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Price (₹)</label>
-                            <input type="number" id="new-item-price" class="input-field" style="width: 100%;" min="1" required>
+                            <input type="number" id="new-item-price" class="input-field" style="width: 100%;" min="1" placeholder="9999" required>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Image URL (Try unsplash or leave empty for default)</label>
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Image URL</label>
                             <input type="text" id="new-item-image" class="input-field" style="width: 100%;" placeholder="https:// images.unsplash.com/...">
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Description</label>
-                            <textarea id="new-item-desc" class="input-field" style="width: 100%; min-height: 100px; border-radius: 12px; resize: vertical;" required></textarea>
+                            <textarea id="new-item-desc" class="input-field" style="width: 100%; min-height: 120px; border-radius: 12px; resize: vertical;" placeholder="Tell customers about this innovation..." required></textarea>
                         </div>
                         <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;">Publish to Store</button>
                     </form>
                 </div>
                 
-                <!-- Inventory Preview -->
-                <div style="flex: 1; min-width: 300px;">
-                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem;">Current Inventory (${products.length})</h2>
-                    <div style="display: flex; flex-direction: column; gap: 1rem; max-height: 600px; overflow-y: auto; padding-right: 1rem;">
-                        ${products.map(p => `
-                            <div style="display: flex; align-items: center; gap: 1rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light); padding: 1rem; border-radius: 12px;">
-                                <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
-                                <div style="flex-grow: 1;">
-                                    <div style="font-weight: 600;">${p.name}</div>
-                                    <div style="color: var(--primary); font-size: 0.875rem;">₹${p.price.toLocaleString('en-IN')}</div>
+                <!-- Orders View -->
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px; padding: 2.5rem; display: flex; flex-direction: column;">
+                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                         <i class='bx bx-receipt' style="color: var(--secondary);"></i> Recent Sales
+                    </h2>
+                    <div style="flex: 1; overflow-y: auto; max-height: 600px; padding-right: 0.5rem;">
+                        ${Object.keys(state.orders).length === 0 ? `
+                             <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                                <i class='bx bx-ghost' style="font-size: 3rem; opacity: 0.3;"></i>
+                                <p>No orders yet. They will appear here!</p>
+                             </div>
+                        ` : Object.entries(state.orders).sort((a, b) => b[0].localeCompare(a[0])).map(([id, order]) => `
+                            <div style="padding: 1.5rem; border: 1px solid var(--border-light); border-radius: 15px; margin-bottom: 1rem; background: rgba(255,255,255,0.02);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span style="font-weight: 800; color: var(--primary);">${id}</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">${order.customerEmail || 'No Email'}</span>
                                 </div>
-                                <div style="color: var(--text-muted); font-size: 0.75rem;">ID: ${p.id}</div>
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">₹${order.total.toLocaleString('en-IN')}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">${order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}</div>
                             </div>
-                        `).reverse().join('')}
+                        `).join('')}
+                    </div>
+                </div>
+
+                 <!-- Inventory Preview -->
+                <div style="grid-column: 1 / -1; margin-top: 2rem;">
+                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem;">Current Inventory (${products.length})</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+                        ${products.map(p => `
+                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light);">
+                                <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
+                                <div style="flex: 1; overflow: hidden;">
+                                    <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                                    <div style="color: var(--primary); font-size: 0.85rem;">₹${p.price.toLocaleString('en-IN')}</div>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             </div>
@@ -985,6 +1063,7 @@ function finalizeCashfreeOrder(items, total, fullAddress, email, paymentId) {
         paymentId,
         gateway: 'Cashfree',
         shipping: { address: fullAddress, date: deliveryDateStr },
+        customerEmail: email, // Save email for admin reference
         timeline: [
             { date: today, title: 'Order Placed', completed: true },
             { date: today, title: 'Payment Confirmed via Cashfree', completed: true },
@@ -992,7 +1071,11 @@ function finalizeCashfreeOrder(items, total, fullAddress, email, paymentId) {
             { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
         ]
     };
+
+    // Save locally and sync to Supabase
     saveOrders();
+    saveOrderToSupabase(orderId, state.orders[orderId]);
+
     state.cart = [];
     updateCartIcon();
 
