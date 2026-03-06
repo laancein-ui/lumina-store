@@ -27,10 +27,38 @@ const defaultProducts = [
     }
 ];
 
-let products = JSON.parse(localStorage.getItem('laance_products')) || defaultProducts;
+// Supabase Initialization
+const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function saveProducts() {
-    localStorage.setItem('laance_products', JSON.stringify(products));
+let products = defaultProducts;
+
+async function fetchProducts() {
+    try {
+        const { data, error } = await supabase.from('products').select('*');
+        if (error) throw error;
+        if (data && data.length > 0) {
+            products = data;
+        }
+    } catch (err) {
+        console.error('Error fetching products from Supabase:', err);
+    }
+}
+
+async function saveProducts(newItem) {
+    try {
+        const { error } = await supabase.from('products').insert([
+            { name: newItem.name, price: newItem.price, image: newItem.image, desc: newItem.desc }
+        ]);
+        if (error) throw error;
+
+        // Refresh local list
+        await fetchProducts();
+    } catch (err) {
+        console.error('Error saving product to Supabase:', err);
+        showToast('Error saving to server');
+    }
 }
 
 // App State
@@ -68,7 +96,7 @@ const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toast-message');
 
 // Initialize App
-function init() {
+async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('trust_device') === 'laance_admin_secure') {
         localStorage.setItem('laance_device_trusted', 'true');
@@ -76,6 +104,8 @@ function init() {
         window.history.replaceState({}, document.title, window.location.pathname);
         setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
     }
+
+    await fetchProducts();
 
     setupNavigation();
     setupModal();
@@ -436,7 +466,7 @@ function bindAdminEvents() {
 
     const addForm = document.getElementById('add-product-form');
     if (addForm) {
-        addForm.addEventListener('submit', (e) => {
+        addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('new-item-name').value;
@@ -449,18 +479,22 @@ function bindAdminEvents() {
                 image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop";
             }
 
-            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+            const btn = addForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Publishing...";
+            btn.disabled = true;
 
             const newItem = {
-                id: newId,
                 name,
                 price,
                 image,
                 desc
             };
 
-            products.push(newItem);
-            saveProducts();
+            await saveProducts(newItem);
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
 
             showToast('Item Published to Store!');
             renderView('admin'); // Refresh dashboard
