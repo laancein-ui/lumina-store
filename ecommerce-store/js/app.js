@@ -27,33 +27,90 @@ const defaultProducts = [
     }
 ];
 
-let products = JSON.parse(localStorage.getItem('laance_products')) || defaultProducts;
+// Supabase Initialization
+const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-function saveProducts() {
-    localStorage.setItem('laance_products', JSON.stringify(products));
+let products = defaultProducts;
+
+async function fetchProducts() {
+    try {
+        if (!supabaseClient) return;
+        const { data, error } = await supabaseClient.from('products').select('*');
+        if (error) throw error;
+        if (data && data.length > 0) {
+            products = data.map(p => ({ ...p, price: Number(p.price) }));
+        }
+    } catch (err) {
+        console.error('Error fetching products from Supabase:', err);
+    }
 }
+
+async function saveProducts(newItem) {
+    try {
+        if (!supabaseClient) throw new Error("Supabase client not initialized");
+        const { error } = await supabaseClient.from('products').insert([
+            { name: newItem.name, price: Number(newItem.price), image: newItem.image, desc: newItem.desc }
+        ]);
+        if (error) throw error;
+
+        // Refresh local list
+        await fetchProducts();
+    } catch (err) {
+        console.error('Error saving product to Supabase:', err);
+        showToast('Error saving to server');
+    }
+}
+
+// Helper for safe storage access
+const safeStorage = {
+    get: (type, key) => {
+        try {
+            return window[type].getItem(key);
+        } catch (e) {
+            console.warn(`Storage access error for ${key}:`, e);
+            return null;
+        }
+    },
+    set: (type, key, value) => {
+        try {
+            window[type].setItem(key, value);
+        } catch (e) {
+            console.error(`Storage save error for ${key}:`, e);
+        }
+    }
+};
 
 // App State
 const state = {
     cart: [],
     currentView: 'home',
     currentProductId: null,
-    isAdmin: sessionStorage.getItem('laance_admin') === 'true',
-    orders: JSON.parse(localStorage.getItem('laance_orders')) || {
-        'LUM-84920': {
-            items: [{ name: 'Laance Pro X ANC', price: 29999, quantity: 1 }],
-            total: 29999,
-            shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
-            timeline: [
-                { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },
-                { date: 'Oct 28, 10:00 AM', title: 'Out for Delivery', completed: false }
-            ]
+    isAdmin: safeStorage.get('sessionStorage', 'laance_admin') === 'true',
+    orders: (() => {
+        const raw = safeStorage.get('localStorage', 'laance_orders');
+        try {
+            return raw ? JSON.parse(raw) : {
+                'LUM-84920': {
+                    items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
+                    total: 349,
+                    shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
+                    timeline: [
+                        { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },
+                        { date: 'Oct 28, 10:00 AM', title: 'Out for Delivery', completed: false }
+                    ]
+                }
+            };
+        } catch (e) {
+            console.error('Error parsing orders:', e);
+            return {};
         }
-    }
+    })()
 };
 
 function saveOrders() {
-    localStorage.setItem('laance_orders', JSON.stringify(state.orders));
+    safeStorage.set('localStorage', 'laance_orders', JSON.stringify(state.orders));
 }
 
 // DOM Elements
@@ -68,10 +125,41 @@ const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toast-message');
 
 // Initialize App
-function init() {
-    setupNavigation();
-    setupModal();
-    renderView('home');
+async function init() {
+    try {
+        console.log("App Initializing...");
+
+        // Handle Trusted Device Logic
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('trust_device') === 'laance_admin_secure') {
+            safeStorage.set('localStorage', 'laance_device_trusted', 'true');
+            // Clean URL without reloading
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
+        }
+
+        // Setup base dynamic elements
+        setupNavigation();
+        setupModal();
+
+        // Render Home View Immediately
+        renderView('home');
+
+        // Fetch Live Products
+        await fetchProducts();
+
+        // Refresh UI with latest products if on home or admin
+        if (state.currentView === 'home' || state.currentView === 'admin') {
+            renderView(state.currentView);
+        }
+
+        console.log("App Successfully Rooted.");
+    } catch (e) {
+        console.error("Critical Boot Error:", e);
+        if (appRoot) {
+            appRoot.innerHTML = `<div style="padding:4rem;color:red;background:#000;"><h1>System Initialization Failure</h1><p>${e.message}</p><pre style="white-space:pre-wrap;">${e.stack}</pre></div>`;
+        }
+    }
 }
 
 // =========================================================================
@@ -93,30 +181,41 @@ function setupNavigation() {
 }
 
 function renderView(viewName, params = {}) {
-    state.currentView = viewName;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+        if (!appRoot) {
+            console.error("appRoot element missing!");
+            return;
+        }
 
-    switch (viewName) {
-        case 'home':
-            appRoot.innerHTML = renderHome();
-            bindHomeEvents();
-            break;
-        case 'product':
-            appRoot.innerHTML = renderProductDetail(params.id);
-            bindProductEvents();
-            break;
-        case 'orders':
-            appRoot.innerHTML = renderOrders();
-            // Optional: bind events for orders view if needed
-            break;
-        case 'admin':
-            appRoot.innerHTML = renderAdmin();
-            bindAdminEvents();
-            break;
-        case 'tracking':
-            appRoot.innerHTML = renderTracking();
-            bindTrackingEvents();
-            break;
+        state.currentView = viewName;
+        window.scrollTo({ top: 0, behavior: 'auto' });
+
+        switch (viewName) {
+            case 'home':
+                appRoot.innerHTML = renderHome();
+                bindHomeEvents();
+                break;
+            case 'product':
+                appRoot.innerHTML = renderProductDetail(params.id);
+                bindProductEvents();
+                break;
+            case 'orders':
+                appRoot.innerHTML = renderOrders();
+                break;
+            case 'admin':
+                appRoot.innerHTML = renderAdmin();
+                bindAdminEvents();
+                break;
+            case 'tracking':
+                appRoot.innerHTML = renderTracking();
+                bindTrackingEvents();
+                break;
+            default:
+                appRoot.innerHTML = `<div class="section"><h2>Page Not Found</h2></div>`;
+        }
+    } catch (e) {
+        console.error(`Rendering error [${viewName}]:`, e);
+        appRoot.innerHTML = `<div style="padding:4rem;color:red;"><h1>Rendering Error</h1><p>${e.message}</p></div>`;
     }
 }
 
@@ -125,13 +224,16 @@ function renderView(viewName, params = {}) {
 // =========================================================================
 
 function renderHome() {
+    // Ensure we have a valid array to work with
+    const displayProducts = Array.isArray(products) ? products : defaultProducts;
+
     return `
         <div class="section hero">
             <div class="hero-content">
                 <h1>Elevate your daily <br><span>Experience.</span></h1>
                 <p>Discover the perfect intersection of minimalist design and high-end technology. Your next upgrade is here.</p>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="#" class="btn" onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})">Expolore Collection</a>
+                    <a href="#" class="btn" onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})">Explore Collection</a>
                 </div>
             </div>
             <div class="hero-image-wrap">
@@ -142,21 +244,25 @@ function renderHome() {
         <div class="section" id="products-grid">
             <h2 class="section-title">Featured Innovation</h2>
             <div class="products-grid">
-                ${products.map(p => `
-                    <div class="product-card" data-id="${p.id}">
-                        <img src="${p.image}" alt="${p.name}" class="product-image">
+                ${displayProducts.map(p => {
+        if (!p) return '';
+        const priceNum = Number(p.price);
+        const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
+        return `
+                    <div class="product-card" data-id="${p.id || 0}">
+                        <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
                         <div class="product-info">
                             <div>
-                                <h3 class="product-title">${p.name}</h3>
-                                <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+                                <h3 class="product-title">${p.name || 'New Item'}</h3>
+                                <div class="product-price">₹${formattedPrice}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn add-to-cart-btn" data-id="${p.id}" style="flex: 1;">Add to Cart</button>
-                            <button class="btn btn-secondary order-now-btn" data-id="${p.id}" style="flex: 1;">Order Now</button>
+                            <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
+                            <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         </div>
     `;
@@ -314,6 +420,19 @@ function bindTrackingEvents() {
 // =========================================================================
 
 function renderAdmin() {
+    if (localStorage.getItem('laance_device_trusted') !== 'true') {
+        return `
+            <div class="section" style="max-width: 500px; margin: 0 auto; text-align: center;">
+                <h1 class="section-title">Access Denied</h1>
+                <div style="background: var(--bg-surface); padding: 3rem 2rem; border-radius: 20px; border: 1px solid var(--border-light);">
+                    <i class='bx bx-mobile-alt' style="font-size: 4rem; margin-bottom: 2rem; color: #ef4444;"></i>
+                    <h3 style="margin-bottom: 1rem; color: white;">Device Not Recognized</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6;">This device is not authorized to manage products. The Creator Dashboard is restricted to your personal phone and laptop.</p>
+                </div>
+            </div>
+        `;
+    }
+
     if (!state.isAdmin) {
         return `
             <div class="section" style="max-width: 500px; margin: 0 auto; text-align: center;">
@@ -347,7 +466,7 @@ function renderAdmin() {
                             <input type="text" id="new-item-name" class="input-field" style="width: 100%;" required>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Price ($)</label>
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Price (₹)</label>
                             <input type="number" id="new-item-price" class="input-field" style="width: 100%;" min="1" required>
                         </div>
                         <div>
@@ -371,7 +490,7 @@ function renderAdmin() {
                                 <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
                                 <div style="flex-grow: 1;">
                                     <div style="font-weight: 600;">${p.name}</div>
-                                    <div style="color: var(--primary); font-size: 0.875rem;">$${p.price}</div>
+                                    <div style="color: var(--primary); font-size: 0.875rem;">₹${p.price.toLocaleString('en-IN')}</div>
                                 </div>
                                 <div style="color: var(--text-muted); font-size: 0.75rem;">ID: ${p.id}</div>
                             </div>
@@ -392,7 +511,7 @@ function bindAdminEvents() {
                 const code = document.getElementById('admin-password').value;
                 if (code === '640') {
                     state.isAdmin = true;
-                    sessionStorage.setItem('lumina_admin', 'true');
+                    sessionStorage.setItem('laance_admin', 'true');
                     renderView('admin');
                     showToast('Creator Mode Activated');
                 } else {
@@ -407,7 +526,7 @@ function bindAdminEvents() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             state.isAdmin = false;
-            sessionStorage.removeItem('lumina_admin');
+            sessionStorage.removeItem('laance_admin');
             renderView('home');
             showToast('Creator Mode Deactivated');
         });
@@ -415,7 +534,7 @@ function bindAdminEvents() {
 
     const addForm = document.getElementById('add-product-form');
     if (addForm) {
-        addForm.addEventListener('submit', (e) => {
+        addForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('new-item-name').value;
@@ -428,18 +547,22 @@ function bindAdminEvents() {
                 image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop";
             }
 
-            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+            const btn = addForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Publishing...";
+            btn.disabled = true;
 
             const newItem = {
-                id: newId,
                 name,
                 price,
                 image,
                 desc
             };
 
-            products.push(newItem);
-            saveProducts();
+            await saveProducts(newItem);
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
 
             showToast('Item Published to Store!');
             renderView('admin'); // Refresh dashboard
@@ -484,7 +607,7 @@ function renderOrders() {
                                 </div>
                                 <div>
                                     <div style="color: var(--text-muted); font-size: 0.875rem;">Total</div>
-                                    <div style="font-weight: 600;">$${order.total}</div>
+                                    <div style="font-weight: 600;">₹${order.total.toLocaleString('en-IN')}</div>
                                 </div>
                                 <div>
                                     <div style="color: var(--text-muted); font-size: 0.875rem;">Scheduled For</div>
@@ -502,7 +625,7 @@ function renderOrders() {
                                 ${order.items.map(item => `
                                     <div style="display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.5rem 0;">
                                         <span>${item.quantity}x ${item.name}</span>
-                                        <span>$${item.price * item.quantity}</span>
+                                        <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -587,137 +710,159 @@ function renderCartContent() {
                     <img src="${item.image}" alt="${item.name}">
                     <div class="cart-item-info flex" style="flex:1;">
                         <h4>${item.name}</h4>
-                        <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × $${item.price}</div>
+                        <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
                     </div>
-                    <div class="price">$${item.price * item.quantity}</div>
+                    <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                 </div>
             `).join('')}
         </div>
         
         <div class="cart-total">
             <span>Total</span>
-            <span style="color: var(--secondary)">$${total}</span>
+            <span style="color: var(--secondary)">₹${total.toLocaleString('en-IN')}</span>
         </div>
         
+        <!-- Shipping form before payment -->
         <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-light);">
             <form id="checkout-form" class="checkout-form">
-                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Secure Checkout</h3>
+                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Delivery Details</h3>
+                <input type="text" id="cart-address" class="input-field" placeholder="Full Delivery Address" required>
                 <div style="display: flex; gap: 1rem;">
-                    <input type="text" class="input-field" placeholder="Card Number" style="flex: 2" required>
-                    <input type="text" class="input-field" placeholder="MM/YY" style="flex: 1" required>
-                    <input type="text" class="input-field" placeholder="CVC" style="flex: 1" required>
+                    <input type="text" id="cart-city" class="input-field" placeholder="City" style="flex: 1" required>
+                    <input type="text" id="cart-pincode" class="input-field" placeholder="Pincode" style="flex: 1" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="tel" id="cart-phone" class="input-field" placeholder="Phone Number" style="flex: 1" required>
+                    <input type="email" id="cart-email" class="input-field" placeholder="Email Address" style="flex: 1" required>
                 </div>
                 
-                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">Pay $${total}</button>
+                <!-- Cashfree Pay Button -->
+                <button type="submit" id="cashfree-cart-btn" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
+                    <i class='bx bx-lock-alt'></i>&nbsp; Pay Securely via Cashfree ₹${total.toLocaleString('en-IN')}
+                </button>
+                <p style="text-align:center; color: var(--text-muted); font-size: 0.8rem; margin-top: 0.75rem;">
+                    <i class='bx bx-shield-quarter'></i> Secured by Cashfree · UPI · Cards · Netbanking
+                </p>
             </form>
         </div>
     `;
 
-    document.getElementById('checkout-form').addEventListener('submit', handleCheckout);
+    document.getElementById('checkout-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleCashfreeCheckout(e, total, groupedCart);
+    });
 }
 
-function handleCheckout(e) {
-    e.preventDefault();
+// Cashfree V3 Initialization
+const cashfree = Cashfree({
+    mode: "production" // CHANGED: Now in production mode
+});
 
-    // Calculate total and items before clearing cart
-    const total = state.cart.reduce((sum, item) => sum + item.price, 0);
-    const items = state.cart.reduce((acc, current) => {
-        const existing = acc.find(item => item.id === current.id);
-        if (existing) {
-            existing.quantity += 1;
-        } else {
-            acc.push({ ...current, quantity: 1 });
-        }
-        return acc;
-    }, []);
+async function handleCashfreeCheckout(e, total, items) {
+    // Collect shipping details from the form
+    const address = document.getElementById('cart-address').value;
+    const city = document.getElementById('cart-city').value;
+    const pincode = document.getElementById('cart-pincode').value;
+    const phone = document.getElementById('cart-phone').value;
+    const email = document.getElementById('cart-email').value;
+    const fullAddress = `${address}, ${city}, ${pincode} (Tel: ${phone})`;
 
-    // Simulate API Call
-    const btn = e.target.querySelector('button');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
-    btn.disabled = true;
+    const btn = document.getElementById('cashfree-cart-btn');
+    if (btn) {
+        btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Securing Session...";
+        btn.disabled = true;
+    }
 
-    setTimeout(() => {
-        // Render shipping form natively
-        modalContent.innerHTML = `
-            <h2 style="margin-bottom: 1rem; color: #10b981; display: flex; align-items: center; gap: 0.5rem;"><i class='bx bxs-check-circle'></i> Payment Successful!</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Please provide your delivery details so we can ship your premium gear.</p>
-            
-            <form id="shipping-form" class="checkout-form">
-                <input type="text" id="ship-address" class="input-field" placeholder="Full Delivery Address" required>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" id="ship-city" class="input-field" placeholder="City" style="flex: 1" required>
-                    <input type="text" id="ship-state" class="input-field" placeholder="State" style="flex: 1" required>
-                    <input type="text" id="ship-pincode" class="input-field" placeholder="Pincode" style="flex: 1" required>
-                </div>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="tel" id="ship-phone" class="input-field" placeholder="Phone Number" style="flex: 1" required>
-                    <input type="email" id="ship-email" class="input-field" placeholder="Email (for Gmail notification)" style="flex: 1" required>
-                </div>
-                
-                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">Confirm & Complete Order</button>
-            </form>
-        `;
+    try {
+        // 1. Call your real backend to create a Cashfree Order
+        const amountINR = total; // Now already in INR
 
-        document.getElementById('shipping-form').addEventListener('submit', (ev) => {
-            ev.preventDefault();
-
-            const address = document.getElementById('ship-address').value;
-            const city = document.getElementById('ship-city').value;
-            const stateAddr = document.getElementById('ship-state').value;
-            const pincode = document.getElementById('ship-pincode').value;
-            const phone = document.getElementById('ship-phone').value;
-            const email = document.getElementById('ship-email').value;
-
-            const fullAddress = `${address}, ${city}, ${stateAddr} ${pincode} (Tel: ${phone})`;
-
-            const orderId = 'LUM-' + Math.floor(10000 + Math.random() * 90000);
-
-            // Save order to state and localStorage
-            const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-            // Assume delivery is 3 days from now
-            const deliveryDt = new Date();
-            deliveryDt.setDate(deliveryDt.getDate() + 3);
-            const deliveryDateStr = deliveryDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-            state.orders[orderId] = {
-                items: items,
-                total: total,
-                shipping: { address: fullAddress, date: deliveryDateStr },
-                timeline: [
-                    { date: today, title: 'Order Placed', completed: true },
-                    { date: today, title: 'Payment Confirmed', completed: true },
-                    { date: 'Pending', title: 'Shipped via Lumina Express', completed: false },
-                    { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
-                ]
-            };
-            saveOrders();
-
-            state.cart = [];
-            updateCartIcon();
-
-            modalContent.innerHTML = `
-                <div style="text-align: center; padding: 4rem 1rem;">
-                    <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-                        <i class='bx bx-check' style="font-size: 3rem; color: #10b981;"></i>
-                    </div>
-                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">Order Placed Successfully!</h2>
-                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
-                        Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
-                        <br><br>
-                        <span style="padding: 0.5rem 1rem; background: rgba(66, 133, 244, 0.1); border-radius: 50px; color: #4285F4; display: inline-flex; align-items: center; gap: 0.5rem;">
-                            <i class='bx bxl-gmail'></i> Receipt sent to ${email} via Gmail
-                        </span>
-                    </p>
-                    <div style="display: flex; gap: 1rem; justify-content: center;">
-                        <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=orders]').click();">View Orders</button>
-                        <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
-                    </div>
-                </div>
-            `;
+        const response = await fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: amountINR,
+                customer_email: email,
+                customer_phone: phone,
+                customer_id: "cust_" + Date.now()
+            })
         });
-    }, 1500);
+
+        const data = await response.json();
+
+        if (data.payment_session_id) {
+            // 2. Launch Cashfree Checkout
+            cashfree.checkout({
+                paymentSessionId: data.payment_session_id,
+                redirectTarget: "_modal" // Opens in a secure modal
+            }).then((result) => {
+                if (result.error) {
+                    showToast("Payment Failed: " + result.error.message);
+                    if (btn) { btn.innerHTML = "Retry Payment"; btn.disabled = false; }
+                    return;
+                }
+
+                // For demonstration, we'll finalize the order locally
+                // In a production app, you should verify payment on backend
+                const customerName = email.split('@')[0] || 'Customer';
+                saveToGoogleSheets(customerName, email, phone, `${address}, ${city}`, pincode);
+                finalizeCashfreeOrder(items, total, fullAddress, email, data.order_id);
+            });
+        } else {
+            throw new Error(data.message || "Failed to create payment session");
+        }
+
+    } catch (err) {
+        console.error("Cashfree Checkout Error:", err);
+        showToast("Error: " + err.message);
+        if (btn) { btn.innerHTML = "Retry Payment"; btn.disabled = false; }
+    }
+}
+
+function finalizeCashfreeOrder(items, total, fullAddress, email, paymentId) {
+    const orderId = 'LUM-' + Math.floor(10000 + Math.random() * 90000);
+    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const deliveryDt = new Date();
+    deliveryDt.setDate(deliveryDt.getDate() + 3);
+    const deliveryDateStr = deliveryDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    state.orders[orderId] = {
+        items,
+        total,
+        paymentId,
+        gateway: 'Cashfree',
+        shipping: { address: fullAddress, date: deliveryDateStr },
+        timeline: [
+            { date: today, title: 'Order Placed', completed: true },
+            { date: today, title: 'Payment Confirmed via Cashfree', completed: true },
+            { date: 'Pending', title: 'Shipped via Laance Express', completed: false },
+            { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
+        ]
+    };
+    saveOrders();
+    state.cart = [];
+    updateCartIcon();
+
+    modalContent.innerHTML = `
+        <div style="text-align: center; padding: 4rem 1rem;">
+            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                <i class='bx bx-check' style="font-size: 3rem; color: #10b981;"></i>
+            </div>
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Order Placed Successfully!</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Cashfree Ref: <code style="color:#10b981">${paymentId}</code></p>
+            <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
+                Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
+                <br><br>
+                <span style="padding: 0.5rem 1rem; background: rgba(66, 133, 244, 0.1); border-radius: 50px; color: #4285F4; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class='bx bxl-gmail'></i> Receipt sent to ${email}
+                </span>
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=tracking]').click();">Track Order</button>
+                <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
+            </div>
+        </div>
+    `;
 }
 
 // =========================================================================
@@ -744,7 +889,7 @@ function renderOrderNowAddressForm() {
             <img src="${state.orderNowData.item.image}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
             <div class="cart-item-info flex" style="flex:1;">
                 <h4 style="margin:0;">${state.orderNowData.item.name}</h4>
-                <div style="color: var(--text-muted); font-size: 0.875rem;">Total: $${state.orderNowData.item.price}</div>
+                <div style="color: var(--text-muted); font-size: 0.875rem;">Total: ₹${state.orderNowData.item.price.toLocaleString('en-IN')}</div>
             </div>
         </div>
 
@@ -792,7 +937,7 @@ function renderOrderNowPaymentView() {
                     </label>
                 </div>
                 
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order (₹${(state.orderNowData ? state.orderNowData.item.price : 0).toLocaleString('en-IN')})</button>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order (₹${state.orderNowData.item.price.toLocaleString('en-IN')})</button>
             </form>
         </div>
         <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="renderOrderNowAddressForm()">Back to Delivery Details</button>
@@ -815,65 +960,128 @@ function renderOrderNowPaymentView() {
     document.getElementById('order-now-payment-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
-        btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
-        btn.disabled = true;
-
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const { item, address } = state.orderNowData;
+        const fullAddress = `${address.line1}, Pincode: ${address.pincode} (Tel: ${address.phone})`;
 
-        setTimeout(() => {
-            const { item, address } = state.orderNowData;
+        if (paymentMethod === 'cod') {
+            // Cash on Delivery — no payment gateway needed
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Placing Order...";
+            btn.disabled = true;
+            setTimeout(() => {
+                const customerName = address.email.split('@')[0] || 'Customer';
+                saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode);
+                finalizeOrderNow(item, fullAddress, address.email, null, 'cod');
+            }, 1000);
+        } else {
+            // Online Payment via Cashfree
+            const amountINR = item.price; // Now already in INR
 
-            const fullAddress = `${address.line1}, Pincode: ${address.pincode} (Tel: ${address.phone}) [Email: ${address.email}]`;
-            const orderId = 'LUM-' + Math.floor(10000 + Math.random() * 90000);
-            const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Securing Session...";
+            btn.disabled = true;
 
-            const deliveryDt = new Date();
-            deliveryDt.setDate(deliveryDt.getDate() + 3);
-            const deliveryDateStr = deliveryDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-            state.orders[orderId] = {
-                items: [item],
-                total: item.price,
-                paymentMethod: paymentMethod, // optional tracking 
-                shipping: { address: fullAddress, date: deliveryDateStr },
-                timeline: [
-                    { date: today, title: 'Order Placed', completed: true },
-                    { date: today, title: paymentMethod === 'cod' ? 'Cash on Delivery Requested' : 'Payment Confirmed', completed: true },
-                    { date: 'Pending', title: 'Shipped via Lumina Express', completed: false },
-                    { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
-                ]
-            };
-            saveOrders();
-
-            modalContent.innerHTML = `
-                <div style="text-align: center; padding: 4rem 1rem;">
-                    <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-                        <i class='bx bx-check' style="font-size: 3rem; color: #10b981;"></i>
-                    </div>
-                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">Order Placed Successfully!</h2>
-                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
-                        Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
-                        <br><br>
-                        <span style="padding: 0.5rem 1rem; background: rgba(66, 133, 244, 0.1); border-radius: 50px; color: #4285F4; display: inline-flex; align-items: center; gap: 0.5rem;">
-                            <i class='bx bx-receipt'></i> Order details sent to your email
-                        </span>
-                    </p>
-                    <div style="display: flex; gap: 1rem; justify-content: center;">
-                        <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=orders]').click();">View Orders</button>
-                        <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
-                    </div>
-                </div>
-            `;
-
-            // Clean up temporary order data
-            delete state.orderNowData;
-        }, 1200);
+            // Call real backend for "Order Now" flow
+            fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: amountINR,
+                    customer_email: address.email,
+                    customer_phone: address.phone,
+                    customer_id: "cust_" + Date.now()
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.payment_session_id) {
+                        cashfree.checkout({
+                            paymentSessionId: data.payment_session_id,
+                            redirectTarget: "_modal"
+                        }).then((result) => {
+                            if (result.error) {
+                                showToast("Payment Failed: " + result.error.message);
+                                btn.innerHTML = "Retry Payment";
+                                btn.disabled = false;
+                                return;
+                            }
+                            const customerName = address.email.split('@')[0] || 'Customer';
+                            saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode);
+                            finalizeOrderNow(item, fullAddress, address.email, data.order_id, 'online');
+                        });
+                    } else {
+                        throw new Error(data.message || "Session creation failed");
+                    }
+                })
+                .catch(err => {
+                    console.error("Fast Checkout Error:", err);
+                    showToast("Error: " + err.message);
+                    btn.innerHTML = "Retry Payment";
+                    btn.disabled = false;
+                });
+        }
     });
+}
+
+function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
+    const orderId = 'LUM-' + Math.floor(10000 + Math.random() * 90000);
+    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const deliveryDt = new Date();
+    deliveryDt.setDate(deliveryDt.getDate() + 3);
+    const deliveryDateStr = deliveryDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    state.orders[orderId] = {
+        items: [item],
+        total: item.price,
+        paymentMethod: method,
+        paymentId: paymentId || 'COD',
+        gateway: method === 'online' ? 'Cashfree' : null,
+        shipping: { address: fullAddress, date: deliveryDateStr },
+        timeline: [
+            { date: today, title: 'Order Placed', completed: true },
+            { date: today, title: method === 'cod' ? 'Cash on Delivery Selected' : 'Payment Confirmed via Cashfree', completed: true },
+            { date: 'Pending', title: 'Shipped via Laance Express', completed: false },
+            { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
+        ]
+    };
+    saveOrders();
+    delete state.orderNowData;
+
+    modalContent.innerHTML = `
+        <div style="text-align: center; padding: 4rem 1rem;">
+            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                <i class='bx bx-check' style="font-size: 3rem; color: #10b981;"></i>
+            </div>
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Order Placed Successfully!</h2>
+            ${paymentId ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Cashfree ID: <code style="color:#10b981">${paymentId}</code></p>` : ''}
+            <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
+                Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=tracking]').click();">Track Order</button>
+                <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
+            </div>
+        </div>
+    `;
 }
 
 // =========================================================================
 // Utilities
 // =========================================================================
+
+function saveToGoogleSheets(name, email, phone, address, pincode) {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyKlRqIAHgAN1sjXqoG9pmgGWXfcjUlfNdzlQZokL97iWh90DRb9MUZPUbgWAyqWYwU/exec';
+
+    const formData = new FormData();
+    formData.append('Name', name || '');
+    formData.append('Email', email || '');
+    formData.append('Phone', phone || '');
+    formData.append('Address', address || '');
+    formData.append('Pincode', pincode || '');
+
+    fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
+        .then(() => console.log('Successfully saved to Google Sheets'))
+        .catch(error => console.error('Error saving to Google Sheets:', error.message));
+}
 
 function showToast(message) {
     toastMessage.textContent = message;

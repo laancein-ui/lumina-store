@@ -181,30 +181,41 @@ function setupNavigation() {
 }
 
 function renderView(viewName, params = {}) {
-    state.currentView = viewName;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+        if (!appRoot) {
+            console.error("appRoot element missing!");
+            return;
+        }
 
-    switch (viewName) {
-        case 'home':
-            appRoot.innerHTML = renderHome();
-            bindHomeEvents();
-            break;
-        case 'product':
-            appRoot.innerHTML = renderProductDetail(params.id);
-            bindProductEvents();
-            break;
-        case 'orders':
-            appRoot.innerHTML = renderOrders();
-            // Optional: bind events for orders view if needed
-            break;
-        case 'admin':
-            appRoot.innerHTML = renderAdmin();
-            bindAdminEvents();
-            break;
-        case 'tracking':
-            appRoot.innerHTML = renderTracking();
-            bindTrackingEvents();
-            break;
+        state.currentView = viewName;
+        window.scrollTo({ top: 0, behavior: 'auto' });
+
+        switch (viewName) {
+            case 'home':
+                appRoot.innerHTML = renderHome();
+                bindHomeEvents();
+                break;
+            case 'product':
+                appRoot.innerHTML = renderProductDetail(params.id);
+                bindProductEvents();
+                break;
+            case 'orders':
+                appRoot.innerHTML = renderOrders();
+                break;
+            case 'admin':
+                appRoot.innerHTML = renderAdmin();
+                bindAdminEvents();
+                break;
+            case 'tracking':
+                appRoot.innerHTML = renderTracking();
+                bindTrackingEvents();
+                break;
+            default:
+                appRoot.innerHTML = `<div class="section"><h2>Page Not Found</h2></div>`;
+        }
+    } catch (e) {
+        console.error(`Rendering error [${viewName}]:`, e);
+        appRoot.innerHTML = `<div style="padding:4rem;color:red;"><h1>Rendering Error</h1><p>${e.message}</p></div>`;
     }
 }
 
@@ -213,13 +224,16 @@ function renderView(viewName, params = {}) {
 // =========================================================================
 
 function renderHome() {
+    // Ensure we have a valid array to work with
+    const displayProducts = Array.isArray(products) ? products : defaultProducts;
+
     return `
         <div class="section hero">
             <div class="hero-content">
                 <h1>Elevate your daily <br><span>Experience.</span></h1>
                 <p>Discover the perfect intersection of minimalist design and high-end technology. Your next upgrade is here.</p>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="#" class="btn" onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})">Expolore Collection</a>
+                    <a href="#" class="btn" onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})">Explore Collection</a>
                 </div>
             </div>
             <div class="hero-image-wrap">
@@ -230,21 +244,25 @@ function renderHome() {
         <div class="section" id="products-grid">
             <h2 class="section-title">Featured Innovation</h2>
             <div class="products-grid">
-                ${products.map(p => `
-                    <div class="product-card" data-id="${p.id}">
-                        <img src="${p.image}" alt="${p.name}" class="product-image">
+                ${displayProducts.map(p => {
+        if (!p) return '';
+        const priceNum = Number(p.price);
+        const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
+        return `
+                    <div class="product-card" data-id="${p.id || 0}">
+                        <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
                         <div class="product-info">
                             <div>
-                                <h3 class="product-title">${p.name}</h3>
-                                <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+                                <h3 class="product-title">${p.name || 'New Item'}</h3>
+                                <div class="product-price">₹${formattedPrice}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn add-to-cart-btn" data-id="${p.id}" style="flex: 1;">Add to Cart</button>
-                            <button class="btn btn-secondary order-now-btn" data-id="${p.id}" style="flex: 1;">Order Now</button>
+                            <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
+                            <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         </div>
     `;
