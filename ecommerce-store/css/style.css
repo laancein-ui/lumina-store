@@ -125,6 +125,7 @@ p {
     cursor: pointer;
     background: linear-gradient(90deg, #fff, var(--text-muted));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -251,6 +252,7 @@ p {
 .hero-content h1 span {
     background: linear-gradient(90deg, var(--secondary), var(--primary));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -727,6 +729,10 @@ footer {
     display: flex;
     justify-content: center;
     gap: 1.5rem;
+}
+
+.social-links a {
+    text-decoration: none;
 }
 
 .social-links i {
