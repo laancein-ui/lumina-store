@@ -105,10 +105,22 @@ async function saveReview(reviewData) {
 async function fetchOrdersFromSupabase() {
     try {
         if (!supabaseClient) return;
-        const { data, error } = await supabaseClient
+
+        let query = supabaseClient
             .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*');
+
+        // If logged in, only fetch user's orders
+        if (state.user) {
+            query = query.eq('user_id', state.user.id);
+        } else {
+            // For guest/anonymous, maybe only show what's in local state
+            // or fetch by email if we have it? Let's just return for now
+            // to avoid showing ALL orders to everyone.
+            return;
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
         if (error) throw error;
 
         if (data) {
@@ -141,12 +153,42 @@ async function saveOrderToSupabase(orderId, orderData) {
                 shipping: JSON.stringify(orderData.shipping),
                 timeline: JSON.stringify(orderData.timeline),
                 payment_id: orderData.paymentId,
-                gateway: orderData.gateway
+                gateway: orderData.gateway,
+                user_id: state.user ? state.user.id : null // Link to user if logged in
             }
         ]);
         if (error) throw error;
     } catch (err) {
         console.error('Error saving order to Supabase:', err);
+    }
+}
+
+async function fetchUserProfile() {
+    try {
+        if (!supabaseClient || !state.user) return;
+
+        let { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', state.user.id)
+            .single();
+
+        if (error && error.code === 'PGRST116') {
+            // Profile doesn't exist, create it
+            const { data: newProfile, error: insertError } = await supabaseClient
+                .from('profiles')
+                .insert([{ id: state.user.id, full_name: state.user.user_metadata.full_name || '', avatar_url: state.user.user_metadata.avatar_url || '' }])
+                .select()
+                .single();
+            if (insertError) throw insertError;
+            data = newProfile;
+        } else if (error) {
+            throw error;
+        }
+
+        state.profile = data;
+    } catch (err) {
+        console.error('Error fetching profile:', err);
     }
 }
 
@@ -171,6 +213,7 @@ const safeStorage = {
 
 // App State
 const state = {
+    user: null, // Current Supabase User
     cart: [],
     currentView: 'home',
     currentProductId: null,
@@ -194,7 +237,8 @@ const state = {
             return {};
         }
     })(),
-    reviews: {} // Map of productId -> reviews[]
+    reviews: {}, // Map of productId -> reviews[]
+    profile: null // User profile data from Supabase
 };
 
 function saveOrders() {
@@ -205,6 +249,7 @@ function saveOrders() {
 const appRoot = document.getElementById('app-root');
 const cartCount = document.getElementById('cart-count');
 const cartTrigger = document.getElementById('cart-trigger');
+const profileTrigger = document.getElementById('profile-trigger'); // New
 const modalOverlay = document.getElementById('modal-overlay');
 const checkoutModal = document.getElementById('checkout-modal');
 const modalContent = document.getElementById('modal-content');
@@ -216,6 +261,29 @@ const toastMessage = document.getElementById('toast-message');
 async function init() {
     try {
         console.log("App Initializing...");
+
+        // Listen for Auth Changes
+        if (supabaseClient) {
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                console.log("Auth Event:", event, session);
+                state.user = session ? session.user : null;
+                if (state.user) {
+                    await fetchUserProfile();
+                } else {
+                    state.profile = null;
+                }
+
+                // Refresh UI if on profile page
+                if (state.currentView === 'profile') {
+                    renderView('profile');
+                }
+            });
+
+            // Initial check
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            state.user = session ? session.user : null;
+            if (state.user) await fetchUserProfile();
+        }
 
         // Handle Trusted Device Logic
         const urlParams = new URLSearchParams(window.location.search);
@@ -240,7 +308,7 @@ async function init() {
         ]);
 
         // Refresh UI with latest data if on home or admin
-        if (state.currentView === 'home' || state.currentView === 'admin') {
+        if (state.currentView === 'home' || state.currentView === 'admin' || state.currentView === 'profile') {
             renderView(state.currentView);
         }
 
@@ -269,6 +337,12 @@ function setupNavigation() {
             renderView(route);
         });
     });
+
+    if (profileTrigger) {
+        profileTrigger.addEventListener('click', () => {
+            renderView('profile');
+        });
+    }
 }
 
 function renderView(viewName, params = {}) {
@@ -300,6 +374,19 @@ function renderView(viewName, params = {}) {
             case 'tracking':
                 appRoot.innerHTML = renderTracking();
                 bindTrackingEvents();
+                break;
+            case 'profile':
+                if (!state.user) {
+                    appRoot.innerHTML = renderAuth();
+                    bindAuthEvents();
+                } else {
+                    appRoot.innerHTML = renderProfile();
+                    bindProfileEvents();
+                }
+                break;
+            case 'auth':
+                appRoot.innerHTML = renderAuth();
+                bindAuthEvents();
                 break;
             default:
                 appRoot.innerHTML = `<div class="section"><h2>Page Not Found</h2></div>`;
@@ -964,7 +1051,7 @@ function renderCartContent() {
                 </div>
                 <div style="display: flex; gap: 1rem;">
                     <input type="tel" id="cart-phone" class="input-field" placeholder="Phone Number" style="flex: 1" required>
-                    <input type="email" id="cart-email" class="input-field" placeholder="Email Address" style="flex: 1" required>
+                    <input type="email" id="cart-email" class="input-field" placeholder="Email Address" style="flex: 1" value="${state.user ? state.user.email : ''}" required>
                 </div>
                 
                 <!-- Cashfree Pay Button -->
@@ -1136,7 +1223,7 @@ function renderOrderNowAddressForm() {
                 <input type="text" id="on-address" class="input-field" placeholder="Address Line 1" required>
                 <div style="display: flex; gap: 1rem;">
                     <input type="text" id="on-pincode" class="input-field" placeholder="Pincode" style="flex: 1" required>
-                    <input type="email" id="on-email" class="input-field" placeholder="Email Address" style="flex: 1" required>
+                    <input type="email" id="on-email" class="input-field" placeholder="Email Address" style="flex: 1" value="${state.user ? state.user.email : ''}" required>
                 </div>
                 
                 <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">Continue to Payment <i class='bx bx-right-arrow-alt'></i></button>
@@ -1317,6 +1404,233 @@ function saveToGoogleSheets(name, email, phone, address, pincode) {
     fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
         .then(() => console.log('Successfully saved to Google Sheets'))
         .catch(error => console.error('Error saving to Google Sheets:', error.message));
+}
+
+// =========================================================================
+// Authentication & Profiles
+// =========================================================================
+
+function renderAuth() {
+    return `
+        <div class="section">
+            <div class="auth-form-container">
+                <h2 id="auth-title">Welcome Back</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login">Login</div>
+                    <div class="auth-tab" id="tab-signup">Sign Up</div>
+                </div>
+                
+                <form id="auth-form" class="checkout-form">
+                    <div id="signup-fields" style="display: none;">
+                        <input type="text" id="auth-name" class="input-field" placeholder="Full Name">
+                    </div>
+                    <input type="email" id="auth-email" class="input-field" placeholder="Email Address" required>
+                    <input type="password" id="auth-password" class="input-field" placeholder="Password" required>
+                    <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;" id="auth-submit-btn">
+                        Login
+                    </button>
+                </form>
+                
+                <div class="social-auth">
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Or continue with</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="btn-social" id="btn-google">
+                            <i class='bx bxl-google'></i> Google
+                        </div>
+                        <div class="btn-social" id="btn-facebook">
+                            <i class='bx bxl-facebook'></i> Facebook
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function bindAuthEvents() {
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const authTitle = document.getElementById('auth-title');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const signupFields = document.getElementById('signup-fields');
+    const authForm = document.getElementById('auth-form');
+
+    let isLogin = true;
+
+    tabLogin.addEventListener('click', () => {
+        isLogin = true;
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        authTitle.textContent = "Welcome Back";
+        authSubmitBtn.textContent = "Login";
+        signupFields.style.display = 'none';
+        document.getElementById('auth-name').required = false;
+    });
+
+    tabSignup.addEventListener('click', () => {
+        isLogin = false;
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        authTitle.textContent = "Create Account";
+        authSubmitBtn.textContent = "Create Account";
+        signupFields.style.display = 'block';
+        document.getElementById('auth-name').required = true;
+    });
+
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        const fullName = document.getElementById('auth-name').value;
+
+        authSubmitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
+        authSubmitBtn.disabled = true;
+
+        try {
+            if (isLogin) {
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                showToast("Welcome back!");
+            } else {
+                const { error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: fullName }
+                    }
+                });
+                if (error) throw error;
+                showToast("Account created! Please check your email.");
+            }
+            renderView('home');
+        } catch (err) {
+            console.error("Auth Error:", err);
+            showToast(err.message);
+            authSubmitBtn.innerHTML = isLogin ? "Login" : "Create Account";
+            authSubmitBtn.disabled = false;
+        }
+    });
+
+    document.getElementById('btn-google').addEventListener('click', async () => {
+        await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+    });
+
+    document.getElementById('btn-facebook').addEventListener('click', async () => {
+        await supabaseClient.auth.signInWithOAuth({ provider: 'facebook' });
+    });
+}
+
+function renderProfile() {
+    const userInitials = state.profile && state.profile.full_name
+        ? state.profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+        : state.user.email[0].toUpperCase();
+
+    return `
+        <div class="section">
+            <h1 class="section-title" style="text-align: left;">Your Account</h1>
+            
+            <div class="profile-dashboard">
+                <aside class="profile-sidebar">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div class="profile-avatar" style="margin: 0 auto 1.5rem;">${userInitials}</div>
+                        <h3 style="margin-bottom: 0.25rem;">${state.profile && state.profile.full_name || 'Guest User'}</h3>
+                        <p style="font-size: 0.875rem;">${state.user.email}</p>
+                    </div>
+                    
+                    <nav>
+                        <div class="profile-nav-item active" data-tab="overview">
+                            <i class='bx bx-grid-alt'></i> Dashboard
+                        </div>
+                        <div class="profile-nav-item" data-tab="orders">
+                            <i class='bx bx-package'></i> Orders
+                        </div>
+                        <div class="profile-nav-item" data-tab="addresses">
+                            <i class='bx bx-map'></i> Saved Addresses
+                        </div>
+                        <div class="profile-nav-item" data-tab="payments">
+                            <i class='bx bx-credit-card'></i> Payment Methods
+                        </div>
+                        <div class="profile-nav-item" id="btn-logout" style="color: #ef4444; margin-top: 2rem;">
+                            <i class='bx bx-log-out'></i> Sign Out
+                        </div>
+                    </nav>
+                </aside>
+                
+                <main id="profile-content" class="profile-content-card">
+                    ${renderProfileOverview()}
+                </main>
+            </div>
+        </div>
+    `;
+}
+
+function renderProfileOverview() {
+    return `
+        <h2 style="margin-bottom: 2rem;">Dashboard Overview</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 3rem;">
+            <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-light);">
+                <div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem;">Total Orders</div>
+                <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(state.orders).length}</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-light);">
+                <div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.5rem;">Member Status</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #fbbf24;">Elite</div>
+            </div>
+        </div>
+        
+        <h3>Recent Activity</h3>
+        <p style="margin-top: 1rem;">Welcome back to your premium dashboard. Here you can manage your orders, delivery preferences, and secure payments.</p>
+        <button class="btn" style="margin-top: 2rem;" onclick="document.querySelector('[data-tab=orders]').click()">View All Orders</button>
+    `;
+}
+
+function bindProfileEvents() {
+    const content = document.getElementById('profile-content');
+    const navItems = document.querySelectorAll('.profile-nav-item');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (item.id === 'btn-logout') {
+                supabaseClient.auth.signOut();
+                renderView('home');
+                showToast("Signed out successfully");
+                return;
+            }
+
+            const tab = item.getAttribute('data-tab');
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            switch (tab) {
+                case 'overview':
+                    content.innerHTML = renderProfileOverview();
+                    break;
+                case 'orders':
+                    content.innerHTML = renderOrders();
+                    break;
+                case 'addresses':
+                    content.innerHTML = `
+                        <h2 style="margin-bottom: 2rem;">Saved Addresses</h2>
+                        <div style="padding: 3rem; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.1); border-radius: 20px;">
+                            <i class='bx bx-map-pin' style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p>No saved addresses yet.</p>
+                            <button class="btn btn-secondary" style="margin-top: 2rem;">+ Add New Address</button>
+                        </div>
+                    `;
+                    break;
+                case 'payments':
+                    content.innerHTML = `
+                        <h2 style="margin-bottom: 2rem;">Payment Methods</h2>
+                        <div style="padding: 3rem; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.1); border-radius: 20px;">
+                            <i class='bx bx-credit-card-front' style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p>No payment methods saved.</p>
+                            <button class="btn btn-secondary" style="margin-top: 2rem;">+ Add Card</button>
+                        </div>
+                    `;
+                    break;
+            }
+        });
+    });
 }
 
 function showToast(message) {
