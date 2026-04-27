@@ -659,10 +659,10 @@ function renderHome() {
                     </div>
                 </div>
 
-                <!-- Dresses Category -->
+                <!-- Fashion Category -->
                 <div class="product-card" onclick="renderView('dress')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--secondary);">
                     <div style="padding: 2rem;">
-                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Dresses</h3>
+                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Fashion</h3>
                         <p style="color: var(--text-muted);">Premium fashion & style.</p>
                         <button class="btn" style="margin-top: 1rem; width: 100%; background: var(--secondary);">Explore Fashion</button>
                     </div>
