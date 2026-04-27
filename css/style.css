@@ -340,6 +340,36 @@ p {
     gap: 2rem;
 }
 
+/* Category Cards (Home Page) */
+.category-card {
+    position: relative;
+    border-radius: 30px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.category-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    border-color: rgba(255,255,255,0.3);
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    z-index: 1;
+    transition: var(--transition);
+}
+
+.category-card:hover::before {
+    background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(79,70,229,0.1));
+}
+
 .product-card {
     background: var(--bg-surface);
     border: 1px solid var(--border-light);
