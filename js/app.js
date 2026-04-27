@@ -763,7 +763,7 @@ function renderHome() {
             
             <div class="hero-glass-card" style="position: relative; z-index: 10; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; padding: 3rem; text-align: center; width: 100%; max-width: 600px; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
                 <div style="margin-bottom: 2.5rem; animation: float 6s ease-in-out infinite;">
-                    <img src="assets/nav_logo.png" alt="LAANCE" style="width: 240px; height: auto; filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0.3));">
+                    <img src="assets/laance_premium_logo.jpg" alt="LAANCE" style="width: 320px; height: auto; filter: drop-shadow(0 0 40px rgba(79, 70, 229, 0.4));">
                 </div>
                 
                 <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -1px;">
