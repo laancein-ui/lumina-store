@@ -569,11 +569,16 @@ function renderDressPage() {
             </div>
         </div>
 
-        <!-- Men's Section -->
-        <div class="section" id="men-section" style="padding-top: 4rem;">
-            <h2 class="section-title">Men's Essentials</h2>
-            <div class="products-grid">
-                ${menDresses.map(p => renderProductCard(p)).join('')}
+        <!-- Men's Section with Custom Background -->
+        <div class="section" id="men-section" style="padding: 6rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/men_bg.jpg'); background-size: cover; background-position: center;">
+            <!-- Dark Overlay for readability -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>
+            
+            <div style="position: relative; z-index: 2;">
+                <h2 class="section-title" style="color: white; border-bottom-color: var(--primary);">Men's Essentials</h2>
+                <div class="products-grid">
+                    ${menDresses.map(p => renderProductCard(p)).join('')}
+                </div>
             </div>
         </div>
 
