@@ -643,7 +643,8 @@ function renderHome() {
                 </div>
             </div>
             <div class="hero-image-wrap">
-                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Laance Premium Multi-Store" class="hero-image">
+                <img src="assets/hero_logo.png" alt="Laance Premium Multi-Store" class="hero-image" style="border-radius: 30px; box-shadow: 0 0 60px rgba(79,70,229,0.4);">
+
             </div>
         </div>
 
