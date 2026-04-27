@@ -24,6 +24,41 @@ const defaultProducts = [
         price: 15999,
         image: "assets/product_sneakers_1772226357442.png",
         desc: "Engineered for speed and comfort. These aesthetic white and neon-blue accented minimalist sneakers offer responsive cushioning and a breathable mesh upper."
+    },
+    {
+        id: 4,
+        name: "Laance UltraBook Pro 16",
+        price: 189999,
+        image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=600",
+        desc: "Ultra-thin 16\" powerhouse laptop. M3 chip, 32GB RAM, 2TB SSD, and a stunning Liquid Retina XDR display that brings your work to life."
+    },
+    {
+        id: 5,
+        name: "Phantom 4K Drone",
+        price: 89999,
+        image: "https://images.unsplash.com/photo-1508444845599-5c89863b1c44?auto=format&fit=crop&q=80&w=600",
+        desc: "Capture the world from above with cinema-grade 4K video, obstacle avoidance, and 45 minutes of flight time."
+    },
+    {
+        id: 6,
+        name: "Eclipse OLED Gaming Monitor",
+        price: 74999,
+        image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&q=80&w=600",
+        desc: "32\" OLED panel with 240Hz refresh rate, 0.03ms response time, and stunning contrast for the most immersive gaming experience."
+    },
+    {
+        id: 7,
+        name: "Laance SoundBar Elite",
+        price: 34999,
+        image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&q=80&w=600",
+        desc: "Premium 5.1 Dolby Atmos soundbar delivering cinema-quality audio in your living room. Wireless subwoofer included."
+    },
+    {
+        id: 8,
+        name: "SnapX Pro Camera",
+        price: 149999,
+        image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600",
+        desc: "Professional mirrorless camera with 61MP full-frame sensor, 8K video recording, and dual card slots for the serious photographer."
     }
 ];
 
@@ -48,6 +83,27 @@ const womenDresses = [
         price: 10999,
         image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=600",
         desc: "A classic cocktail dress made from premium noir velvet. Slim fit with a modern square neckline."
+    },
+    {
+        id: 104,
+        name: "Rose Gold Sari Set",
+        price: 16999,
+        image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=600",
+        desc: "Exquisite handwoven rose gold sari with delicate zari border and matching blouse. Bridal-ready elegance."
+    },
+    {
+        id: 105,
+        name: "Emerald Maxi Wrap Dress",
+        price: 6999,
+        image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=600",
+        desc: "Flowing deep emerald wrap dress in premium jersey fabric. Universally flattering silhouette perfect for any occasion."
+    },
+    {
+        id: 106,
+        name: "Pearl White Anarkali Suit",
+        price: 14499,
+        image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&q=80&w=600",
+        desc: "Graceful floor-length Anarkali suit in pearl white with hand-embroidered detailing and palazzo trousers."
     }
 ];
 
@@ -72,6 +128,27 @@ const menDresses = [
         price: 3499,
         image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=600",
         desc: "The essential white button-down. High-thread-count cotton with a crisp, clean finish."
+    },
+    {
+        id: 154,
+        name: "Royal Bandhgala Sherwani",
+        price: 32999,
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600",
+        desc: "Regal golden-thread embroidered sherwani for weddings and celebrations. Includes matching churidar and dupatta."
+    },
+    {
+        id: 155,
+        name: "Navy Linen Blazer",
+        price: 8999,
+        image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=600",
+        desc: "Summer-weight navy linen blazer. Perfect for smart-casual occasions. Unlined for comfort in warm weather."
+    },
+    {
+        id: 156,
+        name: "Premium Denim Set",
+        price: 5999,
+        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=600",
+        desc: "Raw selvedge denim jacket and jeans set. Stonewashed finish with subtle distressing for a premium look."
     }
 ];
 
@@ -96,6 +173,27 @@ const carProducts = [
         price: 32000000,
         image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600",
         desc: "Ultimate comfort meets performance. Features active suspension and an AI-driven concierge system."
+    },
+    {
+        id: 304,
+        name: "Laance Roma Classic",
+        price: 8500000,
+        image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=600",
+        desc: "A vintage icon reborn. Hand-restored classic Italian roadster with a modern fuel-injected engine and premium leather cabin."
+    },
+    {
+        id: 305,
+        name: "Toscana SUV Prestige",
+        price: 14200000,
+        image: "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=600",
+        desc: "Dominate any terrain in supreme luxury. Panoramic roof, 22\" alloy wheels, 600hp twin-turbo V8 and a 7-seat Nappa leather interior."
+    },
+    {
+        id: 306,
+        name: "Napoli GT Convertible",
+        price: 21000000,
+        image: "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&q=80&w=600",
+        desc: "Open-air grand touring at its finest. Retractable hardtop, a 580hp engine, and hand-stitched Italian leather throughout."
     }
 ];
 
@@ -120,6 +218,27 @@ const realEstateListings = [
         price: 45000000,
         image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800",
         desc: "Escape the city in this minimalist forest cabin. Sustainable materials, geothermal heating, and complete privacy."
+    },
+    {
+        id: 204,
+        name: "Heritage Palace Bungalow",
+        price: 220000000,
+        image: "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&q=80&w=800",
+        desc: "A grand colonial-era heritage bungalow with manicured gardens, 8 bedrooms, a private pool, and fully modernized interiors."
+    },
+    {
+        id: 205,
+        name: "Urban Loft Studio",
+        price: 18500000,
+        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=800",
+        desc: "Chic and modern loft in the heart of the city. Exposed brick, industrial aesthetics, and premium finishes throughout."
+    },
+    {
+        id: 206,
+        name: "Hilltop Infinity Estate",
+        price: 175000000,
+        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800",
+        desc: "Perched above the city on a private hilltop. This 6-bedroom estate features an infinity pool, helicopter pad, and private vineyard."
     }
 ];
 
