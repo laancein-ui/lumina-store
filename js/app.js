@@ -75,6 +75,30 @@ const menDresses = [
     }
 ];
 
+const carProducts = [
+    {
+        id: 301,
+        name: "Laance Rosso GTO",
+        price: 25000000,
+        image: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&q=80&w=600",
+        desc: "A masterpiece of Italian engineering. 750hp V12 engine, handcrafted leather interior, and legendary performance."
+    },
+    {
+        id: 302,
+        name: "Milano Electric Spyder",
+        price: 18500000,
+        image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600",
+        desc: "The future of luxury mobility. Silent, powerful, and impeccably styled for the modern connoisseur."
+    },
+    {
+        id: 303,
+        name: "Venice Luxury Cruiser",
+        price: 32000000,
+        image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600",
+        desc: "Ultimate comfort meets performance. Features active suspension and an AI-driven concierge system."
+    }
+];
+
 const realEstateListings = [
     {
         id: 201,
@@ -455,6 +479,10 @@ function renderView(viewName, params = {}) {
                 appRoot.innerHTML = renderDressPage();
                 bindCategoryEvents();
                 break;
+            case 'cars':
+                appRoot.innerHTML = renderCarsPage();
+                bindCategoryEvents();
+                break;
             case 'realestate':
                 appRoot.innerHTML = renderCategory('Real Estate', realEstateListings);
                 bindCategoryEvents();
@@ -529,6 +557,15 @@ function renderHome() {
                         <button class="btn" style="margin-top: 1rem; width: 100%; background: #10b981; border: none;">Explore Properties</button>
                     </div>
                 </div>
+
+                <!-- Cars Category -->
+                <div class="product-card" onclick="renderView('cars')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/car_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #f59e0b;">
+                    <div style="padding: 2rem;">
+                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Cars</h3>
+                        <p style="color: var(--text-muted);">Italian passion in motion.</p>
+                        <button class="btn" style="margin-top: 1rem; width: 100%; background: #f59e0b; border: none;">Explore Cars</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -554,6 +591,31 @@ function renderHome() {
                         </div>
                     `;
                 }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function renderCarsPage() {
+    return `
+        <!-- Header -->
+        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
+            <div class="hero-content" style="max-width: 100%;">
+                <h1>Italia <br><span>Milano.</span></h1>
+                <p>Passione in Miniatura & Excellence in Engineering.</p>
+            </div>
+        </div>
+
+        <!-- Cars Section with Custom Background -->
+        <div class="section" id="cars-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/car_bg.jpg'); background-size: cover; background-position: center;">
+            <!-- Overlay for readability -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+            
+            <div style="position: relative; z-index: 2;">
+                <h2 class="section-title" style="color: #f59e0b; border-bottom-color: #f59e0b;">Exotic Collection</h2>
+                <div class="products-grid">
+                    ${carProducts.map(p => renderProductCard(p)).join('')}
+                </div>
             </div>
         </div>
     `;
