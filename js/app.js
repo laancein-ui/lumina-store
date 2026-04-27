@@ -27,7 +27,7 @@ const defaultProducts = [
     }
 ];
 
-const dressProducts = [
+const womenDresses = [
     {
         id: 101,
         name: "Midnight Silk Evening Gown",
@@ -48,6 +48,30 @@ const dressProducts = [
         price: 10999,
         image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=600",
         desc: "A classic cocktail dress made from premium noir velvet. Slim fit with a modern square neckline."
+    }
+];
+
+const menDresses = [
+    {
+        id: 151,
+        name: "Classic Charcoal Suit",
+        price: 24999,
+        image: "https://images.unsplash.com/photo-1594932224491-ca680f49fa2f?auto=format&fit=crop&q=80&w=600",
+        desc: "Sharp and sophisticated charcoal suit for the modern professional. Includes jacket and trousers."
+    },
+    {
+        id: 152,
+        name: "Italian Leather Bomber",
+        price: 18999,
+        image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=600",
+        desc: "Premium handcrafted Italian leather bomber jacket in deep espresso brown."
+    },
+    {
+        id: 153,
+        name: "Oxford White Button-Down",
+        price: 3499,
+        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=600",
+        desc: "The essential white button-down. High-thread-count cotton with a crisp, clean finish."
     }
 ];
 
@@ -428,7 +452,7 @@ function renderView(viewName, params = {}) {
                 bindCategoryEvents();
                 break;
             case 'dress':
-                appRoot.innerHTML = renderCategory('Dresses', dressProducts);
+                appRoot.innerHTML = renderDressPage();
                 bindCategoryEvents();
                 break;
             case 'realestate':
@@ -530,6 +554,58 @@ function renderHome() {
                         </div>
                     `;
                 }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function renderDressPage() {
+    return `
+        <!-- Header -->
+        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
+            <div class="hero-content" style="max-width: 100%;">
+                <h1>Fashion <br><span>Collection.</span></h1>
+                <p>Curated elegance for Men and Women.</p>
+            </div>
+        </div>
+
+        <!-- Men's Section -->
+        <div class="section" id="men-section" style="padding-top: 4rem;">
+            <h2 class="section-title">Men's Essentials</h2>
+            <div class="products-grid">
+                ${menDresses.map(p => renderProductCard(p)).join('')}
+            </div>
+        </div>
+
+        <!-- Women's Section with Custom Background -->
+        <div class="section" id="women-section" style="padding: 6rem 2rem; margin-top: 4rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/women_bg.jpg'); background-size: cover; background-position: center;">
+            <!-- Overlay to ensure readability -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 1;"></div>
+            
+            <div style="position: relative; z-index: 2;">
+                <h2 class="section-title" style="color: #d63384; border-bottom-color: #d63384;">Women's Collection</h2>
+                <div class="products-grid">
+                    ${womenDresses.map(p => renderProductCard(p)).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderProductCard(p) {
+    const formattedPrice = Number(p.price).toLocaleString('en-IN');
+    return `
+        <div class="product-card" data-id="${p.id || 0}">
+            <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
+            <div class="product-info">
+                <div>
+                    <h3 class="product-title">${p.name || 'New Item'}</h3>
+                    <div class="product-price">₹${formattedPrice}</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
+                <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
             </div>
         </div>
     `;
