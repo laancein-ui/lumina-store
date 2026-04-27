@@ -103,23 +103,50 @@ p {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: rgba(10, 10, 14, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(10, 10, 14, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid var(--border-light);
-    height: 80px;
+    height: auto;
     display: flex;
+    flex-direction: column;
     transition: var(--transition);
+}
+
+.status-bar {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: 1px;
+}
+
+.status-icons {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .status-bar {
+        display: flex;
+    }
+    .navbar {
+        height: auto;
+    }
 }
 
 .nav-container {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
-    padding: 0 2rem;
+    padding: 0.5rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 60px;
 }
 
 .logo { 
@@ -140,6 +167,20 @@ p {
 .nav-links {
     display: flex;
     gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        gap: 1.5rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Hide scrollbar for cleaner look */
+    }
+    .nav-links::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .nav-links a {
@@ -172,6 +213,13 @@ p {
 .nav-links a:hover::after,
 .nav-links a.active::after {
     width: 100%;
+    animation: pulse-underline 2s infinite;
+}
+
+@keyframes pulse-underline {
+    0% { opacity: 0.5; box-shadow: 0 0 5px var(--primary-glow); }
+    50% { opacity: 1; box-shadow: 0 0 15px var(--primary-glow); }
+    100% { opacity: 0.5; box-shadow: 0 0 5px var(--primary-glow); }
 }
 
 .cart-trigger {
@@ -522,16 +570,18 @@ p {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -45%) scale(0.95);
-    background: #111116;
+    background: rgba(17, 17, 22, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-light);
     width: 90%;
-    max-width: 500px;
-    border-radius: 24px;
+    max-width: 450px;
+    border-radius: 32px;
     z-index: 2001;
     opacity: 0;
     pointer-events: none;
     transition: var(--transition);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(79, 70, 229, 0.1);
     overflow: hidden;
 }
 

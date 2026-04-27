@@ -460,6 +460,36 @@ function saveOrders() {
     safeStorage.set('localStorage', 'laance_orders', JSON.stringify(state.orders));
 }
 
+function updateNavbarProfile() {
+    const profileTrigger = document.getElementById('profile-trigger');
+    if (!profileTrigger) return;
+
+    if (state.user) {
+        const initials = state.profile && state.profile.full_name
+            ? state.profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+            : state.user.email[0].toUpperCase();
+        
+        profileTrigger.innerHTML = `<div style="width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; border: 2px solid rgba(255,255,255,0.2);">${initials}</div>`;
+    } else {
+        profileTrigger.innerHTML = `<i class='bx bx-user'></i>`;
+    }
+}
+
+function startClock() {
+    const clock = document.getElementById('current-time');
+    if (!clock) return;
+
+    function update() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        clock.textContent = `${hours}:${minutes}`;
+    }
+    
+    update();
+    setInterval(update, 60000);
+}
+
 // DOM Elements
 const appRoot = document.getElementById('app-root');
 const cartCount = document.getElementById('cart-count');
@@ -488,6 +518,9 @@ async function init() {
                     state.profile = null;
                 }
 
+                // Update Navbar Profile Icon
+                updateNavbarProfile();
+
                 // Refresh UI if on profile page
                 if (state.currentView === 'profile') {
                     renderView('profile');
@@ -498,6 +531,7 @@ async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             state.user = session ? session.user : null;
             if (state.user) await fetchUserProfile();
+            updateNavbarProfile();
         }
 
         // Handle Trusted Device Logic
@@ -527,6 +561,7 @@ async function init() {
             renderView(state.currentView);
         }
 
+        startClock();
         console.log("App Successfully Rooted.");
     } catch (e) {
         console.error("Critical Boot Error:", e);
@@ -552,12 +587,6 @@ function setupNavigation() {
             renderView(route);
         });
     });
-
-    if (profileTrigger) {
-        profileTrigger.addEventListener('click', () => {
-            renderView('profile');
-        });
-    }
 }
 
 function renderView(viewName, params = {}) {
@@ -608,8 +637,7 @@ function renderView(viewName, params = {}) {
                 break;
             case 'profile':
                 if (!state.user) {
-                    appRoot.innerHTML = renderAuth();
-                    bindAuthEvents();
+                    showAuthModal();
                 } else {
                     appRoot.innerHTML = renderProfile();
                     bindProfileEvents();
@@ -1852,36 +1880,41 @@ function saveToGoogleSheets(name, email, phone, address, pincode) {
 // Authentication & Profiles
 // =========================================================================
 
+function showAuthModal() {
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = renderAuth();
+    bindAuthEvents();
+    document.body.classList.add('modal-open');
+}
+
 function renderAuth() {
     return `
-        <div class="section">
-            <div class="auth-form-container">
-                <h2 id="auth-title">Welcome Back</h2>
-                <div class="auth-tabs">
-                    <div class="auth-tab active" id="tab-login">Login</div>
-                    <div class="auth-tab" id="tab-signup">Sign Up</div>
+        <div class="auth-form-container" style="margin: 0; padding: 1rem; border: none; backdrop-filter: none; background: transparent;">
+            <h2 id="auth-title">Welcome Back</h2>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">Login</div>
+                <div class="auth-tab" id="tab-signup">Sign Up</div>
+            </div>
+            
+            <form id="auth-form" class="checkout-form">
+                <div id="signup-fields" style="display: none;">
+                    <input type="text" id="auth-name" class="input-field" placeholder="Full Name">
                 </div>
-                
-                <form id="auth-form" class="checkout-form">
-                    <div id="signup-fields" style="display: none;">
-                        <input type="text" id="auth-name" class="input-field" placeholder="Full Name">
+                <input type="email" id="auth-email" class="input-field" placeholder="Email Address" required>
+                <input type="password" id="auth-password" class="input-field" placeholder="Password" required>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;" id="auth-submit-btn">
+                    Login
+                </button>
+            </form>
+            
+            <div class="social-auth">
+                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Or continue with</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="btn-social" id="btn-google">
+                        <i class='bx bxl-google'></i> Google
                     </div>
-                    <input type="email" id="auth-email" class="input-field" placeholder="Email Address" required>
-                    <input type="password" id="auth-password" class="input-field" placeholder="Password" required>
-                    <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;" id="auth-submit-btn">
-                        Login
-                    </button>
-                </form>
-                
-                <div class="social-auth">
-                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Or continue with</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="btn-social" id="btn-google">
-                            <i class='bx bxl-google'></i> Google
-                        </div>
-                        <div class="btn-social" id="btn-facebook">
-                            <i class='bx bxl-facebook'></i> Facebook
-                        </div>
+                    <div class="btn-social" id="btn-facebook">
+                        <i class='bx bxl-facebook'></i> Facebook
                     </div>
                 </div>
             </div>
@@ -1928,6 +1961,13 @@ function bindAuthEvents() {
         authSubmitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing...";
         authSubmitBtn.disabled = true;
 
+        if (!supabaseClient) {
+            showToast("Login service currently unavailable");
+            authSubmitBtn.innerHTML = isLogin ? "Login" : "Create Account";
+            authSubmitBtn.disabled = false;
+            return;
+        }
+
         try {
             if (isLogin) {
                 const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -1955,6 +1995,7 @@ function bindAuthEvents() {
     });
 
     document.getElementById('btn-google').addEventListener('click', async () => {
+        if (!supabaseClient) return showToast("Social login unavailable");
         const { error } = await supabaseClient.auth.signInWithOAuth({ 
             provider: 'google',
             options: {
@@ -1965,6 +2006,7 @@ function bindAuthEvents() {
     });
 
     document.getElementById('btn-facebook').addEventListener('click', async () => {
+        if (!supabaseClient) return showToast("Social login unavailable");
         const { error } = await supabaseClient.auth.signInWithOAuth({ 
             provider: 'facebook',
             options: {

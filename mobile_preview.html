@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laance Mobile Experience Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --phone-bg: #0a0a0f;
+            --phone-border: #1c1c1e;
+            --phone-accent: #4f46e5;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #050505;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Outfit', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(79,70,229,0.15) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(100px);
+        }
+
+        .device-container {
+            position: relative;
+            width: 375px;
+            height: 812px;
+            background: var(--phone-bg);
+            border: 12px solid var(--phone-border);
+            border-radius: 60px;
+            box-shadow: 
+                0 0 0 2px #3a3a3c,
+                0 50px 100px rgba(0,0,0,0.8),
+                0 0 40px rgba(79,70,229,0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* The Notch */
+        .device-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 34px;
+            background: var(--phone-border);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 2000;
+        }
+
+        /* Screen Iframe */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 48px;
+        }
+
+        .reflection {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1500;
+        }
+
+        .label {
+            position: absolute;
+            bottom: -60px;
+            text-align: center;
+            width: 100%;
+            color: #666;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    
+    <div class="device-container">
+        <div class="reflection"></div>
+        <iframe src="http://localhost:3000"></iframe>
+        <div class="label">Laance Premium Mobile Interface</div>
+    </div>
+
+    <script>
+        // Optional: Message passing to sync clock if needed
+    </script>
+</body>
+</html>

@@ -26,16 +26,24 @@
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
+        <div class="status-bar" id="mobile-status-bar">
+            <span id="current-time">9:41</span>
+            <div class="status-icons">
+                <i class='bx bx-signal-5'></i>
+                <i class='bx bx-wifi'></i>
+                <i class='bx bxs-battery'></i>
+            </div>
+        </div>
         <div class="nav-container">
             <div class="logo" data-link="home">
-                <img src="assets/nav_logo.png" alt="LAANCE" style="height: 50px; width: auto; vertical-align: middle;">
+                <img src="assets/nav_logo.png" alt="LAANCE" style="height: 40px; width: auto; vertical-align: middle;">
             </div>
             <div class="nav-links">
                 <a href="#" data-link="home" class="active">Home</a>
+                <a href="#" data-link="realestate">Real Estate</a>
                 <a href="#" data-link="electronics">Electronics</a>
                 <a href="#" data-link="dress">Fashion</a>
                 <a href="#" data-link="cars">Cars</a>
-                <a href="#" data-link="realestate">Real Estate</a>
                 <a href="#" data-link="tracking">Track</a>
             </div>
             <div style="display: flex; gap: 1.5rem; align-items: center;">
@@ -92,8 +100,6 @@
                 <a href="#"><i class='bx bxl-instagram'></i></a>
                 <a href="#"><i class='bx bxl-twitter'></i></a>
                 <a href="#"><i class='bx bxl-youtube'></i></a>
-                <i class='bx bx-lock-alt' data-link="admin" style="margin-left: 2rem; opacity: 0.3;"
-                    title="Creator Access"></i>
             </div>
         </div>
     </footer>
