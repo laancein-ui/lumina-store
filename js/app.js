@@ -487,7 +487,7 @@ function renderView(viewName, params = {}) {
 
 function renderHome() {
     return `
-        <div class="section hero">
+        <div class="section hero" style="background: rgba(0,0,0,0.2); border-radius: 40px; backdrop-filter: blur(5px); border: 1px solid var(--border-light); margin-top: 2rem;">
             <div class="hero-content">
                 <h1>Everything you need <br><span>In one place.</span></h1>
                 <p>From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.</p>
