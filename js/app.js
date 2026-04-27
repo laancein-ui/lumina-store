@@ -472,7 +472,7 @@ function renderView(viewName, params = {}) {
                 bindTrackingEvents();
                 break;
             case 'electronics':
-                appRoot.innerHTML = renderCategory('Electronics', products);
+                appRoot.innerHTML = renderElectronicsPage();
                 bindCategoryEvents();
                 break;
             case 'dress':
@@ -532,7 +532,7 @@ function renderHome() {
             <h2 class="section-title">Shop by Category</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
                 <!-- Electronics Category -->
-                <div class="product-card" onclick="renderView('electronics')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--primary);">
+                <div class="product-card" onclick="renderView('electronics')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/electronics_bg.jpg'); background-size: cover; background-position: center; border: 1px solid var(--primary);">
                     <div style="padding: 2rem;">
                         <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Electronics</h3>
                         <p style="color: var(--text-muted);">Next-gen tech and gadgets.</p>
@@ -593,6 +593,34 @@ function renderHome() {
                 }).join('')}
             </div>
         </div>
+    `;
+}
+
+function renderElectronicsPage() {
+    return `
+        <!-- Header -->
+        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
+            <div class="hero-content" style="max-width: 100%;">
+                <h1>Dispositivi <br><span>Elettronici.</span></h1>
+                <p>Eccellenza in Innovazione & Engineering since 1974.</p>
+            </div>
+        </div>
+
+        <!-- Electronics Section with Custom Background -->
+        <div class="section" id="electronics-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/electronics_bg.jpg'); background-size: cover; background-position: center;">
+            <!-- Overlay for readability -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+            
+            <div style="position: relative; z-index: 2;">
+                <h2 class="section-title" style="color: var(--primary); border-bottom-color: var(--primary);">Tech Showcase</h2>
+                <div class="products-grid">
+                    ${products.map(p => renderProductCard(p)).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function renderRealEstatePage() {
     return `
         <!-- Header -->
