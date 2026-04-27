@@ -298,12 +298,43 @@ const realEstateListings = [
     }
 ];
 
+const kidProducts = [
+    {
+        id: 401,
+        name: "Premium Kids Stroller",
+        price: 15000,
+        image: "https://images.unsplash.com/photo-1591189859542-a8da14df6874?auto=format&fit=crop&w=800&q=80",
+        desc: "Ultra-lightweight luxury stroller with advanced suspension. Ensures maximum comfort for your child."
+    },
+    {
+        id: 402,
+        name: "Educational Smart Tablet",
+        price: 8000,
+        image: "https://images.unsplash.com/photo-1544365558-35aa4afcf11f?auto=format&fit=crop&w=800&q=80",
+        desc: "Interactive learning tablet designed specifically for early development. Features a shatterproof screen."
+    },
+    {
+        id: 403,
+        name: "Organic Cotton Onesie Set",
+        price: 2500,
+        image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=800&q=80",
+        desc: "100% organic cotton hypoallergenic onesies. Ultra-soft fabric perfect for sensitive baby skin."
+    },
+    {
+        id: 404,
+        name: "Electric Ride-on Car",
+        price: 25000,
+        image: "https://images.unsplash.com/photo-1566024287286-457247b70310?auto=format&fit=crop&w=800&q=80",
+        desc: "Miniature luxury electric car with remote control for parents. A premium toy for the little ones."
+    }
+];
+
 // Supabase Initialization
 const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-let products = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses];
+let products = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses, ...kidProducts];
 
 async function fetchProducts() {
     try {
@@ -313,7 +344,7 @@ async function fetchProducts() {
         if (data && data.length > 0) {
             const liveProducts = data.map(p => ({ ...p, price: Number(p.price) }));
             // Merge live products with static ones, avoiding duplicates by ID
-            const staticProducts = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses];
+            const staticProducts = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses, ...kidProducts];
             const productMap = new Map();
             staticProducts.forEach(p => productMap.set(p.id, p));
             liveProducts.forEach(p => productMap.set(p.id, p));
@@ -342,34 +373,65 @@ async function saveProducts(newItem) {
 
 async function fetchReviews(productId) {
     try {
-        if (!supabaseClient) return [];
-        const { data, error } = await supabaseClient
-            .from('reviews')
-            .select('*')
-            .eq('product_id', productId)
-            .order('created_at', { ascending: false });
-        if (error) throw error;
-        state.reviews[productId] = data || [];
+        let dbReviews = [];
+        if (supabaseClient) {
+            const { data, error } = await supabaseClient
+                .from('reviews')
+                .select('*')
+                .eq('product_id', productId)
+                .order('created_at', { ascending: false });
+            if (!error && data) {
+                dbReviews = data;
+            }
+        }
+        
+        // Load local fallback reviews
+        const localReviewsMap = JSON.parse(localStorage.getItem('local_reviews') || '{}');
+        const localReviews = localReviewsMap[productId] || [];
+        
+        state.reviews[productId] = [...localReviews, ...dbReviews];
         return state.reviews[productId];
     } catch (err) {
         console.error('Error fetching reviews:', err);
-        return [];
+        const localReviewsMap = JSON.parse(localStorage.getItem('local_reviews') || '{}');
+        state.reviews[productId] = localReviewsMap[productId] || [];
+        return state.reviews[productId];
     }
 }
 
 async function saveReview(reviewData) {
     try {
-        if (!supabaseClient) throw new Error("Supabase client not initialized");
-        const { error } = await supabaseClient.from('reviews').insert([
-            {
+        const newReview = {
+            product_id: reviewData.productId,
+            user_name: reviewData.userName,
+            rating: Number(reviewData.rating),
+            comment: reviewData.comment,
+            created_at: new Date().toISOString()
+        };
+
+        let supabaseSuccess = false;
+        if (supabaseClient) {
+            const { error } = await supabaseClient.from('reviews').insert([{
                 product_id: reviewData.productId,
                 user_name: reviewData.userName,
                 rating: Number(reviewData.rating),
                 comment: reviewData.comment
-            }
-        ]);
-        if (error) throw error;
-        await fetchReviews(reviewData.productId); // Refresh
+            }]);
+            
+            if (!error) supabaseSuccess = true;
+            else console.warn("Supabase review insert skipped/failed:", error.message);
+        }
+
+        // If Supabase fails (e.g. static product IDs failing foreign key/UUID checks), save locally
+        if (!supabaseSuccess) {
+            const localReviewsMap = JSON.parse(localStorage.getItem('local_reviews') || '{}');
+            if (!localReviewsMap[reviewData.productId]) localReviewsMap[reviewData.productId] = [];
+            localReviewsMap[reviewData.productId].unshift(newReview);
+            localStorage.setItem('local_reviews', JSON.stringify(localReviewsMap));
+        }
+
+        // Refresh reviews in state
+        await fetchReviews(reviewData.productId);
         showToast('Review submitted!');
         return true;
     } catch (err) {
@@ -623,6 +685,7 @@ async function init() {
         // Setup base dynamic elements
         setupNavigation();
         setupModal();
+        setupAIChat();
 
         // Render Home View Immediately
         renderView('home');
@@ -652,6 +715,92 @@ async function init() {
             appRoot.innerHTML = `<div style="padding:4rem;color:red;background:#000;"><h1>System Initialization Failure</h1><p>${e.message}</p><pre style="white-space:pre-wrap;">${e.stack}</pre></div>`;
         }
     }
+}
+
+
+// =========================================================================
+// AI Chat Logic
+// =========================================================================
+function setupAIChat() {
+    const fab = document.getElementById('ai-chat-fab');
+    const widget = document.getElementById('ai-chat-widget');
+    const closeBtn = document.getElementById('ai-chat-close');
+    const sendBtn = document.getElementById('ai-chat-send');
+    const input = document.getElementById('ai-chat-input-text');
+    const messages = document.getElementById('ai-chat-messages');
+
+    if (!fab || !widget) return;
+
+    fab.addEventListener('click', () => {
+        widget.classList.toggle('open');
+        if (widget.classList.contains('open')) {
+            if (state.currentView === 'product' && state.currentProductId) {
+                const product = products.find(p => String(p.id) === String(state.currentProductId));
+                if (product) {
+                    addAIMessage(`You're looking at the **${product.name}**. Do you have any questions about its features, or price?`);
+                }
+            }
+        }
+    });
+
+    closeBtn.addEventListener('click', () => widget.classList.remove('open'));
+
+    function addAIMessage(text) {
+        const msg = document.createElement('div');
+        msg.className = 'ai-message';
+        msg.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addUserMessage(text) {
+        const msg = document.createElement('div');
+        msg.className = 'user-message';
+        msg.textContent = text;
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function handleSend() {
+        const text = input.value.trim();
+        if (!text) return;
+        
+        addUserMessage(text);
+        input.value = '';
+        
+        setTimeout(() => {
+            let response = "I am a smart AI assistant for Laance. ";
+            
+            if (state.currentView === 'product' && state.currentProductId) {
+                const product = products.find(p => String(p.id) === String(state.currentProductId));
+                if (product) {
+                    const ltext = text.toLowerCase();
+                    if (ltext.includes('price') || ltext.includes('cost') || ltext.includes('much')) {
+                        response = `The **${product.name}** costs ₹${product.price.toLocaleString('en-IN')}.`;
+                    } else if (ltext.includes('detail') || ltext.includes('feature') || ltext.includes('what')) {
+                        response = `Here are the details for **${product.name}**: ${product.desc}`;
+                    } else {
+                        response = `This is a highly rated product. I definitely recommend adding the **${product.name}** to your cart!`;
+                    }
+                }
+            } else {
+                const ltext = text.toLowerCase();
+                if (ltext.includes('recommend') || ltext.includes('suggest')) {
+                    response = "I highly recommend our **Laance Pro X ANC** headphones or the **Zenith Health + Titanium** smartwatch.";
+                } else if (ltext.includes('hello') || ltext.includes('hi')) {
+                    response = "Hello! I am the Laance AI Assistant. You can ask me about our products, pricing, or recommendations.";
+                } else {
+                    response = "I'm your AI shopping assistant. Try navigating to a product page to ask specific details about it, or ask me for recommendations!";
+                }
+            }
+            addAIMessage(response);
+        }, 600);
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSend();
+    });
 }
 
 // =========================================================================
@@ -718,6 +867,10 @@ function renderView(viewName, params = {}) {
                 appRoot.innerHTML = renderRealEstatePage();
                 bindCategoryEvents();
                 break;
+            case 'kids':
+                appRoot.innerHTML = renderKidsPage();
+                bindCategoryEvents();
+                break;
             case 'profile':
                 if (!state.user) {
                     showAuthModal();
@@ -746,9 +899,11 @@ function renderView(viewName, params = {}) {
 function renderHome() {
     return `
         <!-- Immersive Premium Hero -->
-        <div class="section hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 2rem; background: radial-gradient(circle at center, rgba(79, 70, 229, 0.15) 0%, transparent 70%);">
+        <div class="section hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 2rem; background: url('assets/home_bg.png') center/cover no-repeat;">
             
-            <div class="hero-glass-card" style="position: relative; z-index: 10; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; padding: 3rem; text-align: center; width: 100%; max-width: 600px; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1;"></div>
+            
+            <div class="hero-glass-card" style="position: relative; z-index: 10; background: rgba(20, 20, 30, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; padding: 3rem; text-align: center; width: 100%; max-width: 600px; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
                 
                 <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -1px;">
                     Everything you <br><span style="color: var(--primary); text-shadow: 0 0 30px rgba(79, 70, 229, 0.5);">In one place.</span>
@@ -914,10 +1069,12 @@ function renderCarsPage() {
 function renderDressPage() {
     return `
         <!-- Header -->
-        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
-            <div class="hero-content" style="max-width: 100%;">
-                <h1>Fashion <br><span>Collection.</span></h1>
-                <p>Curated elegance for Men and Women.</p>
+        <div class="section hero" style="min-height: 60vh; align-items: center; justify-content: center; text-align: center; position: relative; background: url('assets/fashion_bg.png'); background-size: cover; background-position: center;">
+            <!-- Dark Overlay for readability -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>
+            <div class="hero-content" style="max-width: 100%; position: relative; z-index: 2;">
+                <h1 style="color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.8);">Fashion <br><span style="color: var(--primary);">Collection.</span></h1>
+                <p style="color: #ccc; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">Curated elegance for Men and Women.</p>
             </div>
         </div>
 
@@ -949,6 +1106,10 @@ function renderDressPage() {
     `;
 }
 
+function renderKidsPage() {
+    return renderCategory('Kids', kidProducts, 'assets/fashion_bg.png');
+}
+
 function renderProductCard(p) {
     const formattedPrice = Number(p.price).toLocaleString('en-IN');
     const isAdmin = safeStorage.get('localStorage', 'laance_device_trusted') === 'true';
@@ -977,12 +1138,21 @@ function renderProductCard(p) {
     `;
 }
 
-function renderCategory(title, items) {
+function renderCategory(title, items, bgImage = null) {
+    const heroStyle = bgImage 
+        ? `min-height: 50vh; align-items: center; justify-content: center; text-align: center; position: relative; background: url('${bgImage}'); background-size: cover; background-position: center;`
+        : `min-height: 40vh; align-items: center; justify-content: center; text-align: center;`;
+
+    const overlay = bgImage 
+        ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>`
+        : ``;
+
     return `
-        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
-            <div class="hero-content" style="max-width: 100%;">
-                <h1>${title} <br><span>Collection.</span></h1>
-                <p>Curated excellence for your refined lifestyle.</p>
+        <div class="section hero" style="${heroStyle}">
+            ${overlay}
+            <div class="hero-content" style="max-width: 100%; position: relative; z-index: 2;">
+                <h1 style="${bgImage ? 'color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.8);' : ''}">${title} <br><span style="${bgImage ? 'color: var(--primary);' : ''}">Collection.</span></h1>
+                <p style="${bgImage ? 'color: #ccc; text-shadow: 0 2px 10px rgba(0,0,0,0.8);' : ''}">Curated excellence for your refined lifestyle.</p>
             </div>
         </div>
 
@@ -1021,30 +1191,29 @@ function bindCategoryEvents() {
 function bindHomeEvents() {
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', (e) => {
-            // Prevent trigger if clicking "Add to Cart" or "Order Now" directly
             if (e.target.classList.contains('add-to-cart-btn') || e.target.classList.contains('order-now-btn')) return;
-            const id = parseInt(card.getAttribute('data-id'));
+            const id = card.getAttribute('data-id');
             renderView('product', { id });
         });
     });
 
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const id = parseInt(e.target.getAttribute('data-id'));
+            const id = e.target.getAttribute('data-id');
             addToCart(id);
         });
     });
 
     document.querySelectorAll('.order-now-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const id = parseInt(e.target.getAttribute('data-id'));
+            const id = e.target.getAttribute('data-id');
             startOrderNowFlow(id);
         });
     });
 }
 
 function renderProductDetail(id) {
-    const product = products.find(p => p.id === id);
+    const product = products.find(p => String(p.id) === String(id));
     if (!product) return renderHome();
 
     // Trigger async review fetch in background without blocking
@@ -1151,7 +1320,7 @@ function bindProductEvents() {
     const addBtn = document.querySelector('.add-to-cart-btn-main');
     if (addBtn) {
         addBtn.addEventListener('click', (e) => {
-            const id = parseInt(e.currentTarget.getAttribute('data-id'));
+            const id = e.currentTarget.getAttribute('data-id');
             addToCart(id);
         });
     }
@@ -1159,7 +1328,7 @@ function bindProductEvents() {
     const buyBtn = document.querySelector('.order-now-btn-main');
     if (buyBtn) {
         buyBtn.addEventListener('click', (e) => {
-            const id = parseInt(e.currentTarget.getAttribute('data-id'));
+            const id = e.currentTarget.getAttribute('data-id');
             startOrderNowFlow(id);
         });
     }
@@ -2098,24 +2267,36 @@ function bindAuthEvents() {
 
     document.getElementById('btn-google').addEventListener('click', async () => {
         if (!supabaseClient) return showToast("Social login unavailable");
-        const { error } = await supabaseClient.auth.signInWithOAuth({ 
+        const isIframe = window !== window.parent;
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
             provider: 'google',
             options: {
-                redirectTo: window.location.origin
+                redirectTo: window.location.origin,
+                skipBrowserRedirect: isIframe
             }
         });
-        if (error) showToast("Google Login Error: " + error.message);
+        if (error) {
+            showToast("Google Login Error: " + error.message);
+        } else if (isIframe && data?.url) {
+            window.top.location.href = data.url;
+        }
     });
 
     document.getElementById('btn-facebook').addEventListener('click', async () => {
         if (!supabaseClient) return showToast("Social login unavailable");
-        const { error } = await supabaseClient.auth.signInWithOAuth({ 
+        const isIframe = window !== window.parent;
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
             provider: 'facebook',
             options: {
-                redirectTo: window.location.origin
+                redirectTo: window.location.origin,
+                skipBrowserRedirect: isIframe
             }
         });
-        if (error) showToast("Facebook Login Error: " + error.message);
+        if (error) {
+            showToast("Facebook Login Error: " + error.message);
+        } else if (isIframe && data?.url) {
+            window.top.location.href = data.url;
+        }
     });
 }
 

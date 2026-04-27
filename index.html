@@ -44,6 +44,7 @@
                 <a href="#" data-link="electronics"><i class='bx bx-devices'></i><span>Electronics</span></a>
                 <a href="#" data-link="dress"><i class='bx bx-closet'></i><span>Fashion</span></a>
                 <a href="#" data-link="cars"><i class='bx bx-car'></i><span>Cars</span></a>
+                <a href="#" data-link="kids"><i class='bx bx-child'></i><span>Kids</span></a>
                 <a href="#" data-link="tracking"><i class='bx bx-map-alt'></i><span>Track</span></a>
             </div>
             <div style="display: flex; gap: 1.5rem; align-items: center;">
@@ -103,6 +104,25 @@
     </footer>
 
     <!-- Global UI Overlays -->
+    
+    <!-- AI Chat Widget -->
+    <button id="ai-chat-fab" class="ai-chat-fab">
+        <i class='bx bx-bot'></i>
+    </button>
+    
+    <div id="ai-chat-widget" class="ai-chat-widget">
+        <div class="ai-chat-header">
+            <h3><i class='bx bx-bot'></i> Laance AI</h3>
+            <button id="ai-chat-close"><i class='bx bx-x'></i></button>
+        </div>
+        <div class="ai-chat-messages" id="ai-chat-messages">
+            <div class="ai-message">Hello! I'm your Laance AI assistant. How can I help you today?</div>
+        </div>
+        <div class="ai-chat-input">
+            <input type="text" id="ai-chat-input-text" placeholder="Ask about a product...">
+            <button id="ai-chat-send"><i class='bx bx-send'></i></button>
+        </div>
+    </div>
 
     <!-- Toast Notification -->
     <div id="toast" class="toast">
