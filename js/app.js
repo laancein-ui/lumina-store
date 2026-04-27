@@ -462,7 +462,23 @@ function saveOrders() {
 
 function updateNavbarProfile() {
     const profileTrigger = document.getElementById('profile-trigger');
-    if (!profileTrigger) return;
+    const iconsContainer = document.querySelector('.icons');
+    if (!profileTrigger || !iconsContainer) return;
+
+    // Check for Admin Access
+    const isAdmin = safeStorage.get('localStorage', 'laance_device_trusted') === 'true';
+    const existingAdminIcon = document.getElementById('admin-add-product');
+    
+    if (isAdmin && !existingAdminIcon) {
+        const adminBtn = document.createElement('i');
+        adminBtn.id = 'admin-add-product';
+        adminBtn.className = 'bx bx-plus-circle admin-icon';
+        adminBtn.style.color = 'var(--primary)';
+        adminBtn.style.cursor = 'pointer';
+        adminBtn.title = 'Add New Product';
+        adminBtn.onclick = () => renderView('admin');
+        iconsContainer.insertBefore(adminBtn, profileTrigger);
+    }
 
     if (state.user) {
         const initials = state.profile && state.profile.full_name
@@ -877,8 +893,11 @@ function renderDressPage() {
 
 function renderProductCard(p) {
     const formattedPrice = Number(p.price).toLocaleString('en-IN');
+    const isAdmin = safeStorage.get('localStorage', 'laance_device_trusted') === 'true';
+    
     return `
-        <div class="product-card" data-id="${p.id || 0}" onclick="startOrderNowFlow(${p.id || 0})">
+        <div class="product-card" data-id="${p.id || 0}">
+            ${isAdmin ? `<div class="admin-edit-badge" onclick="event.stopPropagation(); renderView('admin');"><i class='bx bx-edit-alt'></i></div>` : ''}
             <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
             <div class="product-info">
                 <div>
@@ -910,7 +929,7 @@ function renderCategory(title, items) {
                     const priceNum = Number(p.price);
                     const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
                     return `
-                        <div class="product-card" data-id="${p.id || 0}" onclick="startOrderNowFlow(${p.id || 0})">
+                        <div class="product-card" data-id="${p.id || 0}">
                             <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
                             <div class="product-info">
                                 <div>

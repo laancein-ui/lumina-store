@@ -85,6 +85,39 @@
     visibility: hidden;
 }
 
+/* Admin UI */
+.admin-icon {
+    font-size: 1.5rem;
+    transition: var(--transition);
+}
+
+.admin-icon:hover {
+    transform: scale(1.1);
+    color: white !important;
+}
+
+.admin-edit-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--primary);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.admin-edit-badge:hover {
+    transform: rotate(15deg) scale(1.1);
+}
+
 * {
     margin: 0;
     padding: 0;
