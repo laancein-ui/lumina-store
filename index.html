@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- Boxicons for icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LAANCE">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <meta name="description" content="LAANCE - Discover the perfect intersection of minimalist design and high-end technology.">
 </head>
 
 <body>
@@ -107,6 +115,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Application Logic -->
     <script src="js/app.js"></script>
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
+                    .catch((err) => console.log('[PWA] SW registration failed:', err));
+            });
+        }
+    </script>
 </body>
 
 </html>
