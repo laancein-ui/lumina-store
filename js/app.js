@@ -1942,7 +1942,8 @@ function bindAuthEvents() {
                     }
                 });
                 if (error) throw error;
-                showToast("Account created! Please check your email.");
+                showToast("Account created! Check your email to confirm.");
+                alert("Please check your email inbox to confirm your account before logging in.");
             }
             renderView('home');
         } catch (err) {
@@ -1954,11 +1955,23 @@ function bindAuthEvents() {
     });
 
     document.getElementById('btn-google').addEventListener('click', async () => {
-        await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+        const { error } = await supabaseClient.auth.signInWithOAuth({ 
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) showToast("Google Login Error: " + error.message);
     });
 
     document.getElementById('btn-facebook').addEventListener('click', async () => {
-        await supabaseClient.auth.signInWithOAuth({ provider: 'facebook' });
+        const { error } = await supabaseClient.auth.signInWithOAuth({ 
+            provider: 'facebook',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) showToast("Facebook Login Error: " + error.message);
     });
 }
 
