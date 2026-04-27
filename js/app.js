@@ -651,7 +651,7 @@ function renderHome() {
             <h2 class="section-title">Shop by Category</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
                 <!-- Electronics Category -->
-                <div class="product-card" onclick="renderView('electronics')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/electronics_bg.jpg'); background-size: cover; background-position: center; border: 1px solid var(--primary);">
+                <div class="category-card" onclick="renderView('electronics')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/electronics_bg.jpg'); background-size: cover; background-position: center; border: 1px solid var(--primary); border-radius: 20px; transition: var(--transition); overflow: hidden;">
                     <div style="padding: 2rem;">
                         <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Electronics</h3>
                         <p style="color: var(--text-muted);">Next-gen tech and gadgets.</p>
@@ -660,7 +660,7 @@ function renderHome() {
                 </div>
 
                 <!-- Fashion Category -->
-                <div class="product-card" onclick="renderView('dress')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--secondary);">
+                <div class="category-card" onclick="renderView('dress')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--secondary); border-radius: 20px; transition: var(--transition); overflow: hidden;">
                     <div style="padding: 2rem;">
                         <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Fashion</h3>
                         <p style="color: var(--text-muted);">Premium fashion & style.</p>
@@ -669,7 +669,7 @@ function renderHome() {
                 </div>
 
                 <!-- Real Estate Category -->
-                <div class="product-card" onclick="renderView('realestate')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/realestate_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #10b981;">
+                <div class="category-card" onclick="renderView('realestate')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/realestate_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #10b981; border-radius: 20px; transition: var(--transition); overflow: hidden;">
                     <div style="padding: 2rem;">
                         <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Real Estate</h3>
                         <p style="color: var(--text-muted);">Luxury homes and villas.</p>
@@ -678,7 +678,7 @@ function renderHome() {
                 </div>
 
                 <!-- Cars Category -->
-                <div class="product-card" onclick="renderView('cars')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/car_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #f59e0b;">
+                <div class="category-card" onclick="renderView('cars')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/car_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #f59e0b; border-radius: 20px; transition: var(--transition); overflow: hidden;">
                     <div style="padding: 2rem;">
                         <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Cars</h3>
                         <p style="color: var(--text-muted);">Italian passion in motion.</p>
