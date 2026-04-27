@@ -859,7 +859,7 @@ function renderDressPage() {
 function renderProductCard(p) {
     const formattedPrice = Number(p.price).toLocaleString('en-IN');
     return `
-        <div class="product-card" data-id="${p.id || 0}">
+        <div class="product-card" data-id="${p.id || 0}" onclick="startOrderNowFlow(${p.id || 0})">
             <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
             <div class="product-info">
                 <div>
@@ -867,7 +867,7 @@ function renderProductCard(p) {
                     <div class="product-price">₹${formattedPrice}</div>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;" onclick="event.stopPropagation()">
                 <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
                 <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
             </div>
@@ -891,7 +891,7 @@ function renderCategory(title, items) {
                     const priceNum = Number(p.price);
                     const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
                     return `
-                        <div class="product-card" data-id="${p.id || 0}">
+                        <div class="product-card" data-id="${p.id || 0}" onclick="startOrderNowFlow(${p.id || 0})">
                             <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
                             <div class="product-info">
                                 <div>
@@ -899,7 +899,7 @@ function renderCategory(title, items) {
                                     <div class="product-price">${title === 'Real Estate' ? '₹' : '₹'}${formattedPrice}</div>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;" onclick="event.stopPropagation()">
                                 <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">${title === 'Real Estate' ? 'Enquire' : 'Add to Cart'}</button>
                                 <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">${title === 'Real Estate' ? 'Visit' : 'Order Now'}</button>
                             </div>
@@ -2116,17 +2116,69 @@ function bindProfileEvents() {
                     `;
                     break;
                 case 'payments':
-                    content.innerHTML = `
-                        <h2 style="margin-bottom: 2rem;">Payment Methods</h2>
-                        <div style="padding: 3rem; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.1); border-radius: 20px;">
-                            <i class='bx bx-credit-card-front' style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                            <p>No payment methods saved.</p>
-                            <button class="btn btn-secondary" style="margin-top: 2rem;">+ Add Card</button>
-                        </div>
-                    `;
+                    renderPaymentMethods(content);
                     break;
             }
         });
+    });
+}
+
+function renderPaymentMethods(container) {
+    container.innerHTML = `
+        <h2 style="margin-bottom: 2rem;">Payment Methods</h2>
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            ${state.cards && state.cards.length > 0 ? state.cards.map(card => `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <i class='bx bxl-visa' style="font-size: 2.5rem; color: #1a1f71;"></i>
+                        <div>
+                            <div style="font-weight: 600;">•••• •••• •••• ${card.last4}</div>
+                            <div style="color: var(--text-muted); font-size: 0.8rem;">Expires ${card.expiry}</div>
+                        </div>
+                    </div>
+                    <span style="color: var(--primary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Default</span>
+                </div>
+            `).join('') : `
+                <div style="padding: 3rem; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.1); border-radius: 20px;">
+                    <i class='bx bx-credit-card-front' style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p>No payment methods saved.</p>
+                </div>
+            `}
+            
+            <button class="btn btn-secondary" style="margin-top: 1rem;" id="btn-add-card-toggle">+ Add New Card</button>
+            
+            <div id="add-card-form-container" style="display: none; margin-top: 2rem; background: rgba(255,255,255,0.02); padding: 2rem; border-radius: 20px; border: 1px solid var(--primary-glow);">
+                <h3 style="margin-bottom: 1.5rem;">Secure Card Entry</h3>
+                <form id="add-card-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <input type="text" id="card-number" class="input-field" placeholder="Card Number (16 digits)" maxlength="16" required>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" id="card-expiry" class="input-field" placeholder="MM/YY" maxlength="5" style="flex: 1" required>
+                        <input type="password" id="card-cvv" class="input-field" placeholder="CVV" maxlength="3" style="flex: 1" required>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;">Save Card Securely</button>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('btn-add-card-toggle').addEventListener('click', () => {
+        const form = document.getElementById('add-card-form-container');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('add-card-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const num = document.getElementById('card-number').value;
+        const exp = document.getElementById('card-expiry').value;
+        
+        if (!state.cards) state.cards = [];
+        state.cards.push({
+            last4: num.slice(-4),
+            expiry: exp
+        });
+        
+        showToast("Card saved successfully!");
+        renderPaymentMethods(container);
     });
 }
 
