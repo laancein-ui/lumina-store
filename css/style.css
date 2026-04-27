@@ -211,7 +211,7 @@ p {
 }
 
 .status-bar {
-    display: none;
+    display: none !important;
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
