@@ -484,7 +484,7 @@ function renderView(viewName, params = {}) {
                 bindCategoryEvents();
                 break;
             case 'realestate':
-                appRoot.innerHTML = renderCategory('Real Estate', realEstateListings);
+                appRoot.innerHTML = renderRealEstatePage();
                 bindCategoryEvents();
                 break;
             case 'profile':
@@ -550,7 +550,7 @@ function renderHome() {
                 </div>
 
                 <!-- Real Estate Category -->
-                <div class="product-card" onclick="renderView('realestate')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1460317442991-0ec239fe979a?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid #10b981;">
+                <div class="product-card" onclick="renderView('realestate')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/realestate_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #10b981;">
                     <div style="padding: 2rem;">
                         <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Real Estate</h3>
                         <p style="color: var(--text-muted);">Luxury homes and villas.</p>
@@ -591,6 +591,28 @@ function renderHome() {
                         </div>
                     `;
                 }).join('')}
+            </div>
+        </div>
+function renderRealEstatePage() {
+    return `
+        <!-- Header -->
+        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
+            <div class="hero-content" style="max-width: 100%;">
+                <h1>Officio <br><span>Immobiliare.</span></h1>
+                <p>Eccellenza in Immobili & Luxury Living since 1974.</p>
+            </div>
+        </div>
+
+        <!-- Real Estate Section with Custom Background -->
+        <div class="section" id="realestate-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/realestate_bg.jpg'); background-size: cover; background-position: center;">
+            <!-- Overlay for readability -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+            
+            <div style="position: relative; z-index: 2;">
+                <h2 class="section-title" style="color: #10b981; border-bottom-color: #10b981;">Exclusive Listings</h2>
+                <div class="products-grid">
+                    ${realEstateListings.map(p => renderProductCard(p)).join('')}
+                </div>
             </div>
         </div>
     `;
