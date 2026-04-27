@@ -27,6 +27,54 @@ const defaultProducts = [
     }
 ];
 
+const dressProducts = [
+    {
+        id: 101,
+        name: "Midnight Silk Evening Gown",
+        price: 12999,
+        image: "https://images.unsplash.com/photo-1539008835279-43467f5b2335?auto=format&fit=crop&q=80&w=600",
+        desc: "A stunning floor-length silk gown in deep midnight blue. Features a delicate halter neck and a sweeping train."
+    },
+    {
+        id: 102,
+        name: "Ivory Lace Summer Dress",
+        price: 8499,
+        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=600",
+        desc: "Breezy and elegant ivory dress with intricate lace detailing. Perfect for garden parties and summer weddings."
+    },
+    {
+        id: 103,
+        name: "Noir Velvet Cocktail Dress",
+        price: 10999,
+        image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=600",
+        desc: "A classic cocktail dress made from premium noir velvet. Slim fit with a modern square neckline."
+    }
+];
+
+const realEstateListings = [
+    {
+        id: 201,
+        name: "Skyline Penthouse",
+        price: 85000000,
+        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800",
+        desc: "Luxury living at its peak. This penthouse features 360-degree city views, a private infinity pool, and smart home automation."
+    },
+    {
+        id: 202,
+        name: "Coastal Modern Villa",
+        price: 125000000,
+        image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=800",
+        desc: "A masterpiece of modern architecture right on the beach. Features 5 bedrooms, a home cinema, and floor-to-ceiling windows."
+    },
+    {
+        id: 203,
+        name: "Zen Forest Retreat",
+        price: 45000000,
+        image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800",
+        desc: "Escape the city in this minimalist forest cabin. Sustainable materials, geothermal heating, and complete privacy."
+    }
+];
+
 // Supabase Initialization
 const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
@@ -375,6 +423,18 @@ function renderView(viewName, params = {}) {
                 appRoot.innerHTML = renderTracking();
                 bindTrackingEvents();
                 break;
+            case 'electronics':
+                appRoot.innerHTML = renderCategory('Electronics', products);
+                bindCategoryEvents();
+                break;
+            case 'dress':
+                appRoot.innerHTML = renderCategory('Dresses', dressProducts);
+                bindCategoryEvents();
+                break;
+            case 'realestate':
+                appRoot.innerHTML = renderCategory('Real Estate', realEstateListings);
+                bindCategoryEvents();
+                break;
             case 'profile':
                 if (!state.user) {
                     appRoot.innerHTML = renderAuth();
@@ -402,48 +462,118 @@ function renderView(viewName, params = {}) {
 // =========================================================================
 
 function renderHome() {
-    // Ensure we have a valid array to work with
-    const displayProducts = Array.isArray(products) ? products : defaultProducts;
-
     return `
         <div class="section hero">
             <div class="hero-content">
-                <h1>Elevate your daily <br><span>Experience.</span></h1>
-                <p>Discover the perfect intersection of minimalist design and high-end technology. Your next upgrade is here.</p>
+                <h1>Everything you need <br><span>In one place.</span></h1>
+                <p>From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.</p>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="#" class="btn" onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})">Explore Collection</a>
+                    <a href="#" class="btn" onclick="document.getElementById('categories-section').scrollIntoView({behavior: 'smooth'})">Explore Categories</a>
                 </div>
             </div>
             <div class="hero-image-wrap">
-                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Laance Premium Devices" class="hero-image">
+                <img src="assets/ecommerce_hero_banner_1772226290327.png" alt="Laance Premium Multi-Store" class="hero-image">
+            </div>
+        </div>
+
+        <div class="section" id="categories-section">
+            <h2 class="section-title">Shop by Category</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <!-- Electronics Category -->
+                <div class="product-card" onclick="renderView('electronics')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--primary);">
+                    <div style="padding: 2rem;">
+                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Electronics</h3>
+                        <p style="color: var(--text-muted);">Next-gen tech and gadgets.</p>
+                        <button class="btn" style="margin-top: 1rem; width: 100%;">Explore Tech</button>
+                    </div>
+                </div>
+
+                <!-- Dresses Category -->
+                <div class="product-card" onclick="renderView('dress')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--secondary);">
+                    <div style="padding: 2rem;">
+                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Dresses</h3>
+                        <p style="color: var(--text-muted);">Premium fashion & style.</p>
+                        <button class="btn" style="margin-top: 1rem; width: 100%; background: var(--secondary);">Explore Fashion</button>
+                    </div>
+                </div>
+
+                <!-- Real Estate Category -->
+                <div class="product-card" onclick="renderView('realestate')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1460317442991-0ec239fe979a?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid #10b981;">
+                    <div style="padding: 2rem;">
+                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Real Estate</h3>
+                        <p style="color: var(--text-muted);">Luxury homes and villas.</p>
+                        <button class="btn" style="margin-top: 1rem; width: 100%; background: #10b981; border: none;">Explore Properties</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="section" id="products-grid">
-            <h2 class="section-title">Featured Innovation</h2>
+            <h2 class="section-title">Trending Innovation</h2>
             <div class="products-grid">
-                ${displayProducts.map(p => {
-        if (!p) return '';
-        const priceNum = Number(p.price);
-        const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
-        return `
-                    <div class="product-card" data-id="${p.id || 0}">
-                        <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
-                        <div class="product-info">
-                            <div>
-                                <h3 class="product-title">${p.name || 'New Item'}</h3>
-                                <div class="product-price">₹${formattedPrice}</div>
+                ${products.slice(0, 3).map(p => {
+                    const priceNum = Number(p.price);
+                    const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
+                    return `
+                        <div class="product-card" data-id="${p.id || 0}">
+                            <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
+                            <div class="product-info">
+                                <div>
+                                    <h3 class="product-title">${p.name || 'New Item'}</h3>
+                                    <div class="product-price">₹${formattedPrice}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
+                                <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
-                            <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
-                        </div>
-                    </div>
-                `}).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     `;
+}
+
+function renderCategory(title, items) {
+    return `
+        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
+            <div class="hero-content" style="max-width: 100%;">
+                <h1>${title} <br><span>Collection.</span></h1>
+                <p>Curated excellence for your refined lifestyle.</p>
+            </div>
+        </div>
+
+        <div class="section" id="products-grid">
+            <h2 class="section-title">${title} Showcase</h2>
+            <div class="products-grid">
+                ${items.map(p => {
+                    const priceNum = Number(p.price);
+                    const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
+                    return `
+                        <div class="product-card" data-id="${p.id || 0}">
+                            <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
+                            <div class="product-info">
+                                <div>
+                                    <h3 class="product-title">${p.name || 'New Item'}</h3>
+                                    <div class="product-price">${title === 'Real Estate' ? '₹' : '₹'}${formattedPrice}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">${title === 'Real Estate' ? 'Enquire' : 'Add to Cart'}</button>
+                                <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">${title === 'Real Estate' ? 'Visit' : 'Order Now'}</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function bindCategoryEvents() {
+    // We can reuse the same event binding logic
+    bindHomeEvents();
 }
 
 function bindHomeEvents() {
