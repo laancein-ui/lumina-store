@@ -59,6 +59,20 @@ const defaultProducts = [
         price: 149999,
         image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600",
         desc: "Professional mirrorless camera with 61MP full-frame sensor, 8K video recording, and dual card slots for the serious photographer."
+    },
+    {
+        id: 9,
+        name: "Laance Vision Pro Glasses",
+        price: 249999,
+        image: "https://images.unsplash.com/photo-1478416272538-5f7e51dc5400?auto=format&fit=crop&q=80&w=600",
+        desc: "Augmented reality glasses for the ultimate spatial computing experience. Seamlessly blend digital content with your physical world."
+    },
+    {
+        id: 10,
+        name: "Zenith Tab 12 Ultra",
+        price: 89999,
+        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=600",
+        desc: "The ultimate creative companion. 12.9\" Liquid Retina display, M2 chip, and all-day battery life for professionals on the go."
     }
 ];
 
@@ -104,6 +118,20 @@ const womenDresses = [
         price: 14499,
         image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&q=80&w=600",
         desc: "Graceful floor-length Anarkali suit in pearl white with hand-embroidered detailing and palazzo trousers."
+    },
+    {
+        id: 107,
+        name: "Sapphire Blue Kaftan",
+        price: 9999,
+        image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&q=80&w=600",
+        desc: "Elegant silk kaftan with sapphire blue embroidery. Perfect for resort wear or evening lounging."
+    },
+    {
+        id: 108,
+        name: "Golden Hour Heels",
+        price: 12499,
+        image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=600",
+        desc: "Handcrafted golden stilettos with crystal embellishments. A statement piece for any red-carpet event."
     }
 ];
 
@@ -149,6 +177,20 @@ const menDresses = [
         price: 5999,
         image: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=600",
         desc: "Raw selvedge denim jacket and jeans set. Stonewashed finish with subtle distressing for a premium look."
+    },
+    {
+        id: 157,
+        name: "Royal Blue Sherwani",
+        price: 45999,
+        image: "https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&q=80&w=600",
+        desc: "Exquisite royal blue velvet sherwani with silver Zardosi work. The pinnacle of groom's couture."
+    },
+    {
+        id: 158,
+        name: "Silver Link Watch",
+        price: 28999,
+        image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=600",
+        desc: "Classic stainless steel chronometer with a silver sunray dial. Timeless elegance for the modern gentleman."
     }
 ];
 
@@ -194,6 +236,13 @@ const carProducts = [
         price: 21000000,
         image: "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&q=80&w=600",
         desc: "Open-air grand touring at its finest. Retractable hardtop, a 580hp engine, and hand-stitched Italian leather throughout."
+    },
+    {
+        id: 307,
+        name: "Laance Stealth Coupe",
+        price: 35000000,
+        image: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=600",
+        desc: "The ultimate hypercar. Carbon fiber monocoque, 1200hp hybrid powertrain, and active aerodynamics."
     }
 ];
 
@@ -239,6 +288,13 @@ const realEstateListings = [
         price: 175000000,
         image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800",
         desc: "Perched above the city on a private hilltop. This 6-bedroom estate features an infinity pool, helicopter pad, and private vineyard."
+    },
+    {
+        id: 207,
+        name: "Modern Lakehouse",
+        price: 55000000,
+        image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=800",
+        desc: "A serene waterfront property with private dock, floor-to-ceiling glass walls, and a sustainable green roof."
     }
 ];
 
@@ -247,7 +303,7 @@ const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-let products = defaultProducts;
+let products = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses];
 
 async function fetchProducts() {
     try {
@@ -255,7 +311,13 @@ async function fetchProducts() {
         const { data, error } = await supabaseClient.from('products').select('*');
         if (error) throw error;
         if (data && data.length > 0) {
-            products = data.map(p => ({ ...p, price: Number(p.price) }));
+            const liveProducts = data.map(p => ({ ...p, price: Number(p.price) }));
+            // Merge live products with static ones, avoiding duplicates by ID
+            const staticProducts = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses];
+            const productMap = new Map();
+            staticProducts.forEach(p => productMap.set(p.id, p));
+            liveProducts.forEach(p => productMap.set(p.id, p));
+            products = Array.from(productMap.values());
         }
     } catch (err) {
         console.error('Error fetching products from Supabase:', err);
@@ -428,7 +490,8 @@ const safeStorage = {
 
 // App State
 const state = {
-    user: null, // Current Supabase User
+    user: null,
+    profile: null,
     cart: [],
     currentView: 'home',
     currentProductId: null,
@@ -452,7 +515,18 @@ const state = {
             return {};
         }
     })(),
-    reviews: {}, // Map of productId -> reviews[]
+    reviews: {
+        1: [
+            { user: "Marco Rossi", rating: 5, comment: "Eccezionale! La qualità del suono è incredibile." },
+            { user: "Giulia B.", rating: 4, comment: "Molto comode, le porto tutto il giorno." }
+        ],
+        201: [
+            { user: "Alberto F.", rating: 5, comment: "Vista mozzafiato. Il miglior attico della città." }
+        ],
+        301: [
+            { user: "Ferrari Enthusiast", rating: 5, comment: "A dream come true. Engineering perfection." }
+        ]
+    }, // Map of productId -> reviews[]
     profile: null // User profile data from Supabase
 };
 
@@ -902,6 +976,12 @@ function renderProductCard(p) {
             <div class="product-info">
                 <div>
                     <h3 class="product-title">${p.name || 'New Item'}</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <div style="color: #f59e0b; font-size: 0.8rem;">
+                            <i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star-half'></i>
+                        </div>
+                        <span style="color: var(--text-muted); font-size: 0.75rem;">(12)</span>
+                    </div>
                     <div class="product-price">₹${formattedPrice}</div>
                 </div>
             </div>
