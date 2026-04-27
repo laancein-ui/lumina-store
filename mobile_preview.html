@@ -34,6 +34,17 @@
             filter: blur(100px);
         }
 
+        .ambient-glow-2 {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(80px);
+            bottom: -100px;
+            right: -100px;
+        }
+
         .device-container {
             position: relative;
             width: 375px;
@@ -98,6 +109,7 @@
 </head>
 <body>
     <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
     
     <div class="device-container">
         <div class="reflection"></div>

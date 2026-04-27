@@ -563,6 +563,12 @@ async function init() {
 
         startClock();
         console.log("App Successfully Rooted.");
+
+        // Hide Splash Screen
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.classList.add('fade-out');
+        }, 1500);
     } catch (e) {
         console.error("Critical Boot Error:", e);
         if (appRoot) {
@@ -662,17 +668,30 @@ function renderView(viewName, params = {}) {
 
 function renderHome() {
     return `
-        <div class="section hero" style="background: rgba(0,0,0,0.2); border-radius: 40px; backdrop-filter: blur(5px); border: 1px solid var(--border-light); margin-top: 2rem;">
-            <div class="hero-content">
-                <h1>Everything you need <br><span>In one place.</span></h1>
-                <p>From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.</p>
-                <div style="display: flex; gap: 1rem;">
-                    <a href="#" class="btn" onclick="document.getElementById('categories-section').scrollIntoView({behavior: 'smooth'})">Explore Categories</a>
+        <!-- Immersive Premium Hero -->
+        <div class="section hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 2rem; background: radial-gradient(circle at center, rgba(79, 70, 229, 0.15) 0%, transparent 70%);">
+            
+            <div class="hero-glass-card" style="position: relative; z-index: 10; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; padding: 3rem; text-align: center; width: 100%; max-width: 600px; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
+                <div style="margin-bottom: 2.5rem; animation: float 6s ease-in-out infinite;">
+                    <img src="assets/nav_logo.png" alt="LAANCE" style="width: 240px; height: auto; filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0.3));">
+                </div>
+                
+                <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -1px;">
+                    Everything you <br><span style="color: var(--primary); text-shadow: 0 0 30px rgba(79, 70, 229, 0.5);">In one place.</span>
+                </h1>
+                
+                <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2.5rem; max-width: 450px; margin-left: auto; margin-right: auto;">
+                    From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.
+                </p>
+                
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="#" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;" onclick="document.getElementById('categories-section').scrollIntoView({behavior: 'smooth'})">Explore Categories</a>
                 </div>
             </div>
-            <div class="hero-image-wrap">
-                <img src="assets/hero_banner.jpg" alt="Laance Premium Multi-Store" class="hero-image" style="border-radius: 30px; box-shadow: 0 0 60px rgba(79,70,229,0.4);">
-            </div>
+            
+            <!-- Animated Background Glows -->
+            <div style="position: absolute; width: 400px; height: 400px; background: var(--primary); filter: blur(150px); opacity: 0.1; top: -100px; right: -100px; border-radius: 50%;"></div>
+            <div style="position: absolute; width: 300px; height: 300px; background: #10b981; filter: blur(120px); opacity: 0.1; bottom: -50px; left: -50px; border-radius: 50%;"></div>
         </div>
 
         <div class="section" id="categories-section">
