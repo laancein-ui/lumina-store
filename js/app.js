@@ -1706,7 +1706,7 @@ function renderOrders() {
 // =========================================================================
 
 function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === String(productId));
     if (!product) return;
 
     state.cart.push(product);
@@ -1751,7 +1751,7 @@ function renderCartContent() {
 
     // Group items
     const groupedCart = state.cart.reduce((acc, current) => {
-        const existing = acc.find(item => item.id === current.id);
+        const existing = acc.find(item => String(item.id) === String(current.id));
         if (existing) {
             existing.quantity += 1;
         } else {
@@ -1935,7 +1935,7 @@ function finalizeCashfreeOrder(items, total, fullAddress, email, paymentId) {
 // =========================================================================
 
 function startOrderNowFlow(productId) {
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === String(productId));
     if (!product) return;
 
     // Temporary storage for single item checkout flow
@@ -1994,7 +1994,7 @@ function renderOrderNowPaymentView() {
                 <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
                     <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                         <input type="radio" name="payment_method" value="online" required style="accent-color: var(--primary);"> 
-                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-credit-card'></i> Online Payment</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-credit-card'></i> Card / UPI / Netbanking</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                         <input type="radio" name="payment_method" value="cod" required style="accent-color: var(--primary);"> 
