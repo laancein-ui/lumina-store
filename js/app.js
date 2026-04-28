@@ -897,78 +897,63 @@ function renderView(viewName, params = {}) {
 // =========================================================================
 
 function renderHome() {
+    const featuredProducts = products.slice(0, 6);
     return `
-        <!-- Immersive Premium Hero -->
-        <div class="section hero" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 2rem; background: url('assets/home_bg.png') center/cover no-repeat;">
-            
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1;"></div>
-            
-            <div class="hero-glass-card">
-                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" class="hero-logo-img">
+        <div class="home-hero">
+            <div class="home-hero-overlay"></div>
 
-                <h1 class="hero-title">
-                    Everything you <br><span>In one place.</span>
-                </h1>
-                
-                <p class="hero-description">
-                    From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.
-                </p>
-                
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <a href="#" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;" onclick="document.getElementById('categories-section').scrollIntoView({behavior: 'smooth'})">Explore Categories</a>
+            <div class="hero-glass-card hero-desktop-only">
+                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" class="hero-logo-img">
+                <h1 class="hero-title">Everything you <br><span>In one place.</span></h1>
+                <p class="hero-description">From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.</p>
+                <div style="display:flex;gap:1rem;justify-content:center;">
+                    <a href="#" class="btn" style="padding:1rem 2.5rem;" onclick="document.getElementById('categories-section').scrollIntoView({behavior:'smooth'})">Explore Categories</a>
                 </div>
             </div>
-            
-            <!-- Animated Background Glows -->
-            <div style="position: absolute; width: 400px; height: 400px; background: var(--primary); filter: blur(150px); opacity: 0.1; top: -100px; right: -100px; border-radius: 50%;"></div>
-            <div style="position: absolute; width: 300px; height: 300px; background: #10b981; filter: blur(120px); opacity: 0.1; bottom: -50px; left: -50px; border-radius: 50%;"></div>
+
+            <div class="home-mobile-hero">
+                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" class="mobile-hero-logo">
+                <h1 class="mobile-hero-title">Everything you<br><span>In one place.</span></h1>
+                <p class="mobile-hero-sub">Premium. Curated. Yours.</p>
+                <a href="#" class="btn mobile-hero-btn" onclick="document.getElementById('mobile-categories').scrollIntoView({behavior:'smooth'})">
+                    <i class='bx bx-store-alt'></i> Shop Now
+                </a>
+            </div>
+
+            <div class="home-glow home-glow-1"></div>
+            <div class="home-glow home-glow-2"></div>
+        </div>
+
+        <div class="mobile-cat-chips" id="mobile-categories">
+            <button class="cat-chip cat-chip-primary" onclick="renderView('electronics')"><i class='bx bx-devices'></i> Tech</button>
+            <button class="cat-chip cat-chip-cyan" onclick="renderView('dress')"><i class='bx bx-closet'></i> Fashion</button>
+            <button class="cat-chip cat-chip-green" onclick="renderView('realestate')"><i class='bx bx-building-house'></i> Homes</button>
+            <button class="cat-chip cat-chip-amber" onclick="renderView('cars')"><i class='bx bx-car'></i> Cars</button>
+            <button class="cat-chip cat-chip-pink" onclick="renderView('kids')"><i class='bx bx-child'></i> Kids</button>
         </div>
 
         <div class="section" id="categories-section">
             <h2 class="section-title">Shop by Category</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                <!-- Electronics Category -->
-                <div class="category-card" onclick="renderView('electronics')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/electronics_bg.jpg'); background-size: cover; background-position: center; border: 1px solid var(--primary); border-radius: 20px; transition: var(--transition); overflow: hidden;">
-                    <div style="padding: 2rem;">
-                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Electronics</h3>
-                        <p style="color: var(--text-muted);">Next-gen tech and gadgets.</p>
-                        <button class="btn" style="margin-top: 1rem; width: 100%;">Explore Tech</button>
-                    </div>
+            <div class="category-grid">
+                <div class="category-card home-cat-card" onclick="renderView('electronics')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('assets/electronics_bg.jpg') center/cover;">
+                    <div class="home-cat-info"><i class='bx bx-devices home-cat-icon'></i><h3>Electronics</h3><p>Next-gen tech & gadgets</p></div>
                 </div>
-
-                <!-- Fashion Category -->
-                <div class="category-card" onclick="renderView('dress')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600'); background-size: cover; background-position: center; border: 1px solid var(--secondary); border-radius: 20px; transition: var(--transition); overflow: hidden;">
-                    <div style="padding: 2rem;">
-                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Fashion</h3>
-                        <p style="color: var(--text-muted);">Premium fashion & style.</p>
-                        <button class="btn" style="margin-top: 1rem; width: 100%; background: var(--secondary);">Explore Fashion</button>
-                    </div>
+                <div class="category-card home-cat-card" onclick="renderView('dress')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600') center/cover;">
+                    <div class="home-cat-info"><i class='bx bx-closet home-cat-icon' style='color:#06b6d4'></i><h3>Fashion</h3><p>Premium style & design</p></div>
                 </div>
-
-                <!-- Real Estate Category -->
-                <div class="category-card" onclick="renderView('realestate')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/realestate_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #10b981; border-radius: 20px; transition: var(--transition); overflow: hidden;">
-                    <div style="padding: 2rem;">
-                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Real Estate</h3>
-                        <p style="color: var(--text-muted);">Luxury homes and villas.</p>
-                        <button class="btn" style="margin-top: 1rem; width: 100%; background: #10b981; border: none;">Explore Properties</button>
-                    </div>
+                <div class="category-card home-cat-card" onclick="renderView('realestate')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('assets/realestate_bg.jpg') center/cover;">
+                    <div class="home-cat-info"><i class='bx bx-building-house home-cat-icon' style='color:#10b981'></i><h3>Real Estate</h3><p>Luxury homes & villas</p></div>
                 </div>
-
-                <!-- Cars Category -->
-                <div class="category-card" onclick="renderView('cars')" style="cursor: pointer; height: 400px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url('assets/car_bg.jpg'); background-size: cover; background-position: center; border: 1px solid #f59e0b; border-radius: 20px; transition: var(--transition); overflow: hidden;">
-                    <div style="padding: 2rem;">
-                        <h3 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">Cars</h3>
-                        <p style="color: var(--text-muted);">Italian passion in motion.</p>
-                        <button class="btn" style="margin-top: 1rem; width: 100%; background: #f59e0b; border: none;">Explore Cars</button>
-                    </div>
+                <div class="category-card home-cat-card" onclick="renderView('cars')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('assets/car_bg.jpg') center/cover;">
+                    <div class="home-cat-info"><i class='bx bx-car home-cat-icon' style='color:#f59e0b'></i><h3>Cars</h3><p>Italian passion in motion</p></div>
                 </div>
             </div>
         </div>
 
         <div class="section" id="products-grid">
-            <h2 class="section-title">Trending Innovation</h2>
+            <h2 class="section-title">Trending Now</h2>
             <div class="products-grid">
-                ${products.slice(0, 3).map(p => {
+                ${featuredProducts.map(p => {
                     const priceNum = Number(p.price);
                     const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
                     return `
@@ -977,12 +962,12 @@ function renderHome() {
                             <div class="product-info">
                                 <div>
                                     <h3 class="product-title">${p.name || 'New Item'}</h3>
-                                    <div class="product-price">₹${formattedPrice}</div>
+                                    <div class="product-price">&#8377;${formattedPrice}</div>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                                <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
-                                <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
+                            <div class="product-btn-row" onclick="event.stopPropagation()">
+                                <button class="btn add-to-cart-btn" data-id="${p.id || 0}"><i class='bx bx-cart-add'></i> Cart</button>
+                                <button class="btn order-now-btn" data-id="${p.id || 0}"><i class='bx bx-bolt-circle'></i> Order</button>
                             </div>
                         </div>
                     `;
@@ -1192,7 +1177,8 @@ function bindCategoryEvents() {
 function bindHomeEvents() {
     document.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('add-to-cart-btn') || e.target.classList.contains('order-now-btn')) return;
+            // Use closest() to check if click was on/inside a button — works even on text nodes
+            if (e.target.closest('.add-to-cart-btn') || e.target.closest('.order-now-btn')) return;
             const id = card.getAttribute('data-id');
             renderView('product', { id });
         });
@@ -1200,14 +1186,17 @@ function bindHomeEvents() {
 
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
+            e.stopPropagation();
+            // Use currentTarget (the button) not target (which may be a child text node)
+            const id = e.currentTarget.getAttribute('data-id');
             addToCart(id);
         });
     });
 
     document.querySelectorAll('.order-now-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
+            e.stopPropagation();
+            const id = e.currentTarget.getAttribute('data-id');
             startOrderNowFlow(id);
         });
     });
@@ -1321,6 +1310,7 @@ function bindProductEvents() {
     const addBtn = document.querySelector('.add-to-cart-btn-main');
     if (addBtn) {
         addBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const id = e.currentTarget.getAttribute('data-id');
             addToCart(id);
         });
@@ -1329,6 +1319,7 @@ function bindProductEvents() {
     const buyBtn = document.querySelector('.order-now-btn-main');
     if (buyBtn) {
         buyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const id = e.currentTarget.getAttribute('data-id');
             startOrderNowFlow(id);
         });
@@ -1813,10 +1804,19 @@ function renderCartContent() {
     });
 }
 
-// Cashfree V3 Initialization
-const cashfree = Cashfree({
-    mode: "production" // CHANGED: Now in production mode
-});
+// Cashfree V3 Initialization — lazy init inside function to prevent crash if SDK not loaded
+let cashfree = null;
+function getCashfree() {
+    if (!cashfree) {
+        try {
+            cashfree = Cashfree({ mode: "production" });
+        } catch(e) {
+            console.warn('[Cashfree] SDK not available:', e);
+            return null;
+        }
+    }
+    return cashfree;
+}
 
 async function handleCashfreeCheckout(e, total, items) {
     // Collect shipping details from the form
@@ -1852,7 +1852,9 @@ async function handleCashfreeCheckout(e, total, items) {
 
         if (data.payment_session_id) {
             // 2. Launch Cashfree Checkout
-            cashfree.checkout({
+            const cf = getCashfree();
+            if (!cf) { throw new Error('Payment gateway unavailable. Please try Cash on Delivery.'); }
+            cf.checkout({
                 paymentSessionId: data.payment_session_id,
                 redirectTarget: "_modal" // Opens in a secure modal
             }).then((result) => {
@@ -2059,7 +2061,9 @@ function renderOrderNowPaymentView() {
                 .then(res => res.json())
                 .then(data => {
                     if (data.payment_session_id) {
-                        cashfree.checkout({
+                        const cf = getCashfree();
+                        if (!cf) { throw new Error('Payment gateway unavailable.'); }
+                        cf.checkout({
                             paymentSessionId: data.payment_session_id,
                             redirectTarget: "_modal"
                         }).then((result) => {
