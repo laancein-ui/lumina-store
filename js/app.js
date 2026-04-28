@@ -598,8 +598,8 @@ function saveOrders() {
 
 function updateNavbarProfile() {
     const profileTrigger = document.getElementById('profile-trigger');
-    const iconsContainer = document.querySelector('.icons');
-    if (!profileTrigger || !iconsContainer) return;
+    const navRight = document.querySelector('.nav-right');
+    if (!profileTrigger || !navRight) return;
 
     // Check for Admin Access
     const isAdmin = safeStorage.get('localStorage', 'laance_device_trusted') === 'true';
@@ -611,9 +611,10 @@ function updateNavbarProfile() {
         adminBtn.className = 'bx bx-plus-circle admin-icon';
         adminBtn.style.color = 'var(--primary)';
         adminBtn.style.cursor = 'pointer';
+        adminBtn.style.fontSize = '1.5rem';
         adminBtn.title = 'Add New Product';
         adminBtn.onclick = () => renderView('admin');
-        iconsContainer.insertBefore(adminBtn, profileTrigger);
+        navRight.insertBefore(adminBtn, profileTrigger);
     }
 
     if (state.user) {
@@ -623,7 +624,7 @@ function updateNavbarProfile() {
         
         profileTrigger.innerHTML = `<div style="width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; border: 2px solid rgba(255,255,255,0.2);">${initials}</div>`;
     } else {
-        profileTrigger.innerHTML = `<i class='bx bx-user'></i>`;
+        profileTrigger.innerHTML = `<i class='bx bx-user'></i><span class="login-label">Login</span>`;
     }
 }
 
