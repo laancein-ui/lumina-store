@@ -903,13 +903,14 @@ function renderHome() {
             
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1;"></div>
             
-            <div class="hero-glass-card" style="position: relative; z-index: 10; background: rgba(20, 20, 30, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; padding: 3rem; text-align: center; width: 100%; max-width: 600px; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
-                
-                <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -1px;">
-                    Everything you <br><span style="color: var(--primary); text-shadow: 0 0 30px rgba(79, 70, 229, 0.5);">In one place.</span>
+            <div class="hero-glass-card">
+                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" class="hero-logo-img">
+
+                <h1 class="hero-title">
+                    Everything you <br><span>In one place.</span>
                 </h1>
                 
-                <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2.5rem; max-width: 450px; margin-left: auto; margin-right: auto;">
+                <p class="hero-description">
                     From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.
                 </p>
                 
