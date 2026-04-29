@@ -2153,18 +2153,23 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 function saveToGoogleSheets(name, email, phone, address, pincode, productName, paymentMethod) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwjXFwq1Ee8Xw1tkzXDpej9H8S8c0jZ088YluTmg3xJb4PjpiJCiGk-vMnRHdgmLKY/exec';
 
-    const formData = new FormData();
-    formData.append('Name', name || '');
-    formData.append('Email', email || '');
-    formData.append('Phone', phone || '');
-    formData.append('Address', address || '');
-    formData.append('Pincode', pincode || '');
-    formData.append('Product', productName || '');
-    formData.append('Payment', paymentMethod || '');
+    // Sending via URL parameters is the most reliable method for Google Apps Script
+    const params = new URLSearchParams({
+        'Name': name || '',
+        'Email': email || '',
+        'Phone': phone || '',
+        'Address': address || '',
+        'Pincode': pincode || '',
+        'Product': productName || '',
+        'Payment': paymentMethod || ''
+    });
 
-    fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
-        .then(() => console.log('Successfully saved to Google Sheets'))
-        .catch(error => console.error('Error saving to Google Sheets:', error.message));
+    fetch(`${scriptURL}?${params.toString()}`, { 
+        method: 'POST', 
+        mode: 'no-cors' 
+    })
+    .then(() => console.log('Successfully saved to Google Sheets'))
+    .catch(error => console.error('Error saving to Google Sheets:', error.message));
 }
 
 // =========================================================================
