@@ -857,6 +857,25 @@ function setupNavigation() {
             renderView(route);
         });
     });
+
+    // Secret Gesture: 5 clicks on logo to authorize
+    let logoClicks = 0;
+    let logoTimer;
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.addEventListener('click', () => {
+            logoClicks++;
+            clearTimeout(logoTimer);
+            logoTimer = setTimeout(() => { logoClicks = 0; }, 3000); // Reset after 3 seconds
+
+            if (logoClicks === 5) {
+                safeStorage.set('localStorage', 'laance_device_authorized', 'shibil_777');
+                showToast('Creator Access Authorized for this Device!');
+                updateNavbarProfile();
+                logoClicks = 0;
+            }
+        });
+    }
 }
 
 function renderView(viewName, params = {}) {
@@ -1488,7 +1507,7 @@ function bindTrackingEvents() {
 // =========================================================================
 
 function renderAdmin() {
-    if (localStorage.getItem('laance_device_trusted') !== 'true') {
+    if (safeStorage.get('localStorage', 'laance_device_authorized') !== 'shibil_777') {
         return `
             <div class="section" style="max-width: 500px; margin: 0 auto; text-align: center;">
                 <h1 class="section-title">Access Denied</h1>
@@ -1508,10 +1527,11 @@ function renderAdmin() {
                 <div style="background: var(--bg-surface); padding: 3rem 2rem; border-radius: 20px; border: 1px solid var(--border-light);">
                     <i class='bx bx-lock-alt' style="font-size: 4rem; margin-bottom: 2rem; color: var(--text-muted);"></i>
                     <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <input type="password" id="admin-password" class="input-field" placeholder="Enter Access Code" required>
-                        <button type="submit" class="btn" style="justify-content: center;">Authenticate</button>
+                        <input type="text" id="admin-id" class="input-field" placeholder="Admin ID" required>
+                        <input type="password" id="admin-password" class="input-field" placeholder="Password" required>
+                        <button type="submit" class="btn" style="justify-content: center;">Authorize Access</button>
                     </form>
-                    <p style="margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted);">Access Code Required</p>
+                    <p style="margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted);">Secure Creator Entry</p>
                 </div>
             </div>
         `;
@@ -1593,12 +1613,15 @@ function renderAdmin() {
                     <h2 style="margin-bottom: 2rem; font-size: 1.5rem;">Current Inventory (${products.length})</h2>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
                         ${products.map(p => `
-                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light);">
+                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light); position: relative;">
                                 <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
                                 <div style="flex: 1; overflow: hidden;">
                                     <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
                                     <div style="color: var(--primary); font-size: 0.85rem;">₹${p.price.toLocaleString('en-IN')}</div>
                                 </div>
+                                <button class="delete-product-btn" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.5rem; font-size: 1.2rem;" title="Delete Product">
+                                    <i class='bx bx-trash'></i>
+                                </button>
                             </div>
                         `).join('')}
                     </div>
@@ -1614,14 +1637,15 @@ function bindAdminEvents() {
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                const id = document.getElementById('admin-id').value;
                 const code = document.getElementById('admin-password').value;
-                if (code === '640') {
+                if (id === 'shibil' && code === '640') {
                     state.isAdmin = true;
                     sessionStorage.setItem('laance_admin', 'true');
                     renderView('admin');
                     showToast('Creator Mode Activated');
                 } else {
-                    showToast('Invalid Access Code');
+                    showToast('Invalid ID or Password');
                 }
             });
         }
@@ -1676,6 +1700,32 @@ function bindAdminEvents() {
             renderView('admin'); // Refresh dashboard
         });
     }
+
+    // Handle Delete Buttons
+    document.querySelectorAll('.delete-product-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this product?')) {
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
+                btn.disabled = true;
+
+                try {
+                    const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                    if (error) throw error;
+                    
+                    showToast('Product Deleted Successfully');
+                    await fetchProducts(); // Refresh local list
+                    renderView('admin'); // Re-render dashboard
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    showToast('Error deleting product');
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                }
+            }
+        });
+    });
 }
 
 // =========================================================================
