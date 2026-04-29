@@ -1221,7 +1221,7 @@ function renderProductDetail(id) {
     // Log product click to Google Sheets
     const userName = state.profile?.full_name || state.user?.email?.split('@')[0] || 'Guest';
     const userEmail = state.user?.email || 'N/A';
-    saveToGoogleSheets(userName, userEmail, 'N/A', 'Product Clicked', 'N/A', `View: ${product.name}`);
+    saveToGoogleSheets(userName, userEmail, 'N/A', 'Product Clicked', 'N/A', `View: ${product.name}`, 'N/A');
 
     const productReviews = state.reviews[id] || [];
 
@@ -1713,7 +1713,7 @@ function addToCart(productId) {
         // Log 'Add to Cart' click to Google Sheets
         const userName = state.profile?.full_name || state.user?.email?.split('@')[0] || 'Guest';
         const userEmail = state.user?.email || 'N/A';
-        saveToGoogleSheets(userName, userEmail, 'N/A', 'Add to Cart', 'N/A', `Cart: ${product.name}`);
+        saveToGoogleSheets(userName, userEmail, 'N/A', 'Add to Cart', 'N/A', `Cart: ${product.name}`, 'N/A');
     }
 }
 
@@ -1880,7 +1880,7 @@ async function handleCashfreeCheckout(e, total, items) {
                 // In a production app, you should verify payment on backend
                 const customerName = email.split('@')[0] || 'Customer';
                 const productNames = items.map(i => i.name).join(', ');
-                saveToGoogleSheets(customerName, email, phone, `${address}, ${city}`, pincode, `Order: ${productNames}`);
+                saveToGoogleSheets(customerName, email, phone, `${address}, ${city}`, pincode, `Order: ${productNames}`, 'Online Payment');
                 finalizeCashfreeOrder(items, total, fullAddress, email, data.order_id);
             });
         } else {
@@ -2050,7 +2050,7 @@ function renderOrderNowPaymentView() {
             btn.disabled = true;
             setTimeout(() => {
                 const customerName = address.email.split('@')[0] || 'Customer';
-                saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode, `Order: ${item.name}`);
+                saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode, `Order: ${item.name}`, 'Cash on Delivery');
                 finalizeOrderNow(item, fullAddress, address.email, null, 'cod');
             }, 1000);
         } else {
@@ -2087,7 +2087,7 @@ function renderOrderNowPaymentView() {
                                 return;
                             }
                             const customerName = address.email.split('@')[0] || 'Customer';
-                            saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode, `Order: ${item.name}`);
+                            saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode, `Order: ${item.name}`, 'Online Payment');
                             finalizeOrderNow(item, fullAddress, address.email, data.order_id, 'online');
                         });
                     } else {
@@ -2150,7 +2150,7 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 // Utilities
 // =========================================================================
 
-function saveToGoogleSheets(name, email, phone, address, pincode, productName) {
+function saveToGoogleSheets(name, email, phone, address, pincode, productName, paymentMethod) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycba-p6qCB7luKSM0rH-HnAHohgH-k1UWqtCFK6OG3ki1QNqgRM1tYh2mxyitOljh0si/exec';
 
     const formData = new FormData();
@@ -2160,6 +2160,7 @@ function saveToGoogleSheets(name, email, phone, address, pincode, productName) {
     formData.append('Address', address || '');
     formData.append('Pincode', pincode || '');
     formData.append('Product', productName || '');
+    formData.append('Payment', paymentMethod || '');
 
     fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
         .then(() => console.log('Successfully saved to Google Sheets'))
