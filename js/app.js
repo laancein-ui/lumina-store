@@ -2159,7 +2159,7 @@ function saveToGoogleSheets(name, email, phone, address, pincode, productName) {
     formData.append('Phone', phone || '');
     formData.append('Address', address || '');
     formData.append('Pincode', pincode || '');
-    formData.append('ProductName', productName || '');
+    formData.append('Product', productName || '');
 
     fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' })
         .then(() => console.log('Successfully saved to Google Sheets'))
