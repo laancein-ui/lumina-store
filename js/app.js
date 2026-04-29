@@ -2151,7 +2151,7 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 // =========================================================================
 
 function saveToGoogleSheets(name, email, phone, address, pincode, productName, paymentMethod) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycba-p6qCB7luKSM0rH-HnAHohgH-k1UWqtCFK6OG3ki1QNqgRM1tYh2mxyitOljh0si/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwjXFwq1Ee8Xw1tkzXDpej9H8S8c0jZ088YluTmg3xJb4PjpiJCiGk-vMnRHdgmLKY/exec';
 
     const formData = new FormData();
     formData.append('Name', name || '');
