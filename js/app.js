@@ -638,11 +638,11 @@ function updateNavbarProfile() {
     const navRight = document.querySelector('.nav-right');
     if (!profileTrigger || !navRight) return;
 
-    // Check for Admin Access
-    const isAdmin = safeStorage.get('localStorage', 'laance_device_trusted') === 'true';
+    // Check for Private Device Access
+    const isTrusted = safeStorage.get('localStorage', 'laance_device_authorized') === 'shibil_777';
     const existingAdminIcon = document.getElementById('admin-add-product');
     
-    if (isAdmin && !existingAdminIcon) {
+    if (isTrusted && !existingAdminIcon) {
         const adminBtn = document.createElement('i');
         adminBtn.id = 'admin-add-product';
         adminBtn.className = 'bx bx-plus-circle admin-icon';
@@ -711,13 +711,13 @@ async function init() {
             updateNavbarProfile();
         }
 
-        // Handle Trusted Device Logic
+        // Handle Private Device Authorization
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('trust_device') === 'laance_admin_secure') {
-            safeStorage.set('localStorage', 'laance_device_trusted', 'true');
+        if (urlParams.get('trust_device') === 'shibil_private_access_777') {
+            safeStorage.set('localStorage', 'laance_device_authorized', 'shibil_777');
             // Clean URL without reloading
             window.history.replaceState({}, document.title, window.location.pathname);
-            setTimeout(() => showToast('Device Authorized for Admin Access!'), 500);
+            setTimeout(() => showToast('Creator Access Authorized for this Device!'), 500);
         }
 
         // Setup base dynamic elements
