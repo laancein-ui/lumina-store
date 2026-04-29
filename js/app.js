@@ -2151,7 +2151,7 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
 // =========================================================================
 
 function saveToGoogleSheets(name, email, phone, address, pincode, productName, paymentMethod) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwjXFwq1Ee8Xw1tkzXDpej9H8S8c0jZ088YluTmg3xJb4PjpiJCiGk-vMnRHdgmLKY/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxmKpf4TJAbowXZaHLVDDmAtdTez05nCY4Vib0utVOup3l-Go2zBc7KDbm3E7C-wn59/exec';
 
     // Sending via URL parameters is the most reliable method for Google Apps Script
     const params = new URLSearchParams({
