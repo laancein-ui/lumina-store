@@ -1527,7 +1527,7 @@ function renderAdmin() {
                 <div style="background: var(--bg-surface); padding: 3rem 2rem; border-radius: 20px; border: 1px solid var(--border-light);">
                     <i class='bx bx-lock-alt' style="font-size: 4rem; margin-bottom: 2rem; color: var(--text-muted);"></i>
                     <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <input type="text" id="admin-id" class="input-field" placeholder="Admin ID" required>
+                        <input type="email" id="admin-id" class="input-field" placeholder="laancein@gmail.com" required>
                         <input type="password" id="admin-password" class="input-field" placeholder="Password" required>
                         <button type="submit" class="btn" style="justify-content: center;">Authorize Access</button>
                     </form>
@@ -1639,7 +1639,7 @@ function bindAdminEvents() {
                 e.preventDefault();
                 const id = document.getElementById('admin-id').value;
                 const code = document.getElementById('admin-password').value;
-                if (id === 'shibil' && code === '640') {
+                if (id === 'laancein@gmail.com' && code === '640') {
                     state.isAdmin = true;
                     sessionStorage.setItem('laance_admin', 'true');
                     renderView('admin');
