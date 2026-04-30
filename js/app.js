@@ -362,7 +362,16 @@ const kidProducts = [
         name: "Electric Ride-on Car",
         price: 25000,
         image: "https://images.unsplash.com/photo-1566024287286-457247b70310?auto=format&fit=crop&w=800&q=80",
-        desc: "Miniature luxury electric car with remote control for parents. A premium toy for the little ones."
+        desc: "Miniature luxury electric car with remote control for parents. A premium toy for the little ones.",
+        category: "kids"
+    },
+    {
+        id: 405,
+        name: "Laance Junior Smart Watch",
+        price: 5999,
+        image: "assets/product_kid_watch.png",
+        desc: "A premium smartwatch for kids with GPS tracking, educational games, and a vibrant colorful display. Built for safety and fun.",
+        category: "kids"
     }
 ];
 
