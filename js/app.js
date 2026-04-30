@@ -1010,9 +1010,8 @@ function renderHome() {
 
         <div class="section" id="products-grid">
             <h2 class="section-title">Trending Now</h2>
-            ${renderFilterBar(products.slice(0, 12).length)}
             <div class="products-grid">
-                ${sortProducts(products.slice(0, 12)).map(p => {
+                ${products.slice(0, 6).map(p => {
                     const priceNum = Number(p.price);
                     const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
                     return `
@@ -1037,7 +1036,6 @@ function renderHome() {
 }
 
 function renderElectronicsPage() {
-    const filtered = sortProducts(products.filter(p => p.category === 'electronics'));
     return `
         <!-- Header -->
         <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
@@ -1048,15 +1046,14 @@ function renderElectronicsPage() {
         </div>
 
         <!-- Electronics Section with Custom Background -->
-        <div class="section" id="electronics-section" style="padding: 4rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/electronics_bg.jpg'); background-size: cover; background-position: center;">
+        <div class="section" id="electronics-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/electronics_bg.jpg'); background-size: cover; background-position: center;">
             <!-- Overlay for readability -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
             
             <div style="position: relative; z-index: 2;">
                 <h2 class="section-title" style="color: var(--primary); border-bottom-color: var(--primary);">Tech Showcase</h2>
-                ${renderFilterBar(filtered.length)}
                 <div class="products-grid">
-                    ${filtered.map(p => renderProductCard(p)).join('')}
+                    ${products.filter(p => p.category === 'electronics').map(p => renderProductCard(p)).join('')}
                 </div>
             </div>
         </div>
@@ -1064,7 +1061,6 @@ function renderElectronicsPage() {
 }
 
 function renderRealEstatePage() {
-    const filtered = sortProducts(products.filter(p => p.category === 'realestate'));
     return `
         <!-- Header -->
         <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
@@ -1075,15 +1071,14 @@ function renderRealEstatePage() {
         </div>
 
         <!-- Real Estate Section with Custom Background -->
-        <div class="section" id="realestate-section" style="padding: 4rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/realestate_bg.jpg'); background-size: cover; background-position: center;">
+        <div class="section" id="realestate-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/realestate_bg.jpg'); background-size: cover; background-position: center;">
             <!-- Overlay for readability -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
             
             <div style="position: relative; z-index: 2;">
                 <h2 class="section-title" style="color: #10b981; border-bottom-color: #10b981;">Exclusive Listings</h2>
-                ${renderFilterBar(filtered.length)}
                 <div class="products-grid">
-                    ${filtered.map(p => renderProductCard(p)).join('')}
+                    ${products.filter(p => p.category === 'realestate').map(p => renderProductCard(p)).join('')}
                 </div>
             </div>
         </div>
@@ -1091,7 +1086,6 @@ function renderRealEstatePage() {
 }
 
 function renderCarsPage() {
-    const filtered = sortProducts(products.filter(p => p.category === 'cars'));
     return `
         <!-- Header -->
         <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
@@ -1102,15 +1096,14 @@ function renderCarsPage() {
         </div>
 
         <!-- Cars Section with Custom Background -->
-        <div class="section" id="cars-section" style="padding: 4rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/car_bg.jpg'); background-size: cover; background-position: center;">
+        <div class="section" id="cars-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/car_bg.jpg'); background-size: cover; background-position: center;">
             <!-- Overlay for readability -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
             
             <div style="position: relative; z-index: 2;">
                 <h2 class="section-title" style="color: #f59e0b; border-bottom-color: #f59e0b;">Exotic Collection</h2>
-                ${renderFilterBar(filtered.length)}
                 <div class="products-grid">
-                    ${filtered.map(p => renderProductCard(p)).join('')}
+                    ${products.filter(p => p.category === 'cars').map(p => renderProductCard(p)).join('')}
                 </div>
             </div>
         </div>
@@ -1118,8 +1111,6 @@ function renderCarsPage() {
 }
 
 function renderDressPage() {
-    const menFiltered = sortProducts(products.filter(p => p.category === 'men'));
-    const womenFiltered = sortProducts(products.filter(p => p.category === 'women'));
     return `
         <!-- Header -->
         <div class="section hero" style="min-height: 60vh; align-items: center; justify-content: center; text-align: center; position: relative; background: url('assets/fashion_bg.png'); background-size: cover; background-position: center;">
@@ -1132,29 +1123,27 @@ function renderDressPage() {
         </div>
 
         <!-- Men's Section with Custom Background -->
-        <div class="section" id="men-section" style="padding: 4rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/men_bg.jpg'); background-size: cover; background-position: center;">
+        <div class="section" id="men-section" style="padding: 6rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/men_bg.jpg'); background-size: cover; background-position: center;">
             <!-- Dark Overlay for readability -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>
             
             <div style="position: relative; z-index: 2;">
                 <h2 class="section-title" style="color: white; border-bottom-color: var(--primary);">Men's Essentials</h2>
-                ${renderFilterBar(menFiltered.length)}
                 <div class="products-grid">
-                    ${menFiltered.map(p => renderProductCard(p)).join('')}
+                    ${products.filter(p => p.category === 'men').map(p => renderProductCard(p)).join('')}
                 </div>
             </div>
         </div>
 
         <!-- Women's Section with Custom Background -->
-        <div class="section" id="women-section" style="padding: 4rem 2rem; margin-top: 4rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/women_bg.jpg'); background-size: cover; background-position: center;">
+        <div class="section" id="women-section" style="padding: 6rem 2rem; margin-top: 4rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/women_bg.jpg'); background-size: cover; background-position: center;">
             <!-- Overlay to ensure readability -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 1;"></div>
             
             <div style="position: relative; z-index: 2;">
                 <h2 class="section-title" style="color: #d63384; border-bottom-color: #d63384;">Women's Collection</h2>
-                ${renderFilterBar(womenFiltered.length)}
                 <div class="products-grid">
-                    ${womenFiltered.map(p => renderProductCard(p)).join('')}
+                    ${products.filter(p => p.category === 'women').map(p => renderProductCard(p)).join('')}
                 </div>
             </div>
         </div>
@@ -1165,37 +1154,6 @@ function renderKidsPage() {
     return renderCategory('Kids', products.filter(p => p.category === 'kids'), 'assets/fashion_bg.png');
 }
 
-function sortProducts(items) {
-    const sorted = [...items];
-    switch (state.sortOption) {
-        case 'price-low':
-            return sorted.sort((a, b) => a.price - b.price);
-        case 'price-high':
-            return sorted.sort((a, b) => b.price - a.price);
-        case 'name-az':
-            return sorted.sort((a, b) => a.name.localeCompare(b.name));
-        case 'name-za':
-            return sorted.sort((a, b) => b.name.localeCompare(a.name));
-        default:
-            return sorted;
-    }
-}
-
-function renderFilterBar(itemCount) {
-    return `
-        <div class="filter-container">
-            <div class="filter-bar-mini">
-                <select class="filter-select-mini product-sort">
-                    <option value="default" ${state.sortOption === 'default' ? 'selected' : ''}>Sort</option>
-                    <option value="price-low" ${state.sortOption === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
-                    <option value="price-high" ${state.sortOption === 'price-high' ? 'selected' : ''}>Price: High to Low</option>
-                    <option value="name-az" ${state.sortOption === 'name-az' ? 'selected' : ''}>Name: A to Z</option>
-                    <option value="name-za" ${state.sortOption === 'name-za' ? 'selected' : ''}>Name: Z to A</option>
-                </select>
-            </div>
-        </div>
-    `;
-}
 
 function renderProductCard(p) {
     const formattedPrice = Number(p.price).toLocaleString('en-IN');
@@ -1234,8 +1192,6 @@ function renderCategory(title, items, bgImage = null) {
         ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>`
         : ``;
 
-    const sortedItems = sortProducts(items);
-
     return `
         <div class="section hero" style="${heroStyle}">
             ${overlay}
@@ -1247,9 +1203,8 @@ function renderCategory(title, items, bgImage = null) {
 
         <div class="section">
             <h2 class="section-title">${title} Showcase</h2>
-            ${renderFilterBar(sortedItems.length)}
             <div class="products-grid">
-                ${sortedItems.map(p => {
+                ${items.map(p => {
                     const priceNum = Number(p.price);
                     const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
                     return `
@@ -1274,27 +1229,8 @@ function renderCategory(title, items, bgImage = null) {
 }
 
 function bindCategoryEvents() {
-    const grid = document.querySelector('.products-grid');
-    if (!grid) return;
-
-    grid.addEventListener('click', (e) => {
-        const card = e.target.closest('.product-card');
-        if (!card) return;
-
-        const id = card.dataset.id;
-        if (id) {
-            state.currentProductId = id;
-            renderView('product', { id });
-        }
-    });
-
-    const sortSelects = document.querySelectorAll('.product-sort');
-    sortSelects.forEach(select => {
-        select.addEventListener('change', (e) => {
-            state.sortOption = e.target.value;
-            renderView(state.currentView);
-        });
-    });
+    // We can reuse the same event binding logic
+    bindHomeEvents();
 }
 
 function bindHomeEvents() {
@@ -1321,14 +1257,6 @@ function bindHomeEvents() {
             e.stopPropagation();
             const id = e.currentTarget.getAttribute('data-id');
             startOrderNowFlow(id);
-        });
-    });
-
-    const sortSelects = document.querySelectorAll('.product-sort');
-    sortSelects.forEach(select => {
-        select.addEventListener('change', (e) => {
-            state.sortOption = e.target.value;
-            renderView(state.currentView);
         });
     });
 }

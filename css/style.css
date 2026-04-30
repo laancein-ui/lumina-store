@@ -768,69 +768,6 @@ p {
     gap: 2rem;
 }
 
-/* Mini Filter Styles */
-.filter-container {
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1.5rem;
-    margin-top: -1rem; /* Pull closer to title */
-    z-index: 10;
-}
-
-.filter-bar-mini {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-
-.filter-select-mini {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-main);
-    border: 1px solid var(--border-light);
-    padding: 0.4rem 0.8rem;
-    padding-right: 2rem;
-    border-radius: 12px;
-    font-family: var(--font-main);
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    width: auto;
-    min-width: 80px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.6rem center;
-    background-size: 0.8rem;
-}
-
-.filter-select-mini:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: var(--primary);
-}
-
-.filter-select-mini option {
-    background: #1a1a24;
-    color: var(--text-main);
-    font-size: 0.9rem;
-}
-
-/* Position it absolutely in the corner of sections if needed */
-.section-with-filter {
-    position: relative;
-}
-
-@media (max-width: 768px) {
-    .filter-container {
-        margin-top: 0;
-        margin-bottom: 1rem;
-    }
-}
 
 /* Category Cards (Home Page) */
 .category-card {
