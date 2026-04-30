@@ -1183,19 +1183,15 @@ function sortProducts(items) {
 
 function renderFilterBar(itemCount) {
     return `
-        <div class="filter-bar">
-            <div class="filter-group">
-                <span class="filter-label"><i class='bx bx-sort-alt-2'></i> Sort by:</span>
-                <select class="filter-select product-sort">
-                    <option value="default" ${state.sortOption === 'default' ? 'selected' : ''}>Featured</option>
+        <div class="filter-container">
+            <div class="filter-bar-mini">
+                <select class="filter-select-mini product-sort">
+                    <option value="default" ${state.sortOption === 'default' ? 'selected' : ''}>Sort</option>
                     <option value="price-low" ${state.sortOption === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
                     <option value="price-high" ${state.sortOption === 'price-high' ? 'selected' : ''}>Price: High to Low</option>
                     <option value="name-az" ${state.sortOption === 'name-az' ? 'selected' : ''}>Name: A to Z</option>
                     <option value="name-za" ${state.sortOption === 'name-za' ? 'selected' : ''}>Name: Z to A</option>
                 </select>
-            </div>
-            <div class="filter-group">
-                <span class="filter-label">${itemCount} items found</span>
             </div>
         </div>
     `;
