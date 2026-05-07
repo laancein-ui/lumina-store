@@ -26,16 +26,6 @@
 
 <body>
 
-    <!-- ═══ MOBILE PHONE STATUS BAR ═══ -->
-    <div class="phone-status-bar" id="phone-status-bar">
-        <span class="sb-time" id="sb-clock">9:41</span>
-        <span class="sb-icons">
-            <i class='bx bx-signal-5'></i>
-            <i class='bx bx-wifi'></i>
-            <i class='bx bx-battery'></i>
-        </span>
-    </div>
-
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
@@ -65,9 +55,11 @@
 
     <!-- Mobile Search Bar (phone only) -->
     <div class="mobile-search-bar" id="mobile-search-bar">
-        <i class='bx bx-search'></i>
-        <input type="text" id="mobile-search-input" placeholder="Search products, brands...">
-        <i class='bx bx-microphone' style="color:rgba(255,255,255,0.4);font-size:1.05rem;"></i>
+        <div class="search-inner">
+            <i class='bx bx-search'></i>
+            <input type="text" id="mobile-search-input" placeholder="Search products, brands...">
+        </div>
+        <i class='bx bx-microphone' style="color:rgba(255,255,255,0.4);font-size:1.1rem;flex-shrink:0;"></i>
     </div>
 
     <!-- Main SPA Container -->

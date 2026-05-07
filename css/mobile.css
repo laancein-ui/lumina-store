@@ -1,0 +1,361 @@
+/* =========================================================================
+   LAANCE — Professional Phone Layout (Mobile Only)
+   Reference: Clean top navbar + hero + bottom nav (like HAMCO Arabia)
+   ========================================================================= */
+
+/* ── DESKTOP: hide all mobile-only elements ─────────────────────────────── */
+@media (min-width: 769px) {
+  .phone-status-bar,
+  .mobile-search-bar,
+  .bottom-nav { display: none !important; }
+}
+
+/* ============================================================
+   MOBILE STYLES  (max-width: 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* ── 0. Remove body horizontal overflow (fixes cut-off text) ── */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+
+  /* ── 1. HIDE the fake status bar — phone already has one ─────── */
+  .phone-status-bar { display: none !important; }
+
+  /* ── 2. TOP NAVBAR — compact, clean, single row ──────────────── */
+  .navbar {
+    top: 0 !important;
+    height: 58px !important;
+    padding: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  }
+  .nav-container {
+    height: 58px !important;
+    padding: 0 14px !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+  }
+
+  /* Logo stays on left */
+  .logo {
+    flex: 0 0 auto !important;
+    margin-right: auto !important;
+  }
+  .logo img { height: 36px !important; width: auto !important; }
+
+  /* Hide the old horizontal scrolling nav links */
+  .nav-links { display: none !important; }
+
+  /* Nav right (profile + cart) — compact */
+  .nav-right {
+    display: flex !important;
+    gap: 18px !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+  .profile-trigger {
+    font-size: 1.4rem !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+  }
+  .cart-trigger { font-size: 1.4rem !important; }
+
+  /* ── 3. APP ROOT — sits below navbar, above bottom nav ────────── */
+  .app-root {
+    margin-top: 58px !important;
+    padding-bottom: 80px !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+
+  /* ── 4. MOBILE SEARCH BAR — below navbar, always visible ─────── */
+  .mobile-search-bar {
+    display: flex !important;
+    position: sticky;
+    top: 58px;
+    z-index: 500;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 14px;
+    background: rgba(10, 10, 14, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .mobile-search-bar .search-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 9px 14px;
+  }
+  .mobile-search-bar i { color: rgba(255,255,255,0.45); font-size: 1rem; }
+  .mobile-search-bar input {
+    flex: 1; background: none; border: none;
+    outline: none; color: #fff;
+    font-size: 0.88rem; font-family: 'Outfit', sans-serif;
+  }
+  .mobile-search-bar input::placeholder { color: rgba(255,255,255,0.35); }
+
+  /* ── 5. HERO — full-width, text fits screen ───────────────────── */
+  .home-hero {
+    min-height: 55vh !important;
+    padding: 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  /* Fix hero text overflow — THE key fix matching the reference */
+  .mobile-hero-title {
+    font-size: clamp(1.8rem, 7vw, 2.4rem) !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    width: 100% !important;
+  }
+  .mobile-hero-title span { display: inline !important; }
+  .mobile-hero-sub {
+    font-size: 0.82rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  .mobile-hero-btn {
+    padding: 0.8rem 2rem !important;
+    font-size: 0.95rem !important;
+  }
+  .home-mobile-hero {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 1.5rem 1rem !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  /* ── 6. CATEGORY CHIPS — sticky, scrollable ───────────────────── */
+  .mobile-cat-chips {
+    display: flex !important;
+    gap: 7px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    background: rgba(0,0,0,0.35);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 116px; /* below navbar (58) + search bar (58) */
+    z-index: 99;
+    backdrop-filter: blur(10px);
+  }
+  .mobile-cat-chips::-webkit-scrollbar { display: none; }
+
+  /* ── 7. SECTIONS — remove wide padding ───────────────────────── */
+  .section {
+    padding: 1.2rem 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  .section-title {
+    font-size: 1.3rem !important;
+    margin-bottom: 1rem !important;
+    padding: 0 12px;
+  }
+
+  /* ── 8. PRODUCTS — 2-col grid ────────────────────────────────── */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 0 10px 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .product-card {
+    padding: 10px !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+  .product-image {
+    height: 130px !important;
+    border-radius: 8px !important;
+    margin-bottom: 8px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+  }
+  .product-title {
+    font-size: 0.8rem !important;
+    margin-bottom: 3px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  .product-price { font-size: 0.9rem !important; }
+  .product-btn-row {
+    flex-direction: column !important;
+    gap: 5px !important;
+    margin-top: 8px !important;
+  }
+  .product-btn-row .btn {
+    font-size: 0.72rem !important;
+    padding: 0.45rem 0.5rem !important;
+    border-radius: 8px !important;
+    justify-content: center !important;
+  }
+
+  /* ── 9. PRODUCT DETAIL VIEW — stacked ───────────────────────── */
+  .product-detail-view {
+    flex-direction: column !important;
+    gap: 1.2rem !important;
+    padding: 0 12px !important;
+  }
+  .detail-image { max-width: 100% !important; }
+  .detail-info h1 { font-size: 1.4rem !important; }
+  .detail-info .price { font-size: 1.4rem !important; margin-bottom: 1rem !important; }
+  .detail-actions { flex-direction: column !important; gap: 0.7rem !important; }
+
+  /* ── 10. BOTTOM NAV BAR — WhatsApp / Instagram style ─────────── */
+  .bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 62px;
+    background: rgba(8, 8, 14, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.09);
+    z-index: 1500;
+    align-items: stretch;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    padding: 6px 0 8px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.38);
+    font-family: 'Outfit', sans-serif;
+    transition: color 0.2s ease;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bottom-nav-item i { font-size: 1.4rem; line-height: 1; }
+  .bottom-nav-item span {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .bottom-nav-item.active { color: #818cf8; }
+  .bottom-nav-item.active i {
+    filter: drop-shadow(0 0 6px rgba(129,140,248,0.6));
+  }
+  /* Active top indicator line */
+  .bottom-nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 25%; right: 25%;
+    height: 2px;
+    background: #818cf8;
+    border-radius: 0 0 3px 3px;
+  }
+  .bottom-nav-item:active { opacity: 0.65; }
+
+  /* Cart badge */
+  .bnav-badge {
+    position: absolute;
+    top: 5px; right: calc(50% - 20px);
+    background: #ec4899;
+    color: #fff;
+    font-size: 0.58rem; font-weight: 800;
+    min-width: 16px; height: 16px;
+    border-radius: 50%;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 0 3px;
+    box-shadow: 0 0 6px rgba(236,72,153,0.6);
+    border: 1.5px solid rgba(8,8,14,0.98);
+  }
+  .bnav-badge.show { display: flex; }
+
+  /* ── 11. OVERLAYS — shift above bottom nav ───────────────────── */
+  .toast {
+    bottom: 74px !important;
+    left: 12px !important;
+    right: 12px !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+  .ai-chat-fab {
+    bottom: 74px !important;
+    right: 14px !important;
+    width: 46px !important; height: 46px !important;
+    font-size: 1.3rem !important;
+  }
+  .ai-chat-widget {
+    bottom: 130px !important;
+    right: 10px !important; left: 10px !important;
+    width: auto !important;
+  }
+
+  /* ── 12. MODAL — sheet from bottom ──────────────────────────── */
+  .modal {
+    top: auto !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    width: 100% !important; max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    transform: translateY(100%) scale(1) !important;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1) !important;
+  }
+  body.modal-open .modal {
+    transform: translateY(0) scale(1) !important;
+  }
+  #modal-content { max-height: 70vh !important; padding: 1.2rem !important; }
+
+  /* ── 13. PROFILE / AUTH — full width on mobile ───────────────── */
+  .profile-dashboard { grid-template-columns: 1fr !important; }
+  .profile-sidebar { position: static !important; top: auto !important; }
+  .auth-form-container {
+    margin: 1rem !important;
+    padding: 1.5rem !important;
+    border-radius: 18px !important;
+  }
+
+  /* ── 14. TRACKING ─────────────────────────────────────────────── */
+  .tracking-container { border-radius: 14px !important; padding: 1.2rem 1rem !important; }
+  .tracking-form { flex-direction: column !important; gap: 0.8rem !important; }
+
+  /* ── 15. FOOTER — hidden; bottom nav replaces it ─────────────── */
+  footer { display: none !important; }
+
+  /* ── 16. CATEGORY CARDS — full-width on mobile ───────────────── */
+  .category-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .home-cat-card { height: 150px !important; }
+
+  /* ── 17. HERO GLASS CARD ─────────────────────────────────────── */
+  .hero-glass-card {
+    padding: 1.5rem 1.2rem !important;
+    border-radius: 20px !important;
+    width: 96% !important;
+  }
+  .hero-logo-img { width: 90px !important; margin-bottom: 1rem !important; }
+  .hero-title { font-size: 1.8rem !important; }
+  .hero-description { font-size: 0.9rem !important; margin-bottom: 1.5rem !important; }
+
+  /* ── 18. General text overflow fix ───────────────────────────── */
+  h1, h2, h3, h4, p {
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
+  }
+}
