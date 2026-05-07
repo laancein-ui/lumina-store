@@ -413,7 +413,31 @@ async function saveProducts(newItem) {
         await fetchProducts();
     } catch (err) {
         console.error('Error saving product to Supabase:', err);
-        showToast('Error saving to server');
+        showToast('Error: ' + (err.message || 'Check database connection'));
+        throw err;
+    }
+}
+
+async function clearSupabaseData() {
+    if (!confirm("Are you absolutely sure? This will delete ALL products, orders, and reviews from the database!")) return;
+    
+    try {
+        if (!supabaseClient) throw new Error("Supabase client not initialized");
+        
+        showToast("Clearing database...");
+        
+        // Delete from all tables
+        await Promise.all([
+            supabaseClient.from('products').delete().neq('id', 0),
+            supabaseClient.from('orders').delete().neq('id', 0),
+            supabaseClient.from('reviews').delete().neq('id', 0)
+        ]);
+        
+        showToast("Database Cleared Successfully");
+        location.reload(); // Refresh to show empty state
+    } catch (err) {
+        console.error('Error clearing Supabase data:', err);
+        showToast('Error clearing data. Check RLS policies.');
     }
 }
 
@@ -636,8 +660,24 @@ const state = {
         ]
     }, // Map of productId -> reviews[]
     profile: null, // User profile data from Supabase
+    allUsers: [], // List of all users (admin only)
     sortOption: 'default' // Default sorting option
 };
+
+async function fetchAllUsers() {
+    try {
+        if (!supabaseClient || !state.isAdmin) return;
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        state.allUsers = data || [];
+    } catch (err) {
+        console.error('Error fetching all users:', err);
+    }
+}
 
 function saveOrders() {
     safeStorage.set('localStorage', 'laance_orders', JSON.stringify(state.orders));
@@ -738,27 +778,34 @@ async function init() {
         // Render Home View Immediately
         renderView('home');
 
-        // Fetch Live Products and Orders
-        await Promise.all([
-            fetchProducts(),
-            fetchOrdersFromSupabase()
-        ]);
-
-        // Refresh UI with latest data if on home or admin
-        if (state.currentView === 'home' || state.currentView === 'admin' || state.currentView === 'profile') {
-            renderView(state.currentView);
-        }
-
-
-        console.log("App Successfully Rooted.");
-
-        // Hide Splash Screen
+        // Hide Splash Screen after a short delay so the user sees the branding
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash) splash.classList.add('fade-out');
-        }, 1500);
+        }, 1000);
+
+        // Fetch Live Products and Orders in background
+        try {
+            await Promise.all([
+                fetchProducts(),
+                fetchOrdersFromSupabase()
+            ]);
+            
+            // Refresh UI if still on a page that needs data
+            if (state.currentView === 'home' || state.currentView === 'admin' || state.currentView === 'profile') {
+                renderView(state.currentView);
+            }
+        } catch (fetchError) {
+            console.warn("Background fetch failed:", fetchError);
+        }
+
+        console.log("App Successfully Rooted.");
     } catch (e) {
         console.error("Critical Boot Error:", e);
+        // Ensure splash screen is gone so error is visible
+        const splash = document.getElementById('splash-screen');
+        if (splash) splash.style.display = 'none';
+        
         if (appRoot) {
             appRoot.innerHTML = `<div style="padding:4rem;color:red;background:#000;"><h1>System Initialization Failure</h1><p>${e.message}</p><pre style="white-space:pre-wrap;">${e.stack}</pre></div>`;
         }
@@ -913,6 +960,17 @@ function renderView(viewName, params = {}) {
             case 'admin':
                 appRoot.innerHTML = renderAdmin();
                 bindAdminEvents();
+                // Fetch latest data for dashboard
+                Promise.all([
+                    fetchProducts(),
+                    fetchOrdersFromSupabase(),
+                    fetchAllUsers()
+                ]).then(() => {
+                    if (state.currentView === 'admin') {
+                        appRoot.innerHTML = renderAdmin();
+                        bindAdminEvents();
+                    }
+                });
                 break;
             case 'tracking':
                 appRoot.innerHTML = renderTracking();
@@ -1553,8 +1611,9 @@ function renderAdmin() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
                 <h1 class="section-title" style="margin-bottom: 0;">Creator Dashboard</h1>
                 <div style="display: flex; gap: 1rem;">
-                     <button id="admin-logout-btn" class="btn btn-secondary" style="padding: 0.5rem 1.5rem;"><i class='bx bx-log-out'></i> Lock</button>
-                </div>
+                      <button id="admin-clear-db-btn" class="btn btn-secondary" style="padding: 0.5rem 1.5rem; background: #ef4444; border-color: #ef4444; color: white;"><i class='bx bx-trash'></i> Clear DB</button>
+                      <button id="admin-logout-btn" class="btn btn-secondary" style="padding: 0.5rem 1.5rem;"><i class='bx bx-log-out'></i> Lock</button>
+                 </div>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
@@ -1621,22 +1680,50 @@ function renderAdmin() {
 
                  <!-- Inventory Preview -->
                 <div style="grid-column: 1 / -1; margin-top: 2rem;">
-                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem;">Current Inventory (${products.length})</h2>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-                        ${products.map(p => `
-                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light); position: relative;">
-                                <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
-                                <div style="flex: 1; overflow: hidden;">
-                                    <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
-                                    <div style="color: var(--primary); font-size: 0.85rem;">₹${p.price.toLocaleString('en-IN')}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.5rem;">Current Inventory (${products.length})</h2>
+                        <h2 style="font-size: 1.5rem;">Registered Users (${state.allUsers.length})</h2>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+                        <!-- Products List -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+                            ${products.map(p => `
+                                <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light); position: relative;">
+                                    <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
+                                    <div style="flex: 1; overflow: hidden;">
+                                        <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                                        <div style="color: var(--primary); font-size: 0.85rem;">₹${p.price.toLocaleString('en-IN')}</div>
+                                    </div>
+                                    <button class="delete-product-btn" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.5rem; font-size: 1.2rem;" title="Delete Product">
+                                        <i class='bx bx-trash'></i>
+                                    </button>
                                 </div>
-                                <button class="delete-product-btn" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.5rem; font-size: 1.2rem;" title="Delete Product">
-                                    <i class='bx bx-trash'></i>
-                                </button>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
+
+                        <!-- Users List -->
+                        <div style="background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px; padding: 2.5rem; max-height: 600px; overflow-y: auto;">
+                            ${state.allUsers.length === 0 ? `
+                                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    <p>No users registered yet.</p>
+                                </div>
+                            ` : state.allUsers.map(u => `
+                                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border-light);">
+                                    <div style="width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem;">
+                                        ${u.full_name ? u.full_name[0].toUpperCase() : '?'}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: white;">${u.full_name || 'Anonymous User'}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Member since: ${new Date(u.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
             </div>
         </div>
     `;
@@ -1663,6 +1750,11 @@ function bindAdminEvents() {
         return;
     }
 
+    const clearDbBtn = document.getElementById('admin-clear-db-btn');
+    if (clearDbBtn) {
+        clearDbBtn.addEventListener('click', clearSupabaseData);
+    }
+
     const logoutBtn = document.getElementById('admin-logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
@@ -1680,7 +1772,7 @@ function bindAdminEvents() {
 
             const name = document.getElementById('new-item-name').value;
             const price = parseInt(document.getElementById('new-item-price').value);
-            const image = document.getElementById('new-item-image').value.trim();
+            let image = document.getElementById('new-item-image').value.trim();
             const category = document.getElementById('new-item-category').value;
             const desc = document.getElementById('new-item-desc').value;
 
@@ -1702,13 +1794,16 @@ function bindAdminEvents() {
                 category
             };
 
-            await saveProducts(newItem);
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
-            showToast('Item Published to Store!');
-            renderView('admin'); // Refresh dashboard
+            try {
+                await saveProducts(newItem);
+                showToast('Item Published to Store!');
+                renderView('admin'); // Refresh dashboard
+            } catch (err) {
+                // Error toast already handled in saveProducts
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
     }
 
@@ -2392,6 +2487,7 @@ function bindAuthEvents() {
                 showToast("Account created! Check your email to confirm.");
                 alert("Please check your email inbox to confirm your account before logging in.");
             }
+            document.body.classList.remove('modal-open');
             renderView('home');
         } catch (err) {
             console.error("Auth Error:", err);
