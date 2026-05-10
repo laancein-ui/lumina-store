@@ -382,38 +382,99 @@ const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_U
 
 let products = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses, ...kidProducts];
 
+const getBackendUrl = () => {
+    return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:3000'
+        : 'https://lumina-store-i5tc.onrender.com';
+};
+
 async function fetchProducts() {
+    let liveProducts = [];
     try {
-        if (!supabaseClient) return;
-        const { data, error } = await supabaseClient.from('products').select('*');
-        if (error) throw error;
-        if (data && data.length > 0) {
-            const liveProducts = data.map(p => ({ ...p, price: Number(p.price) }));
-            // Merge live products with static ones, avoiding duplicates by ID
-            const staticProducts = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses, ...kidProducts];
-            const productMap = new Map();
-            staticProducts.forEach(p => productMap.set(p.id, p));
-            liveProducts.forEach(p => productMap.set(p.id, p));
-            products = Array.from(productMap.values());
+        if (supabaseClient) {
+            const { data, error } = await supabaseClient.from('products').select('*');
+            if (!error && data && data.length > 0) {
+                liveProducts = data.map(p => ({ ...p, price: Number(p.price) }));
+            }
         }
     } catch (err) {
         console.error('Error fetching products from Supabase:', err);
     }
+    
+    // Fetch from backend API
+    let backendProducts = [];
+    try {
+        const response = await fetch(`${getBackendUrl()}/api/products`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.products && Array.isArray(data.products)) {
+                backendProducts = data.products.map(p => ({ ...p, price: Number(p.price) }));
+            }
+        }
+    } catch (err) {
+        console.error('Error fetching products from backend:', err);
+    }
+    
+    // Load local fallback products
+    let localProducts = [];
+    try {
+        localProducts = JSON.parse(localStorage.getItem('local_products') || '[]');
+    } catch (e) {}
+
+    // Merge live products with static ones, avoiding duplicates by ID
+    const staticProducts = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses, ...kidProducts];
+    const productMap = new Map();
+    staticProducts.forEach(p => productMap.set(p.id, p));
+    liveProducts.forEach(p => productMap.set(p.id, p));
+    backendProducts.forEach(p => productMap.set(p.id, p));
+    localProducts.forEach(p => productMap.set(p.id, p));
+    products = Array.from(productMap.values());
 }
 
 async function saveProducts(newItem) {
     try {
-        if (!supabaseClient) throw new Error("Supabase client not initialized");
-        const { error } = await supabaseClient.from('products').insert([
-            { name: newItem.name, price: Number(newItem.price), image: newItem.image, desc: newItem.desc, category: newItem.category }
-        ]);
-        if (error) throw error;
+        let supabaseSuccess = false;
+        if (supabaseClient) {
+            const { error } = await supabaseClient.from('products').insert([
+                { name: newItem.name, price: Number(newItem.price), image: newItem.image, desc: newItem.desc, category: newItem.category }
+            ]);
+            if (!error) {
+                supabaseSuccess = true;
+            } else {
+                console.warn("Supabase product insert skipped/failed:", error.message);
+            }
+        }
+
+        // Try saving to backend API
+        let backendSuccess = false;
+        try {
+            const newId = 'backend_' + Date.now();
+            const productToSave = { ...newItem, id: newId };
+            const response = await fetch(`${getBackendUrl()}/api/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productToSave)
+            });
+            if (response.ok) {
+                backendSuccess = true;
+            }
+        } catch(e) {
+            console.warn("Backend product insert failed:", e);
+        }
+
+        if (!supabaseSuccess && !backendSuccess) {
+            // Save locally if both fail
+            const localProducts = JSON.parse(localStorage.getItem('local_products') || '[]');
+            const newId = 'local_' + Date.now(); // Generate a unique ID for local products
+            localProducts.push({ ...newItem, id: newId });
+            localStorage.setItem('local_products', JSON.stringify(localProducts));
+        }
 
         // Refresh local list
         await fetchProducts();
     } catch (err) {
-        console.error('Error saving product to Supabase:', err);
-        showToast('Error: ' + (err.message || 'Check database connection'));
+        console.error('Error saving product:', err);
+        showToast('Error submitting product');
         throw err;
     }
 }
@@ -422,22 +483,25 @@ async function clearSupabaseData() {
     if (!confirm("Are you absolutely sure? This will delete ALL products, orders, and reviews from the database!")) return;
     
     try {
-        if (!supabaseClient) throw new Error("Supabase client not initialized");
-        
         showToast("Clearing database...");
         
-        // Delete from all tables
-        await Promise.all([
-            supabaseClient.from('products').delete().neq('id', 0),
-            supabaseClient.from('orders').delete().neq('id', 0),
-            supabaseClient.from('reviews').delete().neq('id', 0)
-        ]);
+        if (supabaseClient) {
+            // Delete from all tables
+            await Promise.all([
+                supabaseClient.from('products').delete().neq('id', 0),
+                supabaseClient.from('orders').delete().neq('id', 0),
+                supabaseClient.from('reviews').delete().neq('id', 0)
+            ]);
+        }
+        
+        localStorage.removeItem('local_products');
+        localStorage.removeItem('local_reviews');
         
         showToast("Database Cleared Successfully");
         location.reload(); // Refresh to show empty state
     } catch (err) {
-        console.error('Error clearing Supabase data:', err);
-        showToast('Error clearing data. Check RLS policies.');
+        console.error('Error clearing data:', err);
+        showToast('Error clearing data.');
     }
 }
 
@@ -1817,8 +1881,20 @@ function bindAdminEvents() {
                 btn.disabled = true;
 
                 try {
-                    const { error } = await supabaseClient.from('products').delete().eq('id', id);
-                    if (error) throw error;
+                    let deletedLocally = false;
+                    if (String(id).startsWith('local_')) {
+                        const localProducts = JSON.parse(localStorage.getItem('local_products') || '[]');
+                        const filtered = localProducts.filter(p => String(p.id) !== String(id));
+                        localStorage.setItem('local_products', JSON.stringify(filtered));
+                        deletedLocally = true;
+                    } else if (String(id).startsWith('backend_')) {
+                        await fetch(`${getBackendUrl()}/api/products?id=${id}`, {
+                            method: 'DELETE'
+                        });
+                    } else if (supabaseClient) {
+                        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                        if (error) throw error;
+                    }
                     
                     showToast('Product Deleted Successfully');
                     await fetchProducts(); // Refresh local list

@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/mobile.css">
     <!-- Boxicons for icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <!-- PWA Support -->
@@ -25,6 +24,7 @@
 </head>
 
 <body>
+    <!-- Splash Screen Removed for Performance -->
 
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -52,15 +52,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- Mobile Search Bar (phone only) -->
-    <div class="mobile-search-bar" id="mobile-search-bar">
-        <div class="search-inner">
-            <i class='bx bx-search'></i>
-            <input type="text" id="mobile-search-input" placeholder="Search products, brands...">
-        </div>
-        <i class='bx bx-microphone' style="color:rgba(255,255,255,0.4);font-size:1.1rem;flex-shrink:0;"></i>
-    </div>
 
     <!-- Main SPA Container -->
     <main id="app-root" class="app-root">
@@ -106,33 +97,6 @@
         </div>
     </footer>
 
-    <!-- ═══ MOBILE BOTTOM NAVIGATION BAR (WhatsApp-style) ═══ -->
-    <nav class="bottom-nav" id="bottom-nav">
-        <button class="bottom-nav-item active" id="bnav-home" data-link="home">
-            <i class='bx bx-home-alt-2'></i>
-            <span>Home</span>
-        </button>
-        <button class="bottom-nav-item" id="bnav-search" data-link="electronics">
-            <i class='bx bx-category'></i>
-            <span>Shop</span>
-        </button>
-        <button class="bottom-nav-item" id="bnav-cart" data-link="cart">
-            <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                <i class='bx bx-shopping-bag' style="font-size:1.45rem;"></i>
-                <span id="bnav-cart-count" class="bnav-badge">0</span>
-            </div>
-            <span style="font-size:0.6rem;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;">Cart</span>
-        </button>
-        <button class="bottom-nav-item" id="bnav-track" data-link="tracking">
-            <i class='bx bx-map-alt'></i>
-            <span>Track</span>
-        </button>
-        <button class="bottom-nav-item" id="bnav-profile" data-link="profile">
-            <i class='bx bx-user-circle'></i>
-            <span>Account</span>
-        </button>
-    </nav>
-
     <!-- Global UI Overlays -->
     
     <!-- AI Chat Widget -->
@@ -173,105 +137,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Application Logic -->
     <script src="js/app.js"></script>
-
-    <!-- ═══ MOBILE PHONE LAYOUT — JavaScript ═══ -->
-    <script>
-    (function() {
-        // ── Live Clock ──────────────────────────────────────────
-        function updateClock() {
-            const el = document.getElementById('sb-clock');
-            if (!el) return;
-            const now = new Date();
-            let h = now.getHours(), m = now.getMinutes();
-            const ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12 || 12;
-            el.textContent = h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
-        }
-        updateClock();
-        setInterval(updateClock, 10000);
-
-        // ── Bottom Nav Routing ──────────────────────────────────
-        function setBottomNavActive(view) {
-            const map = { home:'bnav-home', electronics:'bnav-search', cart:'bnav-cart', tracking:'bnav-track', profile:'bnav-profile', realestate:'bnav-search', dress:'bnav-search', cars:'bnav-search', kids:'bnav-search' };
-            document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-            const id = map[view] || 'bnav-home';
-            const btn = document.getElementById(id);
-            if (btn) btn.classList.add('active');
-        }
-
-        document.querySelectorAll('.bottom-nav-item[data-link]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const route = btn.getAttribute('data-link');
-                if (route === 'cart') {
-                    // Trigger the existing cart trigger
-                    const cartTrigger = document.getElementById('cart-trigger');
-                    if (cartTrigger) cartTrigger.click();
-                } else {
-                    if (typeof renderView === 'function') renderView(route);
-                }
-                setBottomNavActive(route);
-            });
-        });
-
-        // ── Sync bottom nav when top nav or logo is clicked ─────
-        document.querySelectorAll('[data-link]').forEach(el => {
-            if (!el.closest('#bottom-nav')) {
-                el.addEventListener('click', () => {
-                    const v = el.getAttribute('data-link');
-                    if (v) setTimeout(() => setBottomNavActive(v), 50);
-                });
-            }
-        });
-
-        // ── Cart Badge Sync ─────────────────────────────────────
-        function syncBnavCart() {
-            const badge = document.getElementById('bnav-cart-count');
-            const count = document.getElementById('cart-count');
-            if (!badge || !count) return;
-            const n = parseInt(count.textContent) || 0;
-            badge.textContent = n;
-            badge.classList.toggle('show', n > 0);
-        }
-        setInterval(syncBnavCart, 800);
-        syncBnavCart();
-
-        // ── Mobile Search ───────────────────────────────────────
-        const mobileInput = document.getElementById('mobile-search-input');
-        if (mobileInput) {
-            mobileInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && this.value.trim()) {
-                    // If the app has a search/filter function, use it;
-                    // otherwise navigate to electronics with search term
-                    if (typeof renderView === 'function') {
-                        renderView('electronics');
-                        setTimeout(() => {
-                            // Try to find a search input in the rendered view and fill it
-                            const sInput = document.querySelector('.products-search, #search-input, input[type="search"]');
-                            if (sInput) { sInput.value = mobileInput.value; sInput.dispatchEvent(new Event('input')); }
-                        }, 300);
-                    }
-                }
-            });
-        }
-
-        // ── Profile icon on bottom nav reflects login state ─────
-        function syncBnavProfile() {
-            const btn = document.getElementById('bnav-profile');
-            if (!btn) return;
-            const avatar = document.querySelector('.nav-right [style*="border-radius: 50%"]');
-            const icon = btn.querySelector('i');
-            if (avatar && icon) {
-                icon.className = 'bx bxs-user-circle';
-                icon.style.color = '#818cf8';
-            } else if (icon) {
-                icon.className = 'bx bx-user-circle';
-                icon.style.color = '';
-            }
-        }
-        setInterval(syncBnavProfile, 1500);
-    })();
-    </script>
-
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {

@@ -10,6 +10,7 @@ load_dotenv()
 
 PORT = 3000
 ORDERS_FILE = 'orders.json'
+PRODUCTS_FILE = 'products.json'
 
 # Use environment variables or local placeholders
 CASHFREE_APP_ID = os.getenv('CASHFREE_APP_ID', 'YOUR_APP_ID_HERE')
@@ -28,6 +29,63 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With, Content-type, x-api-version, cashfree-api-version, x-client-id, x-client-secret")
         self.end_headers()
+
+    def do_GET(self):
+        if self.path == '/api/products':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            if not os.path.exists(PRODUCTS_FILE):
+                self.wfile.write(json.dumps({'products': []}).encode('utf-8'))
+                return
+                
+            with open(PRODUCTS_FILE, 'r') as f:
+                try:
+                    products = json.load(f)
+                except json.JSONDecodeError:
+                    products = []
+                    
+            self.wfile.write(json.dumps({'products': products}).encode('utf-8'))
+        else:
+            super().do_GET()
+
+    def do_DELETE(self):
+        if self.path.startswith('/api/products'):
+            try:
+                # Basic query parsing for ?id=xyz
+                query = self.path.split('?')[1] if '?' in self.path else ''
+                product_id = None
+                for param in query.split('&'):
+                    if param.startswith('id='):
+                        product_id = param.split('=')[1]
+                
+                if product_id and os.path.exists(PRODUCTS_FILE):
+                    with open(PRODUCTS_FILE, 'r') as f:
+                        try:
+                            products = json.load(f)
+                        except json.JSONDecodeError:
+                            products = []
+                            
+                    filtered_products = [p for p in products if str(p.get('id', '')) != str(product_id)]
+                    
+                    with open(PRODUCTS_FILE, 'w') as f:
+                        json.dump(filtered_products, f, indent=4)
+                        
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': True, 'message': 'Product deleted'}).encode('utf-8'))
+            except Exception as e:
+                print("Failed to delete product:", e)
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': False, 'message': 'Server error'}).encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
 
     def do_POST(self):
         if self.path == '/api/orders':
@@ -60,6 +118,39 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({'success': True, 'message': 'Order saved securely'}).encode('utf-8'))
             except Exception as e:
                 print("Failed to save order:", e)
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': False, 'message': 'Server error'}).encode('utf-8'))
+
+        elif self.path == '/api/products':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                new_product = json.loads(post_data.decode('utf-8'))
+                
+                if not os.path.exists(PRODUCTS_FILE):
+                    with open(PRODUCTS_FILE, 'w') as f:
+                        json.dump([], f)
+                        
+                with open(PRODUCTS_FILE, 'r') as f:
+                    try:
+                        products = json.load(f)
+                    except json.JSONDecodeError:
+                        products = []
+                    
+                products.append(new_product)
+                
+                with open(PRODUCTS_FILE, 'w') as f:
+                    json.dump(products, f, indent=4)
+                    
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': True, 'message': 'Product saved securely'}).encode('utf-8'))
+            except Exception as e:
+                print("Failed to save product:", e)
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -179,6 +270,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 if not os.path.exists(ORDERS_FILE):
     with open(ORDERS_FILE, 'w') as f:
         json.dump({}, f, indent=4)
+        
+if not os.path.exists(PRODUCTS_FILE):
+    with open(PRODUCTS_FILE, 'w') as f:
+        json.dump([], f, indent=4)
 
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
     print(f"Laance Store API Server running on http://localhost:{PORT}")
