@@ -6,24 +6,10 @@
 const defaultProducts = [
     {
         id: 1,
-        name: "Laance Pro X ANC",
-        price: 29999,
-        image: "assets/product_headphones_1772226325362.png",
-        desc: "Experience pure audio bliss with industry-leading noise cancellation. Perfect for audiophiles, featuring 40hr battery life, spatial audio, and memory foam earcups."
-    },
-    {
-        id: 2,
-        name: "Zenith Health + Titanium",
-        price: 49999,
-        image: "assets/product_smartwatch_1772226340060.png",
-        desc: "A sleek, aerospace-grade titanium smartwatch. Features an ultra-bright OLED display, ECG tracking, 100+ sports modes, and a comfortable silicone strap."
-    },
-    {
-        id: 3,
-        name: "Aero Glide Velocity",
-        price: 15999,
-        image: "assets/product_sneakers_1772226357442.png",
-        desc: "Engineered for speed and comfort. These aesthetic white and neon-blue accented minimalist sneakers offer responsive cushioning and a breathable mesh upper."
+        name: "Dummy Product",
+        price: 999,
+        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600",
+        desc: "This is a dummy product description. It acts as a placeholder for testing the e-commerce store functionality."
     }
 ];
 
@@ -33,33 +19,132 @@ const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let products = defaultProducts;
+try {
+    const deletedProductIds = JSON.parse(localStorage.getItem('laance_deleted_product_ids') || '[]');
+    products = defaultProducts.filter(p => !deletedProductIds.includes(p.id) && !deletedProductIds.includes(String(p.id)) && !deletedProductIds.includes(Number(p.id)));
+} catch (e) {}
+
+const getProductImages = (product) => {
+    if (!product || !product.image) return [];
+    const imgStr = product.image.trim();
+    if (imgStr.startsWith('[') && imgStr.endsWith(']')) {
+        try {
+            return JSON.parse(imgStr);
+        } catch (e) {}
+    }
+    if (imgStr.includes(',')) {
+        return imgStr.split(',').map(s => s.trim());
+    }
+    return [imgStr];
+};
+
+const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.75) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(dataUrl);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
 
 async function fetchProducts() {
+    let liveProducts = [];
     try {
-        if (!supabaseClient) return;
-        const { data, error } = await supabaseClient.from('products').select('*');
-        if (error) throw error;
-        if (data && data.length > 0) {
-            products = data.map(p => ({ ...p, price: Number(p.price) }));
+        if (supabaseClient) {
+            const { data, error } = await supabaseClient.from('products').select('*');
+            if (!error && data && data.length > 0) {
+                liveProducts = data.map(p => ({ ...p, price: Number(p.price) }));
+            }
         }
     } catch (err) {
         console.error('Error fetching products from Supabase:', err);
     }
+
+    // Load local fallback products
+    let localProducts = [];
+    try {
+        localProducts = JSON.parse(localStorage.getItem('local_products') || '[]');
+    } catch (e) {}
+
+    // Merge default products with database/local products, avoiding duplicate IDs
+    const productMap = new Map();
+    defaultProducts.forEach(p => productMap.set(p.id, p));
+    liveProducts.forEach(p => productMap.set(p.id, p));
+    localProducts.forEach(p => productMap.set(p.id, p));
+
+    // Filter out deleted product IDs
+    let deletedProductIds = [];
+    try {
+        deletedProductIds = JSON.parse(localStorage.getItem('laance_deleted_product_ids') || '[]');
+    } catch (e) {}
+
+    deletedProductIds.forEach(id => {
+        productMap.delete(id);
+        productMap.delete(String(id));
+        productMap.delete(Number(id));
+    });
+
+    products = Array.from(productMap.values());
 }
 
 async function saveProducts(newItem) {
     try {
-        if (!supabaseClient) throw new Error("Supabase client not initialized");
-        const { error } = await supabaseClient.from('products').insert([
-            { name: newItem.name, price: Number(newItem.price), image: newItem.image, desc: newItem.desc }
-        ]);
-        if (error) throw error;
+        let supabaseSuccess = false;
+        if (supabaseClient) {
+            const { error } = await supabaseClient.from('products').insert([
+                { name: newItem.name, price: Number(newItem.price), image: newItem.image, desc: newItem.desc }
+            ]);
+            if (!error) {
+                supabaseSuccess = true;
+            } else {
+                console.warn("Supabase product insert skipped/failed:", error.message);
+            }
+        }
+
+        if (!supabaseSuccess) {
+            // Save locally if Supabase fails
+            const localProducts = JSON.parse(localStorage.getItem('local_products') || '[]');
+            const newId = 'local_' + Date.now();
+            localProducts.push({ ...newItem, id: newId });
+            localStorage.setItem('local_products', JSON.stringify(localProducts));
+        }
 
         // Refresh local list
         await fetchProducts();
     } catch (err) {
-        console.error('Error saving product to Supabase:', err);
-        showToast('Error saving to server');
+        console.error('Error saving product:', err);
+        showToast('Error submitting product');
+        throw err;
     }
 }
 
@@ -385,7 +470,7 @@ function bindHomeEvents() {
 }
 
 function renderProductDetail(id) {
-    const product = products.find(p => p.id === id);
+    const product = products.find(p => p.id === id || String(p.id) === String(id));
     if (!product) return renderHome();
 
     // Trigger async review fetch in background without blocking
@@ -399,12 +484,25 @@ function renderProductDetail(id) {
 
     state.currentProductId = id;
     const productReviews = state.reviews[id] || [];
+    const images = getProductImages(product);
+    const mainImage = images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
 
     return `
         <div class="section">
             <div class="product-detail-view">
-                <div class="detail-image">
-                    <img src="${product.image}" alt="${product.name}">
+                <div class="detail-image" style="display: flex; flex-direction: column;">
+                    <div style="width: 100%; aspect-ratio: 1.2; overflow: hidden; border-radius: 20px; border: 1px solid var(--border-light); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); background: rgba(255,255,255,0.01);">
+                        <img id="product-detail-main-img" src="${mainImage}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    ${images.length > 1 ? `
+                        <div class="product-thumbnails">
+                            ${images.map((img, idx) => `
+                                <div class="thumb-img-wrap ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+                                    <img src="${img}" alt="${product.name} gallery image ${idx + 1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="detail-info">
                     <div style="color: var(--primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; text-transform: uppercase;">Premium Series</div>
@@ -492,7 +590,7 @@ function bindProductEvents() {
     const addBtn = document.querySelector('.add-to-cart-btn-main');
     if (addBtn) {
         addBtn.addEventListener('click', (e) => {
-            const id = parseInt(e.currentTarget.getAttribute('data-id'));
+            const id = e.currentTarget.getAttribute('data-id');
             addToCart(id);
         });
     }
@@ -500,8 +598,26 @@ function bindProductEvents() {
     const buyBtn = document.querySelector('.order-now-btn-main');
     if (buyBtn) {
         buyBtn.addEventListener('click', (e) => {
-            const id = parseInt(e.currentTarget.getAttribute('data-id'));
+            const id = e.currentTarget.getAttribute('data-id');
             startOrderNowFlow(id);
+        });
+    }
+
+    // Product Gallery Switching
+    const thumbnails = document.querySelectorAll('.thumb-img-wrap');
+    const mainImg = document.getElementById('product-detail-main-img');
+    if (mainImg) {
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                thumbnails.forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+                const src = thumb.querySelector('img').src;
+                mainImg.style.opacity = '0.3';
+                setTimeout(() => {
+                    mainImg.src = src;
+                    mainImg.style.opacity = '1';
+                }, 150);
+            });
         });
     }
 
@@ -621,8 +737,7 @@ function bindTrackingEvents() {
 
 // =========================================================================
 // Creator Access Dashboard (Admin)
-// =========================================================================
-
+// =======================================================================
 function renderAdmin() {
     if (localStorage.getItem('laance_device_trusted') !== 'true') {
         return `
@@ -678,8 +793,28 @@ function renderAdmin() {
                             <input type="number" id="new-item-price" class="input-field" style="width: 100%;" min="1" placeholder="9999" required>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Image URL</label>
-                            <input type="text" id="new-item-image" class="input-field" style="width: 100%;" placeholder="https:// images.unsplash.com/...">
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Product Images</label>
+                            <div class="admin-form-tabs">
+                                <div class="admin-form-tab active" id="tab-btn-upload">Drag & Drop</div>
+                                <div class="admin-form-tab" id="tab-btn-url">Image URLs</div>
+                            </div>
+                            
+                            <!-- Upload Tab Content -->
+                            <div class="admin-tab-content active" id="tab-content-upload">
+                                <div class="drag-drop-zone" id="image-drag-drop-zone">
+                                    <i class='bx bx-cloud-upload'></i>
+                                    <p style="font-weight: 500; margin: 0;">Drag & Drop Images here</p>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">or click to browse from device</p>
+                                    <input type="file" id="new-item-image-files" multiple accept="image/*" style="display:none;">
+                                </div>
+                                <div class="preview-thumbnails" id="image-upload-previews"></div>
+                            </div>
+                            
+                            <!-- URL Tab Content -->
+                            <div class="admin-tab-content" id="tab-content-url">
+                                <input type="text" id="new-item-image" class="input-field" style="width: 100%;" placeholder="Paste image URLs (comma-separated)">
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;">For multiple images, separate URLs with a comma.</p>
+                            </div>
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Description</label>
@@ -718,12 +853,15 @@ function renderAdmin() {
                     <h2 style="margin-bottom: 2rem; font-size: 1.5rem;">Current Inventory (${products.length})</h2>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
                         ${products.map(p => `
-                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light);">
-                                <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
+                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light); position: relative;">
+                                <img src="${getProductImages(p)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
                                 <div style="flex: 1; overflow: hidden;">
                                     <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
                                     <div style="color: var(--primary); font-size: 0.85rem;">₹${p.price.toLocaleString('en-IN')}</div>
                                 </div>
+                                <button class="delete-product-btn" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0.5rem; font-size: 1.2rem;" title="Delete Product">
+                                    <i class='bx bx-trash'></i>
+                                </button>
                             </div>
                         `).join('')}
                     </div>
@@ -753,6 +891,99 @@ function bindAdminEvents() {
         return;
     }
 
+    // Form tab toggling
+    const tabUpload = document.getElementById('tab-btn-upload');
+    const tabUrl = document.getElementById('tab-btn-url');
+    const contentUpload = document.getElementById('tab-content-upload');
+    const contentUrl = document.getElementById('tab-content-url');
+    let activeTab = 'upload'; // default
+
+    if (tabUpload && tabUrl) {
+        tabUpload.addEventListener('click', () => {
+            tabUpload.classList.add('active');
+            tabUrl.classList.remove('active');
+            contentUpload.classList.add('active');
+            contentUrl.classList.remove('active');
+            activeTab = 'upload';
+        });
+
+        tabUrl.addEventListener('click', () => {
+            tabUrl.classList.add('active');
+            tabUpload.classList.remove('active');
+            contentUrl.classList.add('active');
+            contentUpload.classList.remove('active');
+            activeTab = 'url';
+        });
+    }
+
+    // Drag & Drop File Upload handling
+    const dropZone = document.getElementById('image-drag-drop-zone');
+    const fileInput = document.getElementById('new-item-image-files');
+    const previewsContainer = document.getElementById('image-upload-previews');
+    let uploadedImagesBase64 = [];
+
+    const updatePreviews = () => {
+        if (!previewsContainer) return;
+        previewsContainer.innerHTML = uploadedImagesBase64.map((img, idx) => `
+            <div class="preview-thumb-wrap">
+                <img src="${img}" alt="Preview thumbnail">
+                <button type="button" class="preview-thumb-remove" data-index="${idx}">×</button>
+            </div>
+        `).join('');
+
+        // Bind remove button events
+        previewsContainer.querySelectorAll('.preview-thumb-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.getAttribute('data-index'));
+                uploadedImagesBase64.splice(idx, 1);
+                updatePreviews();
+            });
+        });
+    };
+
+    const processFiles = async (files) => {
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            try {
+                const compressed = await compressImage(file, 800, 800, 0.75);
+                uploadedImagesBase64.push(compressed);
+            } catch (e) {
+                console.error("Failed to compress file:", e);
+            }
+        }
+        updatePreviews();
+    };
+
+    if (dropZone) {
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        ['dragleave', 'dragend'].forEach(evt => {
+            dropZone.addEventListener(evt, () => dropZone.classList.remove('dragover'));
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                processFiles(e.dataTransfer.files);
+            }
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                processFiles(fileInput.files);
+            }
+        });
+    }
+
     const logoutBtn = document.getElementById('admin-logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
@@ -770,12 +1001,28 @@ function bindAdminEvents() {
 
             const name = document.getElementById('new-item-name').value;
             const price = parseInt(document.getElementById('new-item-price').value);
-            let image = document.getElementById('new-item-image').value.trim();
             const desc = document.getElementById('new-item-desc').value;
-
-            if (!image) {
-                // Fallback placeholder image
-                image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop";
+            
+            let finalImageStr = '';
+            
+            if (activeTab === 'upload') {
+                if (uploadedImagesBase64.length === 0) {
+                    showToast('Please upload at least one image or paste an image URL');
+                    return;
+                }
+                finalImageStr = JSON.stringify(uploadedImagesBase64);
+            } else {
+                const urlVal = document.getElementById('new-item-image').value.trim();
+                if (!urlVal) {
+                    showToast('Please enter an image URL');
+                    return;
+                }
+                if (urlVal.includes(',')) {
+                    const urls = urlVal.split(',').map(u => u.trim()).filter(Boolean);
+                    finalImageStr = JSON.stringify(urls);
+                } else {
+                    finalImageStr = urlVal;
+                }
             }
 
             const btn = addForm.querySelector('button[type="submit"]');
@@ -786,19 +1033,65 @@ function bindAdminEvents() {
             const newItem = {
                 name,
                 price,
-                image,
+                image: finalImageStr || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
                 desc
             };
 
-            await saveProducts(newItem);
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
-            showToast('Item Published to Store!');
-            renderView('admin'); // Refresh dashboard
+            try {
+                await saveProducts(newItem);
+                showToast('Item Published to Store!');
+                renderView('admin'); // Refresh dashboard
+            } catch (err) {
+                // Error toast already handled in saveProducts
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
     }
+
+    // Handle Delete Buttons
+    document.querySelectorAll('.delete-product-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this product?')) {
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
+                btn.disabled = true;
+
+                try {
+                    let deletedLocally = false;
+                    if (String(id).startsWith('local_')) {
+                        const localProducts = JSON.parse(localStorage.getItem('local_products') || '[]');
+                        const filtered = localProducts.filter(p => String(p.id) !== String(id));
+                        localStorage.setItem('local_products', JSON.stringify(filtered));
+                        deletedLocally = true;
+                    } else if (supabaseClient) {
+                        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+                        if (error) throw error;
+                    }
+                    
+                    // Track deleted product IDs locally to ensure static/cached entries disappear
+                    const deletedProductIds = JSON.parse(localStorage.getItem('laance_deleted_product_ids') || '[]');
+                    if (!deletedProductIds.includes(id)) {
+                        deletedProductIds.push(id);
+                        deletedProductIds.push(String(id));
+                        if (!isNaN(id)) deletedProductIds.push(Number(id));
+                        localStorage.setItem('laance_deleted_product_ids', JSON.stringify(deletedProductIds));
+                    }
+                    
+                    showToast('Product Deleted Successfully');
+                    await fetchProducts(); // Refresh local list
+                    renderView('admin'); // Re-render dashboard
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    showToast('Error deleting product');
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                }
+            }
+        });
+    });
 }
 
 // =========================================================================

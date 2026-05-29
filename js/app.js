@@ -6,374 +6,19 @@
 const defaultProducts = [
     {
         id: 1,
-        name: "Laance Pro X ANC",
-        price: 29999,
-        image: "assets/product_headphones_1772226325362.png",
-        desc: "Experience pure audio bliss with industry-leading noise cancellation. Perfect for audiophiles, featuring 40hr battery life, spatial audio, and memory foam earcups.",
+        name: "Dummy Product",
+        price: 999,
+        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600",
+        desc: "This is a dummy product description. It acts as a placeholder for testing the e-commerce store functionality.",
         category: "electronics"
-    },
-    {
-        id: 2,
-        name: "Zenith Health + Titanium",
-        price: 49999,
-        image: "assets/product_smartwatch_1772226340060.png",
-        desc: "A sleek, aerospace-grade titanium smartwatch. Features an ultra-bright OLED display, ECG tracking, 100+ sports modes, and a comfortable silicone strap.",
-        category: "electronics"
-    },
-    {
-        id: 3,
-        name: "Aero Glide Velocity",
-        price: 15999,
-        image: "assets/product_sneakers_1772226357442.png",
-        desc: "Engineered for speed and comfort. These aesthetic white and neon-blue accented minimalist sneakers offer responsive cushioning and a breathable mesh upper.",
-        category: "electronics"
-    },
-    {
-        id: 4,
-        name: "Laance UltraBook Pro 16",
-        price: 189999,
-        image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=600",
-        desc: "Ultra-thin 16\" powerhouse laptop. M3 chip, 32GB RAM, 2TB SSD, and a stunning Liquid Retina XDR display that brings your work to life.",
-        category: "electronics"
-    },
-    {
-        id: 5,
-        name: "Phantom 4K Drone",
-        price: 89999,
-        image: "https://images.unsplash.com/photo-1508444845599-5c89863b1c44?auto=format&fit=crop&q=80&w=600",
-        desc: "Capture the world from above with cinema-grade 4K video, obstacle avoidance, and 45 minutes of flight time.",
-        category: "electronics"
-    },
-    {
-        id: 6,
-        name: "Eclipse OLED Gaming Monitor",
-        price: 74999,
-        image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&q=80&w=600",
-        desc: "32\" OLED panel with 240Hz refresh rate, 0.03ms response time, and stunning contrast for the most immersive gaming experience.",
-        category: "electronics"
-    },
-    {
-        id: 7,
-        name: "Laance SoundBar Elite",
-        price: 34999,
-        image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&q=80&w=600",
-        desc: "Premium 5.1 Dolby Atmos soundbar delivering cinema-quality audio in your living room. Wireless subwoofer included.",
-        category: "electronics"
-    },
-    {
-        id: 8,
-        name: "SnapX Pro Camera",
-        price: 149999,
-        image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600",
-        desc: "Professional mirrorless camera with 61MP full-frame sensor, 8K video recording, and dual card slots for the serious photographer.",
-        category: "electronics"
-    },
-    {
-        id: 9,
-        name: "Laance Vision Pro Glasses",
-        price: 249999,
-        image: "https://images.unsplash.com/photo-1478416272538-5f7e51dc5400?auto=format&fit=crop&q=80&w=600",
-        desc: "Augmented reality glasses for the ultimate spatial computing experience. Seamlessly blend digital content with your physical world.",
-        category: "electronics"
-    },
-    {
-        id: 10,
-        name: "Zenith Tab 12 Ultra",
-        price: 89999,
-        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=600",
-        desc: "The ultimate creative companion. 12.9\" Liquid Retina display, M2 chip, and all-day battery life for professionals on the go."
     }
 ];
 
-const womenDresses = [
-    {
-        id: 101,
-        name: "Midnight Silk Evening Gown",
-        price: 12999,
-        image: "https://images.unsplash.com/photo-1539008835279-43467f5b2335?auto=format&fit=crop&q=80&w=600",
-        desc: "A stunning floor-length silk gown in deep midnight blue. Features a delicate halter neck and a sweeping train.",
-        category: "women"
-    },
-    {
-        id: 102,
-        name: "Ivory Lace Summer Dress",
-        price: 8499,
-        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=600",
-        desc: "Breezy and elegant ivory dress with intricate lace detailing. Perfect for garden parties and summer weddings.",
-        category: "women"
-    },
-    {
-        id: 103,
-        name: "Noir Velvet Cocktail Dress",
-        price: 10999,
-        image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=600",
-        desc: "A classic cocktail dress made from premium noir velvet. Slim fit with a modern square neckline.",
-        category: "women"
-    },
-    {
-        id: 104,
-        name: "Rose Gold Sari Set",
-        price: 16999,
-        image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=600",
-        desc: "Exquisite handwoven rose gold sari with delicate zari border and matching blouse. Bridal-ready elegance.",
-        category: "women"
-    },
-    {
-        id: 105,
-        name: "Emerald Maxi Wrap Dress",
-        price: 6999,
-        image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=600",
-        desc: "Flowing deep emerald wrap dress in premium jersey fabric. Universally flattering silhouette perfect for any occasion.",
-        category: "women"
-    },
-    {
-        id: 106,
-        name: "Pearl White Anarkali Suit",
-        price: 14499,
-        image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&q=80&w=600",
-        desc: "Graceful floor-length Anarkali suit in pearl white with hand-embroidered detailing and palazzo trousers.",
-        category: "women"
-    },
-    {
-        id: 107,
-        name: "Sapphire Blue Kaftan",
-        price: 9999,
-        image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&q=80&w=600",
-        desc: "Elegant silk kaftan with sapphire blue embroidery. Perfect for resort wear or evening lounging.",
-        category: "women"
-    },
-    {
-        id: 108,
-        name: "Golden Hour Heels",
-        price: 12499,
-        image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=600",
-        desc: "Handcrafted golden stilettos with crystal embellishments. A statement piece for any red-carpet event."
-    }
-];
-
-const menDresses = [
-    {
-        id: 151,
-        name: "Classic Charcoal Suit",
-        price: 24999,
-        image: "https://images.unsplash.com/photo-1594932224491-ca680f49fa2f?auto=format&fit=crop&q=80&w=600",
-        desc: "Sharp and sophisticated charcoal suit for the modern professional. Includes jacket and trousers.",
-        category: "men"
-    },
-    {
-        id: 152,
-        name: "Italian Leather Bomber",
-        price: 18999,
-        image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=600",
-        desc: "Premium handcrafted Italian leather bomber jacket in deep espresso brown.",
-        category: "men"
-    },
-    {
-        id: 153,
-        name: "Oxford White Button-Down",
-        price: 3499,
-        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=600",
-        desc: "The essential white button-down. High-thread-count cotton with a crisp, clean finish.",
-        category: "men"
-    },
-    {
-        id: 154,
-        name: "Royal Bandhgala Sherwani",
-        price: 32999,
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600",
-        desc: "Regal golden-thread embroidered sherwani for weddings and celebrations. Includes matching churidar and dupatta."
-    },
-    {
-        id: 155,
-        name: "Navy Linen Blazer",
-        price: 8999,
-        image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=600",
-        desc: "Summer-weight navy linen blazer. Perfect for smart-casual occasions. Unlined for comfort in warm weather.",
-        category: "men"
-    },
-    {
-        id: 156,
-        name: "Premium Denim Set",
-        price: 5999,
-        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=600",
-        desc: "Raw selvedge denim jacket and jeans set. Stonewashed finish with subtle distressing for a premium look.",
-        category: "men"
-    },
-    {
-        id: 157,
-        name: "Royal Blue Sherwani",
-        price: 45999,
-        image: "https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&q=80&w=600",
-        desc: "Exquisite royal blue velvet sherwani with silver Zardosi work. The pinnacle of groom's couture.",
-        category: "men"
-    },
-    {
-        id: 158,
-        name: "Silver Link Watch",
-        price: 28999,
-        image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=600",
-        desc: "Classic stainless steel chronometer with a silver sunray dial. Timeless elegance for the modern gentleman."
-    }
-];
-
-const carProducts = [
-    {
-        id: 301,
-        name: "Laance Rosso GTO",
-        price: 25000000,
-        image: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&q=80&w=600",
-        desc: "A masterpiece of Italian engineering. 750hp V12 engine, handcrafted leather interior, and legendary performance.",
-        category: "cars"
-    },
-    {
-        id: 302,
-        name: "Milano Electric Spyder",
-        price: 18500000,
-        image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600",
-        desc: "The future of luxury mobility. Silent, powerful, and impeccably styled for the modern connoisseur.",
-        category: "cars"
-    },
-    {
-        id: 303,
-        name: "Venice Luxury Cruiser",
-        price: 32000000,
-        image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600",
-        desc: "Ultimate comfort meets performance. Features active suspension and an AI-driven concierge system.",
-        category: "cars"
-    },
-    {
-        id: 304,
-        name: "Laance Roma Classic",
-        price: 8500000,
-        image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=600",
-        desc: "A vintage icon reborn. Hand-restored classic Italian roadster with a modern fuel-injected engine and premium leather cabin.",
-        category: "cars"
-    },
-    {
-        id: 305,
-        name: "Toscana SUV Prestige",
-        price: 14200000,
-        image: "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&q=80&w=600",
-        desc: "Dominate any terrain in supreme luxury. Panoramic roof, 22\" alloy wheels, 600hp twin-turbo V8 and a 7-seat Nappa leather interior.",
-        category: "cars"
-    },
-    {
-        id: 306,
-        name: "Napoli GT Convertible",
-        price: 21000000,
-        image: "https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&q=80&w=600",
-        desc: "Open-air grand touring at its finest. Retractable hardtop, a 580hp engine, and hand-stitched Italian leather throughout.",
-        category: "cars"
-    },
-    {
-        id: 307,
-        name: "Laance Stealth Coupe",
-        price: 35000000,
-        image: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=600",
-        desc: "The ultimate hypercar. Carbon fiber monocoque, 1200hp hybrid powertrain, and active aerodynamics."
-    }
-];
-
-const realEstateListings = [
-    {
-        id: 201,
-        name: "Skyline Penthouse",
-        price: 85000000,
-        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800",
-        desc: "Luxury living at its peak. This penthouse features 360-degree city views, a private infinity pool, and smart home automation.",
-        category: "realestate"
-    },
-    {
-        id: 202,
-        name: "Coastal Modern Villa",
-        price: 125000000,
-        image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=800",
-        desc: "A masterpiece of modern architecture right on the beach. Features 5 bedrooms, a home cinema, and floor-to-ceiling windows.",
-        category: "realestate"
-    },
-    {
-        id: 203,
-        name: "Zen Forest Retreat",
-        price: 45000000,
-        image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800",
-        desc: "Escape the city in this minimalist forest cabin. Sustainable materials, geothermal heating, and complete privacy.",
-        category: "realestate"
-    },
-    {
-        id: 204,
-        name: "Heritage Palace Bungalow",
-        price: 220000000,
-        image: "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&q=80&w=800",
-        desc: "A grand colonial-era heritage bungalow with manicured gardens, 8 bedrooms, a private pool, and fully modernized interiors.",
-        category: "realestate"
-    },
-    {
-        id: 205,
-        name: "Urban Loft Studio",
-        price: 18500000,
-        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=800",
-        desc: "Chic and modern loft in the heart of the city. Exposed brick, industrial aesthetics, and premium finishes throughout.",
-        category: "realestate"
-    },
-    {
-        id: 206,
-        name: "Hilltop Infinity Estate",
-        price: 175000000,
-        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800",
-        desc: "Perched above the city on a private hilltop. This 6-bedroom estate features an infinity pool, helicopter pad, and private vineyard.",
-        category: "realestate"
-    },
-    {
-        id: 207,
-        name: "Modern Lakehouse",
-        price: 55000000,
-        image: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=800",
-        desc: "A serene waterfront property with private dock, floor-to-ceiling glass walls, and a sustainable green roof."
-    }
-];
-
-const kidProducts = [
-    {
-        id: 401,
-        name: "Premium Kids Stroller",
-        price: 15000,
-        image: "https://images.unsplash.com/photo-1591189859542-a8da14df6874?auto=format&fit=crop&w=800&q=80",
-        desc: "Ultra-lightweight luxury stroller with advanced suspension. Ensures maximum comfort for your child.",
-        category: "kids"
-    },
-    {
-        id: 402,
-        name: "Educational Smart Tablet",
-        price: 8000,
-        image: "https://images.unsplash.com/photo-1544365558-35aa4afcf11f?auto=format&fit=crop&w=800&q=80",
-        desc: "Interactive learning tablet designed specifically for early development. Features a shatterproof screen.",
-        category: "kids"
-    },
-    {
-        id: 403,
-        name: "Organic Cotton Onesie Set",
-        price: 2500,
-        image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=800&q=80",
-        desc: "100% organic cotton hypoallergenic onesies. Ultra-soft fabric perfect for sensitive baby skin.",
-        category: "kids"
-    },
-    {
-        id: 404,
-        name: "Electric Ride-on Car",
-        price: 25000,
-        image: "https://images.unsplash.com/photo-1566024287286-457247b70310?auto=format&fit=crop&w=800&q=80",
-        desc: "Miniature luxury electric car with remote control for parents. A premium toy for the little ones.",
-        category: "kids"
-    },
-    {
-        id: 405,
-        name: "Laance Junior Smart Watch",
-        price: 5999,
-        image: "assets/product_kid_watch.png",
-        desc: "A premium smartwatch for kids with GPS tracking, educational games, and a vibrant colorful display. Built for safety and fun.",
-        category: "kids"
-    }
-];
+const womenDresses = [];
+const menDresses = [];
+const carProducts = [];
+const realEstateListings = [];
+const kidProducts = [];
 
 // Supabase Initialization
 const SUPABASE_URL = 'https://trlqpkavpwweobyibcvd.supabase.co';
@@ -381,11 +26,68 @@ const SUPABASE_KEY = 'sb_publishable_Y-e9ojdQqXcgn1tvG7-sSw_obhwpgYQ';
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let products = [...defaultProducts, ...carProducts, ...realEstateListings, ...menDresses, ...womenDresses, ...kidProducts];
+try {
+    const deletedProductIds = JSON.parse(localStorage.getItem('laance_deleted_product_ids') || '[]');
+    products = products.filter(p => !deletedProductIds.includes(p.id) && !deletedProductIds.includes(String(p.id)) && !deletedProductIds.includes(Number(p.id)));
+} catch (e) {}
 
 const getBackendUrl = () => {
-    return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '' || window.location.protocol === 'file:')
         ? 'http://localhost:3000'
         : 'https://lumina-store-i5tc.onrender.com';
+};
+
+const getProductImages = (product) => {
+    if (!product || !product.image) return [];
+    const imgStr = product.image.trim();
+    if (imgStr.startsWith('[') && imgStr.endsWith(']')) {
+        try {
+            return JSON.parse(imgStr);
+        } catch (e) {}
+    }
+    if (imgStr.includes(',')) {
+        return imgStr.split(',').map(s => s.trim());
+    }
+    return [imgStr];
+};
+
+const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.75) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(dataUrl);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 };
 
 async function fetchProducts() {
@@ -428,6 +130,19 @@ async function fetchProducts() {
     liveProducts.forEach(p => productMap.set(p.id, p));
     backendProducts.forEach(p => productMap.set(p.id, p));
     localProducts.forEach(p => productMap.set(p.id, p));
+    
+    // Filter out deleted product IDs
+    let deletedProductIds = [];
+    try {
+        deletedProductIds = JSON.parse(localStorage.getItem('laance_deleted_product_ids') || '[]');
+    } catch (e) {}
+
+    deletedProductIds.forEach(id => {
+        productMap.delete(id);
+        productMap.delete(String(id));
+        productMap.delete(Number(id));
+    });
+
     products = Array.from(productMap.values());
 }
 
@@ -445,21 +160,23 @@ async function saveProducts(newItem) {
             }
         }
 
-        // Try saving to backend API
+        // Try saving to backend API ONLY if Supabase insert was not successful
         let backendSuccess = false;
-        try {
-            const newId = 'backend_' + Date.now();
-            const productToSave = { ...newItem, id: newId };
-            const response = await fetch(`${getBackendUrl()}/api/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productToSave)
-            });
-            if (response.ok) {
-                backendSuccess = true;
+        if (!supabaseSuccess) {
+            try {
+                const newId = 'backend_' + Date.now();
+                const productToSave = { ...newItem, id: newId };
+                const response = await fetch(`${getBackendUrl()}/api/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productToSave)
+                });
+                if (response.ok) {
+                    backendSuccess = true;
+                }
+            } catch(e) {
+                console.warn("Backend product insert failed:", e);
             }
-        } catch(e) {
-            console.warn("Backend product insert failed:", e);
         }
 
         if (!supabaseSuccess && !backendSuccess) {
@@ -1413,12 +1130,25 @@ function renderProductDetail(id) {
     saveToGoogleSheets(userName, userEmail, 'N/A', 'Product Clicked', 'N/A', `View: ${product.name}`, 'N/A');
 
     const productReviews = state.reviews[id] || [];
+    const images = getProductImages(product);
+    const mainImage = images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
 
     return `
         <div class="section">
             <div class="product-detail-view">
-                <div class="detail-image">
-                    <img src="${product.image}" alt="${product.name}">
+                <div class="detail-image" style="display: flex; flex-direction: column;">
+                    <div style="width: 100%; aspect-ratio: 1.2; overflow: hidden; border-radius: 20px; border: 1px solid var(--border-light); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); background: rgba(255,255,255,0.01);">
+                        <img id="product-detail-main-img" src="${mainImage}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    ${images.length > 1 ? `
+                        <div class="product-thumbnails">
+                            ${images.map((img, idx) => `
+                                <div class="thumb-img-wrap ${idx === 0 ? 'active' : ''}" data-index="${idx}">
+                                    <img src="${img}" alt="${product.name} gallery image ${idx + 1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="detail-info">
                     <div style="color: var(--primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; text-transform: uppercase;">Premium Series</div>
@@ -1518,6 +1248,24 @@ function bindProductEvents() {
             e.stopPropagation();
             const id = e.currentTarget.getAttribute('data-id');
             startOrderNowFlow(id);
+        });
+    }
+
+    // Product Gallery Switching
+    const thumbnails = document.querySelectorAll('.thumb-img-wrap');
+    const mainImg = document.getElementById('product-detail-main-img');
+    if (mainImg) {
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                thumbnails.forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+                const src = thumb.querySelector('img').src;
+                mainImg.style.opacity = '0.3';
+                setTimeout(() => {
+                    mainImg.src = src;
+                    mainImg.style.opacity = '1';
+                }, 150);
+            });
         });
     }
 
@@ -1696,8 +1444,28 @@ function renderAdmin() {
                             <input type="number" id="new-item-price" class="input-field" style="width: 100%;" min="1" placeholder="9999" required>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Image URL</label>
-                            <input type="text" id="new-item-image" class="input-field" style="width: 100%;" placeholder="https:// images.unsplash.com/...">
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Product Images</label>
+                            <div class="admin-form-tabs">
+                                <div class="admin-form-tab active" id="tab-btn-upload">Drag & Drop</div>
+                                <div class="admin-form-tab" id="tab-btn-url">Image URLs</div>
+                            </div>
+                            
+                            <!-- Upload Tab Content -->
+                            <div class="admin-tab-content active" id="tab-content-upload">
+                                <div class="drag-drop-zone" id="image-drag-drop-zone">
+                                    <i class='bx bx-cloud-upload'></i>
+                                    <p style="font-weight: 500; margin: 0;">Drag & Drop Images here</p>
+                                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">or click to browse from device</p>
+                                    <input type="file" id="new-item-image-files" multiple accept="image/*" style="display:none;">
+                                </div>
+                                <div class="preview-thumbnails" id="image-upload-previews"></div>
+                            </div>
+                            
+                            <!-- URL Tab Content -->
+                            <div class="admin-tab-content" id="tab-content-url">
+                                <input type="text" id="new-item-image" class="input-field" style="width: 100%;" placeholder="Paste image URLs (comma-separated)">
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;">For multiple images, separate URLs with a comma.</p>
+                            </div>
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.875rem;">Category Section</label>
@@ -1754,7 +1522,7 @@ function renderAdmin() {
                         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
                             ${products.map(p => `
                                 <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-surface); padding: 1rem; border-radius: 15px; border: 1px solid var(--border-light); position: relative;">
-                                    <img src="${p.image}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
+                                    <img src="${getProductImages(p)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
                                     <div style="flex: 1; overflow: hidden;">
                                         <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
                                         <div style="color: var(--primary); font-size: 0.85rem;">₹${p.price.toLocaleString('en-IN')}</div>
@@ -1814,6 +1582,99 @@ function bindAdminEvents() {
         return;
     }
 
+    // Form tab toggling
+    const tabUpload = document.getElementById('tab-btn-upload');
+    const tabUrl = document.getElementById('tab-btn-url');
+    const contentUpload = document.getElementById('tab-content-upload');
+    const contentUrl = document.getElementById('tab-content-url');
+    let activeTab = 'upload'; // default
+
+    if (tabUpload && tabUrl) {
+        tabUpload.addEventListener('click', () => {
+            tabUpload.classList.add('active');
+            tabUrl.classList.remove('active');
+            contentUpload.classList.add('active');
+            contentUrl.classList.remove('active');
+            activeTab = 'upload';
+        });
+
+        tabUrl.addEventListener('click', () => {
+            tabUrl.classList.add('active');
+            tabUpload.classList.remove('active');
+            contentUrl.classList.add('active');
+            contentUpload.classList.remove('active');
+            activeTab = 'url';
+        });
+    }
+
+    // Drag & Drop File Upload handling
+    const dropZone = document.getElementById('image-drag-drop-zone');
+    const fileInput = document.getElementById('new-item-image-files');
+    const previewsContainer = document.getElementById('image-upload-previews');
+    let uploadedImagesBase64 = [];
+
+    const updatePreviews = () => {
+        if (!previewsContainer) return;
+        previewsContainer.innerHTML = uploadedImagesBase64.map((img, idx) => `
+            <div class="preview-thumb-wrap">
+                <img src="${img}" alt="Preview thumbnail">
+                <button type="button" class="preview-thumb-remove" data-index="${idx}">×</button>
+            </div>
+        `).join('');
+
+        // Bind remove button events
+        previewsContainer.querySelectorAll('.preview-thumb-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.getAttribute('data-index'));
+                uploadedImagesBase64.splice(idx, 1);
+                updatePreviews();
+            });
+        });
+    };
+
+    const processFiles = async (files) => {
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            try {
+                const compressed = await compressImage(file, 800, 800, 0.75);
+                uploadedImagesBase64.push(compressed);
+            } catch (e) {
+                console.error("Failed to compress file:", e);
+            }
+        }
+        updatePreviews();
+    };
+
+    if (dropZone) {
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        ['dragleave', 'dragend'].forEach(evt => {
+            dropZone.addEventListener(evt, () => dropZone.classList.remove('dragover'));
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                processFiles(e.dataTransfer.files);
+            }
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                processFiles(fileInput.files);
+            }
+        });
+    }
+
     const clearDbBtn = document.getElementById('admin-clear-db-btn');
     if (clearDbBtn) {
         clearDbBtn.addEventListener('click', clearSupabaseData);
@@ -1836,13 +1697,30 @@ function bindAdminEvents() {
 
             const name = document.getElementById('new-item-name').value;
             const price = parseInt(document.getElementById('new-item-price').value);
-            let image = document.getElementById('new-item-image').value.trim();
             const category = document.getElementById('new-item-category').value;
             const desc = document.getElementById('new-item-desc').value;
-
-            if (!image) {
-                // Fallback placeholder image
-                image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop";
+            
+            let finalImageStr = '';
+            
+            if (activeTab === 'upload') {
+                if (uploadedImagesBase64.length === 0) {
+                    showToast('Please upload at least one image or paste an image URL');
+                    return;
+                }
+                finalImageStr = JSON.stringify(uploadedImagesBase64);
+            } else {
+                const urlVal = document.getElementById('new-item-image').value.trim();
+                if (!urlVal) {
+                    showToast('Please enter an image URL');
+                    return;
+                }
+                if (urlVal.includes(',')) {
+                    // Store as JSON array of trimmed URLs
+                    const urls = urlVal.split(',').map(u => u.trim()).filter(Boolean);
+                    finalImageStr = JSON.stringify(urls);
+                } else {
+                    finalImageStr = urlVal;
+                }
             }
 
             const btn = addForm.querySelector('button[type="submit"]');
@@ -1853,7 +1731,7 @@ function bindAdminEvents() {
             const newItem = {
                 name,
                 price,
-                image: image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
+                image: finalImageStr || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
                 desc,
                 category
             };
@@ -1894,6 +1772,15 @@ function bindAdminEvents() {
                     } else if (supabaseClient) {
                         const { error } = await supabaseClient.from('products').delete().eq('id', id);
                         if (error) throw error;
+                    }
+                    
+                    // Track deleted product IDs locally to ensure static/cached entries disappear
+                    const deletedProductIds = JSON.parse(localStorage.getItem('laance_deleted_product_ids') || '[]');
+                    if (!deletedProductIds.includes(id)) {
+                        deletedProductIds.push(id);
+                        deletedProductIds.push(String(id));
+                        if (!isNaN(id)) deletedProductIds.push(Number(id));
+                        localStorage.setItem('laance_deleted_product_ids', JSON.stringify(deletedProductIds));
                     }
                     
                     showToast('Product Deleted Successfully');

@@ -4,8 +4,8 @@
   "description": "Discover the perfect intersection of minimalist design and high-end technology.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#0a0a0f",
+  "background_color": "#041215",
+  "theme_color": "#041215",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [
