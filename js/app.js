@@ -2350,15 +2350,15 @@ function renderCartContent() {
         <h2 style="margin-bottom: 1.5rem;">Your Cart</h2>
         <div style="max-height: 50vh; overflow-y: auto; padding-right: 1rem; margin-bottom: 1.5rem;">
             ${groupedCart.map(item => {
-                const firstImage = getProductImages(item)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
+                const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
                 return `
                     <div class="cart-item">
                         <img src="${firstImage}" alt="${item.name}">
                         <div class="cart-item-info flex" style="flex:1;">
                             <h4>${item.name}</h4>
-                            <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × $${item.price.toFixed(2)}</div>
                         </div>
-                        <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                        <div class="price">$${(item.price * item.quantity).toFixed(2)}</div>
                     </div>
                 `;
             }).join('')}
@@ -2366,327 +2366,61 @@ function renderCartContent() {
         
         <div class="cart-total">
             <span>Total</span>
-            <span style="color: var(--secondary)">₹${total.toLocaleString('en-IN')}</span>
+            <span style="font-weight: 700;">$${total.toFixed(2)}</span>
         </div>
         
-        <!-- Shipping form before payment -->
-        <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-light);">
-            <form id="checkout-form" class="checkout-form">
-                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Delivery Details</h3>
-                <input type="text" id="cart-address" class="input-field" placeholder="Full Delivery Address" required>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" id="cart-city" class="input-field" placeholder="City" style="flex: 1" required>
-                    <input type="text" id="cart-pincode" class="input-field" placeholder="Pincode" style="flex: 1" required>
-                </div>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="tel" id="cart-phone" class="input-field" placeholder="Phone Number" style="flex: 1" required>
-                    <input type="email" id="cart-email" class="input-field" placeholder="Email Address" style="flex: 1" value="${state.user ? state.user.email : ''}" required>
-                </div>
-                
-                <!-- Cashfree Pay Button -->
-                <button type="submit" id="cashfree-cart-btn" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
-                    <i class='bx bx-lock-alt'></i>&nbsp; Pay Securely via Cashfree ₹${total.toLocaleString('en-IN')}
-                </button>
-                <p style="text-align:center; color: var(--text-muted); font-size: 0.8rem; margin-top: 0.75rem;">
-                    <i class='bx bx-shield-quarter'></i> Secured by Cashfree · UPI · Cards · Netbanking
-                </p>
-            </form>
-        </div>
+        <button id="cart-checkout-btn" style="
+            width: 100%;
+            margin-top: 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 1px;
+            font-family: var(--font-main);
+            transition: var(--transition);
+        ">PROCEED TO CHECKOUT</button>
     `;
 
-    document.getElementById('checkout-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        handleCashfreeCheckout(e, total, groupedCart);
+    document.getElementById('cart-checkout-btn').addEventListener('click', () => {
+        // Set the cart as the order source
+        if (state.cart.length > 0) {
+            state.orderNowData = {
+                item: state.cart[0],
+                quantity: state.cart.reduce((s, i) => s + 1, 0)
+            };
+        }
+        // Close modal and go to checkout
+        document.body.classList.remove('modal-open');
+        renderView('checkout');
     });
 }
 
-// Cashfree V3 Initialization — lazy init inside function to prevent crash if SDK not loaded
+// =========================================================================
+// Cashfree SDK stub — kept to prevent reference errors from old code paths
+// =========================================================================
 let cashfree = null;
-function getCashfree() {
-    if (!cashfree) {
-        try {
-            cashfree = Cashfree({ mode: "production" });
-        } catch(e) {
-            console.warn('[Cashfree] SDK not available:', e);
-            return null;
-        }
-    }
-    return cashfree;
-}
-
-async function handleCashfreeCheckout(e, total, items) {
-    // Collect shipping details from the form
-    const address = document.getElementById('cart-address').value;
-    const city = document.getElementById('cart-city').value;
-    const pincode = document.getElementById('cart-pincode').value;
-    const phone = document.getElementById('cart-phone').value;
-    const email = document.getElementById('cart-email').value;
-    const fullAddress = `${address}, ${city}, ${pincode} (Tel: ${phone})`;
-
-    const btn = document.getElementById('cashfree-cart-btn');
-    if (btn) {
-        btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Securing Session...";
-        btn.disabled = true;
-    }
-
-    try {
-        // 1. Call your real backend to create a Cashfree Order
-        const amountINR = total; // Now already in INR
-
-        const response = await fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                amount: amountINR,
-                customer_email: email,
-                customer_phone: phone,
-                customer_id: "cust_" + Date.now()
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.payment_session_id) {
-            // 2. Launch Cashfree Checkout
-            const cf = getCashfree();
-            if (!cf) { throw new Error('Payment gateway unavailable. Please try Cash on Delivery.'); }
-            cf.checkout({
-                paymentSessionId: data.payment_session_id,
-                redirectTarget: "_modal" // Opens in a secure modal
-            }).then((result) => {
-                if (result.error) {
-                    showToast("Payment Failed: " + result.error.message);
-                    if (btn) { btn.innerHTML = "Retry Payment"; btn.disabled = false; }
-                    return;
-                }
-
-                // For demonstration, we'll finalize the order locally
-                // In a production app, you should verify payment on backend
-                const customerName = email.split('@')[0] || 'Customer';
-                const productNames = items.map(i => i.name).join(', ');
-                saveToGoogleSheets(customerName, email, phone, `${address}, ${city}`, pincode, `Order: ${productNames}`, 'Online Payment');
-                finalizeCashfreeOrder(items, total, fullAddress, email, data.order_id);
-            });
-        } else {
-            throw new Error(data.message || "Failed to create payment session");
-        }
-
-    } catch (err) {
-        console.error("Cashfree Checkout Error:", err);
-        showToast("Error: " + err.message);
-        if (btn) { btn.innerHTML = "Retry Payment"; btn.disabled = false; }
-    }
-}
-
-function finalizeCashfreeOrder(items, total, fullAddress, email, paymentId) {
-    const orderId = 'LUM-' + Math.floor(10000 + Math.random() * 90000);
-    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const deliveryDt = new Date();
-    deliveryDt.setDate(deliveryDt.getDate() + 3);
-    const deliveryDateStr = deliveryDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    state.orders[orderId] = {
-        items,
-        total,
-        paymentId,
-        gateway: 'Cashfree',
-        shipping: { address: fullAddress, date: deliveryDateStr },
-        customerEmail: email, // Save email for admin reference
-        timeline: [
-            { date: today, title: 'Order Placed', completed: true },
-            { date: today, title: 'Payment Confirmed via Cashfree', completed: true },
-            { date: 'Pending', title: 'Shipped via Laance Express', completed: false },
-            { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
-        ]
-    };
-
-    // Save locally and sync to Supabase
-    saveOrders();
-    saveOrderToSupabase(orderId, state.orders[orderId]);
-
-    state.cart = [];
-    updateCartIcon();
-
-    modalContent.innerHTML = `
-        <div style="text-align: center; padding: 4rem 1rem;">
-            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-                <i class='bx bx-check' style="font-size: 3rem; color: #10b981;"></i>
-            </div>
-            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Order Placed Successfully!</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Cashfree Ref: <code style="color:#10b981">${paymentId}</code></p>
-            <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
-                Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
-                <br><br>
-                <span style="padding: 0.5rem 1rem; background: rgba(66, 133, 244, 0.1); border-radius: 50px; color: #4285F4; display: inline-flex; align-items: center; gap: 0.5rem;">
-                    <i class='bx bxl-gmail'></i> Receipt sent to ${email}
-                </span>
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=tracking]').click();">Track Order</button>
-                <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
-            </div>
-        </div>
-    `;
-}
+function getCashfree() { return null; }
 
 // =========================================================================
-// Order Now Fast Checkout Flow
+// Order Now Fast Checkout Flow — now routes to our custom checkout page
 // =========================================================================
 
 function startOrderNowFlow(productId) {
     const product = products.find(p => String(p.id) === String(productId));
     if (!product) return;
 
-    // Temporary storage for single item checkout flow
     state.orderNowData = {
         item: { ...product, quantity: 1 }
     };
 
-    renderOrderNowAddressForm();
-    document.body.classList.add('modal-open');
-}
-
-function renderOrderNowAddressForm() {
-    const firstImage = getProductImages(state.orderNowData.item)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
-    modalContent.innerHTML = `
-        <h2 style="margin-bottom: 1.5rem;">Fast Checkout</h2>
-        <div class="cart-item" style="margin-bottom: 2rem; border: none; padding: 0;">
-            <img src="${firstImage}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
-            <div class="cart-item-info flex" style="flex:1;">
-                <h4 style="margin:0;">${state.orderNowData.item.name}</h4>
-                <div style="color: var(--text-muted); font-size: 0.875rem;">Total: ₹${state.orderNowData.item.price.toLocaleString('en-IN')}</div>
-            </div>
-        </div>
-
-        <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-light);">
-            <form id="order-now-address-form" class="checkout-form">
-                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Delivery Details</h3>
-                <input type="tel" id="on-phone" class="input-field" placeholder="Phone Number" required>
-                <input type="text" id="on-address" class="input-field" placeholder="Address Line 1" required>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" id="on-pincode" class="input-field" placeholder="Pincode" style="flex: 1" required>
-                    <input type="email" id="on-email" class="input-field" placeholder="Email Address" style="flex: 1" value="${state.user ? state.user.email : ''}" required>
-                </div>
-                
-                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">Continue to Payment <i class='bx bx-right-arrow-alt'></i></button>
-            </form>
-        </div>
-    `;
-
-    document.getElementById('order-now-address-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        state.orderNowData.address = {
-            phone: document.getElementById('on-phone').value,
-            line1: document.getElementById('on-address').value,
-            pincode: document.getElementById('on-pincode').value,
-            email: document.getElementById('on-email').value
-        };
-        renderOrderNowPaymentView();
-    });
-}
-
-function renderOrderNowPaymentView() {
-    modalContent.innerHTML = `
-        <h2 style="margin-bottom: 1.5rem;">Payment Information</h2>
-        
-        <div style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--border-light);">
-            <form id="order-now-payment-form" class="checkout-form">
-                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
-                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="payment_method" value="online" required style="accent-color: var(--primary);"> 
-                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-credit-card'></i> Card / UPI / Netbanking</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        <input type="radio" name="payment_method" value="cod" required style="accent-color: var(--primary);"> 
-                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-money'></i> Cash on Delivery</span>
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Place Order (₹${state.orderNowData.item.price.toLocaleString('en-IN')})</button>
-            </form>
-        </div>
-        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="renderOrderNowAddressForm()">Back to Delivery Details</button>
-    `;
-
-    // Add visual selection styles for radio buttons
-    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            document.querySelectorAll('input[name="payment_method"]').forEach(r => {
-                r.parentElement.style.borderColor = 'var(--border-light)';
-                r.parentElement.style.background = 'transparent';
-            });
-            if (e.target.checked) {
-                e.target.parentElement.style.borderColor = 'var(--primary)';
-                e.target.parentElement.style.background = 'rgba(16, 185, 129, 0.05)';
-            }
-        });
-    });
-
-    document.getElementById('order-now-payment-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-        const { item, address } = state.orderNowData;
-        const fullAddress = `${address.line1}, Pincode: ${address.pincode} (Tel: ${address.phone})`;
-
-        if (paymentMethod === 'cod') {
-            // Cash on Delivery — no payment gateway needed
-            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Placing Order...";
-            btn.disabled = true;
-            setTimeout(() => {
-                const customerName = address.email.split('@')[0] || 'Customer';
-                saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode, `Order: ${item.name}`, 'Cash on Delivery');
-                finalizeOrderNow(item, fullAddress, address.email, null, 'cod');
-            }, 1000);
-        } else {
-            // Online Payment via Cashfree
-            const amountINR = item.price; // Now already in INR
-
-            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Securing Session...";
-            btn.disabled = true;
-
-            // Call real backend for "Order Now" flow
-            fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount: amountINR,
-                    customer_email: address.email,
-                    customer_phone: address.phone,
-                    customer_id: "cust_" + Date.now()
-                })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.payment_session_id) {
-                        const cf = getCashfree();
-                        if (!cf) { throw new Error('Payment gateway unavailable.'); }
-                        cf.checkout({
-                            paymentSessionId: data.payment_session_id,
-                            redirectTarget: "_modal"
-                        }).then((result) => {
-                            if (result.error) {
-                                showToast("Payment Failed: " + result.error.message);
-                                btn.innerHTML = "Retry Payment";
-                                btn.disabled = false;
-                                return;
-                            }
-                            const customerName = address.email.split('@')[0] || 'Customer';
-                            saveToGoogleSheets(customerName, address.email, address.phone, address.line1, address.pincode, `Order: ${item.name}`, 'Online Payment');
-                            finalizeOrderNow(item, fullAddress, address.email, data.order_id, 'online');
-                        });
-                    } else {
-                        throw new Error(data.message || "Session creation failed");
-                    }
-                })
-                .catch(err => {
-                    console.error("Fast Checkout Error:", err);
-                    showToast("Error: " + err.message);
-                    btn.innerHTML = "Retry Payment";
-                    btn.disabled = false;
-                });
-        }
-    });
+    // Close modal if open, navigate to our custom checkout page
+    document.body.classList.remove('modal-open');
+    renderView('checkout');
 }
 
 function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
@@ -2701,34 +2435,19 @@ function finalizeOrderNow(item, fullAddress, email, paymentId, method) {
         total: item.price,
         paymentMethod: method,
         paymentId: paymentId || 'COD',
-        gateway: method === 'online' ? 'Cashfree' : null,
         shipping: { address: fullAddress, date: deliveryDateStr },
         timeline: [
             { date: today, title: 'Order Placed', completed: true },
-            { date: today, title: method === 'cod' ? 'Cash on Delivery Selected' : 'Payment Confirmed via Cashfree', completed: true },
+            { date: today, title: method === 'cod' ? 'Cash on Delivery Selected' : 'Payment Confirmed', completed: true },
             { date: 'Pending', title: 'Shipped via Laance Express', completed: false },
             { date: deliveryDateStr, title: 'Scheduled for Delivery', completed: false }
         ]
     };
     saveOrders();
     delete state.orderNowData;
-
-    modalContent.innerHTML = `
-        <div style="text-align: center; padding: 4rem 1rem;">
-            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-                <i class='bx bx-check' style="font-size: 3rem; color: #10b981;"></i>
-            </div>
-            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Order Placed Successfully!</h2>
-            ${paymentId ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Cashfree ID: <code style="color:#10b981">${paymentId}</code></p>` : ''}
-            <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
-                Your order <strong style="color: white;">${orderId}</strong> is scheduled for delivery on ${deliveryDateStr}.
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn btn-secondary" onclick="document.body.classList.remove('modal-open'); document.querySelector('[data-link=tracking]').click();">Track Order</button>
-                <button class="btn" onclick="document.body.classList.remove('modal-open')">Done</button>
-            </div>
-        </div>
-    `;
+    document.body.classList.remove('modal-open');
+    showToast('Order placed successfully!');
+    renderView('home');
 }
 
 // =========================================================================
