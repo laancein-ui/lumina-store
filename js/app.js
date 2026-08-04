@@ -1374,6 +1374,17 @@ function bindPaymentEvents() {
                     deliveryStr
                 };
                 
+                const addressStr = `${shipping.line1 || ''} ${shipping.line2 || ''} ${shipping.city || ''} ${shipping.state || ''} ${shipping.country || ''}`.trim();
+                saveToGoogleSheets(
+                    shipping.name || 'Guest', 
+                    shipping.email || '', 
+                    shipping.phone || '', 
+                    addressStr, 
+                    shipping.zip || '', 
+                    item.name || '', 
+                    shipping.method || 'Credit Card'
+                );
+                
                 let orders = [];
                 try { orders = JSON.parse(localStorage.getItem('laance_orders') || '[]'); } catch(e) {}
                 orders.push({ id: 'ORD-' + orderId, date: new Date().toLocaleDateString(), item: item.name, price: item.price, status: 'Processing' });
