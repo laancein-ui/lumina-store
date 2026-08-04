@@ -839,6 +839,10 @@ function renderView(viewName, params = {}) {
                 appRoot.innerHTML = renderPaymentPage();
                 bindPaymentEvents();
                 break;
+            case 'confirmation':
+                appRoot.innerHTML = renderOrderConfirmation();
+                bindConfirmationEvents();
+                break;
             case 'about':
                 appRoot.innerHTML = renderAboutPage();
                 bindAboutEvents();
@@ -1347,32 +1351,131 @@ function bindPaymentEvents() {
             
             setTimeout(() => {
                 const item = state.orderNowData ? state.orderNowData.item : (state.cart[0] || products[0]);
-                const shipping = state.orderNowData ? state.orderNowData.shippingAddress : { line1: "N/A", city: "N/A" };
+                const shipping = state.orderNowData ? state.orderNowData.shippingAddress : {};
+                const cardNumber = document.getElementById('pay-card-number')?.value || '';
+                const last4 = cardNumber.replace(/\s/g,'').slice(-4) || '4321';
                 
-                const orderId = "ORD-" + Math.floor(Math.random() * 90000 + 10000);
-                const newOrder = {
+                const orderId = Math.floor(Math.random() * 90000 + 10000);
+                const customerName = shipping.name || (state.profile?.full_name) || 'Guest';
+                
+                // Build delivery date string ~3-5 days from now
+                const deliveryDate = new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + 4);
+                const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                const deliveryStr = `${dayNames[deliveryDate.getDay()]}, ${monthNames[deliveryDate.getMonth()]} ${deliveryDate.getDate()}${deliveryDate.getDate() === 1 ? 'st' : deliveryDate.getDate() === 2 ? 'nd' : deliveryDate.getDate() === 3 ? 'rd' : 'th'}.`;
+                
+                state.lastOrder = {
                     id: orderId,
-                    date: new Date().toLocaleDateString(),
-                    item: item.name,
-                    price: item.price,
-                    status: "Delivered",
-                    shippingAddress: shipping.line1 + ", " + shipping.city
+                    item,
+                    shipping,
+                    customerName,
+                    last4,
+                    deliveryStr
                 };
                 
                 let orders = [];
-                try {
-                    orders = JSON.parse(localStorage.getItem('laance_orders') || '[]');
-                } catch(e) {}
-                orders.push(newOrder);
+                try { orders = JSON.parse(localStorage.getItem('laance_orders') || '[]'); } catch(e) {}
+                orders.push({ id: 'ORD-' + orderId, date: new Date().toLocaleDateString(), item: item.name, price: item.price, status: 'Processing' });
                 localStorage.setItem('laance_orders', JSON.stringify(orders));
                 
-                state.orderNowData = null;
                 state.cart = [];
                 updateCartIcon();
                 
-                showToast("Order Placed Successfully!");
-                renderView('home');
+                renderView('confirmation');
             }, 1800);
+        });
+    }
+}
+
+function renderOrderConfirmation() {
+    const order = state.lastOrder;
+    if (!order) return renderHome();
+    
+    const item = order.item;
+    const shipping = order.shipping || {};
+    const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
+    
+    const subtotal = item.price;
+    const subtotalStr = `$${(subtotal * 0.9).toFixed(2)}`;
+    const shippingStr = `$${(subtotal * 0.1 * 0.95).toFixed(2)}`;
+    const taxesStr = `$${(subtotal * 0.05).toFixed(2)}`;
+    const totalStr = `$${subtotal.toFixed(2)}`;
+    
+    return `
+        <div class="checkout-container">
+            <div class="breadcrumbs">
+                <a href="#" onclick="renderView('home')">Home</a> <span>&gt;</span> <a href="#" onclick="renderView('shop')">Shop</a> <span>&gt;</span> <a href="#" onclick="renderView('product', {id: ${item.id}})">${item.name}</a> <span>&gt;</span> Checkout <span>&gt;</span> Payment <span>&gt;</span> <strong>Order Confirmation</strong>
+            </div>
+            
+            <div class="confirmation-hero">
+                <div class="confirmation-check"><i class='bx bx-check'></i></div>
+                <h1 class="confirmation-title">Thank you for your purchase, ${order.customerName.split(' ')[0]}!</h1>
+                <p class="confirmation-subtitle">Order #${order.id} Confirmed</p>
+                <p class="confirmation-delivery">Expected delivery by ${order.deliveryStr}</p>
+            </div>
+            
+            <div class="confirmation-summary-box">
+                <h2 class="confirmation-summary-title">Order Summary - #${order.id}</h2>
+                
+                <div class="confirmation-grid">
+                    <div class="confirmation-left">
+                        <div class="conf-section-title">Shipping & Billing Details</div>
+                        <div class="conf-detail-row"><strong>Customer Name:</strong></div>
+                        <div class="conf-detail-row">${order.customerName}</div>
+                        <div class="conf-detail-row">${shipping.line1 || 'Address not provided'}</div>
+                        <div class="conf-detail-row">${shipping.line2 || ''}</div>
+                        <div class="conf-detail-row">${shipping.zip || ''} ${shipping.city || ''}</div>
+                        <div class="conf-detail-row" style="margin-top: 0.8rem;"><strong>Payment Method:</strong></div>
+                        <div class="conf-detail-row">Credit Card - ending in ${order.last4}</div>
+                    </div>
+                    
+                    <div class="confirmation-right">
+                        <div class="summary-item-row">
+                            <div class="summary-item-img">
+                                <img src="${firstImage}" alt="${item.name}">
+                            </div>
+                            <div class="summary-item-info">
+                                <div class="summary-item-name">${item.name}</div>
+                                <div class="summary-item-price">${totalStr}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pricing-row">
+                            <span>Subtotal</span>
+                            <span>${subtotalStr}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Shipping</span>
+                            <span>${shippingStr}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Taxes</span>
+                            <span>${taxesStr}</span>
+                        </div>
+                        <div class="pricing-row total">
+                            <span>Grand Total</span>
+                            <span>${totalStr}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2.5rem;">
+                <button class="btn-continue-checkout" id="download-invoice-btn" style="display: inline-flex; align-items: center; gap: 0.6rem; max-width: 300px; margin: 0 auto;">
+                    <i class='bx bx-download'></i> DOWNLOAD INVOICE (PDF)
+                </button>
+                <p style="font-size: 0.85rem; color: #888888; margin-top: 1rem;">A copy of your invoice has also been sent to your email address.</p>
+            </div>
+        </div>
+    `;
+}
+
+function bindConfirmationEvents() {
+    const dlBtn = document.getElementById('download-invoice-btn');
+    if (dlBtn) {
+        dlBtn.addEventListener('click', () => {
+            showToast('Invoice download started!');
         });
     }
 }

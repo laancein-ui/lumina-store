@@ -8,12 +8,14 @@
     --bg-light: #fdfbf7;
     --bg-card: #ffffff;
     
-    --primary: #a18276; /* Soft editorial brown */
-    --primary-hover: #8e7267;
+    --primary: #8B6148;         /* Warm brown — matches screenshot buttons */
+    --primary-hover: #7a5540;
+    --primary-light: #d4a88a;   /* Lighter beige-brown for logo badge */
     
     --text-main: #111111;
     --text-muted: #555555;
     --border-light: rgba(0,0,0,0.1);
+    --primary-glow: rgba(139,97,72,0.15);
 
     --font-main: 'Outfit', sans-serif;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -158,10 +160,10 @@ p {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: rgba(4, 18, 21, 0.85);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-bottom: 1px solid var(--border-light);
+    background: rgba(245, 230, 211, 0.92); /* warm beige tint matching left half of bg */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     height: auto;
     display: flex;
     flex-direction: column;
@@ -221,19 +223,33 @@ p {
     }
 }
 
-.logo { 
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 2px;
+.logo {
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    background: linear-gradient(90deg, #fff, var(--text-muted));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+}
+
+.logo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-light);
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #3d2010;
+    text-transform: uppercase;
+    line-height: 1;
+    text-align: center;
+    padding: 2px;
+    user-select: none;
 }
 
 .logo .dot {
-    color: var(--primary);
-    -webkit-text-fill-color: var(--primary);
+    display: none;
 }
 
 .nav-links {
@@ -311,9 +327,9 @@ p {
 }
 
 .nav-links a {
-    color: var(--text-muted);
+    color: #333333;
     text-decoration: none;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     transition: var(--transition);
     position: relative;
@@ -323,9 +339,13 @@ p {
     gap: 0.5rem;
 }
 
-.nav-links a:hover,
+.nav-links a:hover {
+    color: #111111;
+}
+
 .nav-links a.active {
-    color: var(--text-main);
+    color: #111111;
+    font-weight: 700;
 }
 
 .nav-links a::after {
@@ -337,13 +357,11 @@ p {
     height: 2px;
     background: var(--primary);
     transition: var(--transition);
-    box-shadow: 0 0 10px var(--primary-glow);
 }
 
 .nav-links a:hover::after,
 .nav-links a.active::after {
     width: 100%;
-    animation: pulse-underline 2s infinite;
 }
 
 @keyframes pulse-underline {
@@ -668,28 +686,27 @@ p {
     border: none;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 4px 15px var(--primary-glow);
+    box-shadow: none;
     font-family: var(--font-main);
 }
 
 .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px var(--primary-glow);
-    background: #4338ca;
+    transform: translateY(-2px);
+    background: var(--primary-hover);
 }
 
 .btn-secondary {
     background: transparent;
-    border: 1px solid var(--border-light);
+    border: 1px solid rgba(0,0,0,0.2);
     box-shadow: none;
     color: var(--text-main);
 }
 
 .btn-secondary:hover {
-    background: var(--bg-surface-hover);
+    background: rgba(0,0,0,0.04);
     border-color: var(--text-muted);
     box-shadow: none;
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 .hero-image-wrap {
@@ -2472,4 +2489,79 @@ footer {
     border-top: 1px solid rgba(0,0,0,0.05);
     padding: 2.5rem 0;
     margin-top: auto;
+}
+
+/* =========================================================================
+   Order Confirmation Page
+   ========================================================================= */
+.confirmation-hero {
+    text-align: center;
+    padding: 3rem 0 2rem 0;
+}
+.confirmation-check {
+    width: 56px;
+    height: 56px;
+    background: #2a9d5c;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+.confirmation-title {
+    font-size: 1.9rem;
+    font-weight: 500;
+    color: #111111;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+.confirmation-subtitle {
+    font-size: 1rem;
+    color: #555555;
+    margin-bottom: 0.3rem;
+}
+.confirmation-delivery {
+    font-size: 0.95rem;
+    color: #555555;
+}
+.confirmation-summary-box {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 720px;
+    margin: 2rem auto 0 auto;
+    background: #ffffff;
+}
+.confirmation-summary-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111111;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.confirmation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+}
+@media (max-width: 640px) {
+    .confirmation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.conf-section-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111111;
+    margin-bottom: 0.8rem;
+    text-decoration: underline;
+}
+.conf-detail-row {
+    font-size: 0.9rem;
+    color: #444444;
+    line-height: 1.6;
 }
