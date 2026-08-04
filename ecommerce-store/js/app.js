@@ -424,9 +424,10 @@ function renderHome() {
         if (!p) return '';
         const priceNum = Number(p.price);
         const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
+        const firstImage = getProductImages(p)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
         return `
                     <div class="product-card" data-id="${p.id || 0}">
-                        <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
+                        <img src="${firstImage}" alt="${p.name || 'Product'}" class="product-image">
                         <div class="product-info">
                             <div>
                                 <h3 class="product-title">${p.name || 'New Item'}</h3>
@@ -1229,16 +1230,19 @@ function renderCartContent() {
     modalContent.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">Your Cart</h2>
         <div style="max-height: 50vh; overflow-y: auto; padding-right: 1rem; margin-bottom: 1.5rem;">
-            ${groupedCart.map(item => `
-                <div class="cart-item">
-                    <img src="${item.image}" alt="${item.name}">
-                    <div class="cart-item-info flex" style="flex:1;">
-                        <h4>${item.name}</h4>
-                        <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
+            ${groupedCart.map(item => {
+                const firstImage = getProductImages(item)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
+                return `
+                    <div class="cart-item">
+                        <img src="${firstImage}" alt="${item.name}">
+                        <div class="cart-item-info flex" style="flex:1;">
+                            <h4>${item.name}</h4>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
+                        </div>
+                        <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                     </div>
-                    <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-                </div>
-            `).join('')}
+                `;
+            }).join('')}
         </div>
         
         <div class="cart-total">
@@ -1412,10 +1416,11 @@ function startOrderNowFlow(productId) {
 }
 
 function renderOrderNowAddressForm() {
+    const firstImage = getProductImages(state.orderNowData.item)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
     modalContent.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">Fast Checkout</h2>
         <div class="cart-item" style="margin-bottom: 2rem; border: none; padding: 0;">
-            <img src="${state.orderNowData.item.image}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
+            <img src="${firstImage}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
             <div class="cart-item-info flex" style="flex:1;">
                 <h4 style="margin:0;">${state.orderNowData.item.name}</h4>
                 <div style="color: var(--text-muted); font-size: 0.875rem;">Total: ₹${state.orderNowData.item.price.toLocaleString('en-IN')}</div>

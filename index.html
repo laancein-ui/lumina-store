@@ -30,20 +30,18 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo" data-link="home">
-                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" style="height: 40px; width: auto; vertical-align: middle;">
+                <div class="logo-circle">LAANCE</div>
             </div>
             <div class="nav-links">
-                <a href="#" data-link="home" class="active"><i class='bx bx-home-alt'></i><span>Home</span></a>
-                <a href="#" data-link="realestate"><i class='bx bx-building-house'></i><span>Real Estate</span></a>
-                <a href="#" data-link="electronics"><i class='bx bx-devices'></i><span>Electronics</span></a>
-                <a href="#" data-link="dress"><i class='bx bx-closet'></i><span>Fashion</span></a>
-                <a href="#" data-link="cars"><i class='bx bx-car'></i><span>Cars</span></a>
-                <a href="#" data-link="kids"><i class='bx bx-child'></i><span>Kids</span></a>
-                <a href="#" data-link="tracking"><i class='bx bx-map-alt'></i><span>Track</span></a>
+                <a href="#" data-link="home" class="active">Home</a>
+                <a href="#" data-link="shop">Shop</a>
+                <a href="#" data-link="about">About Us</a>
+                <a href="#" data-link="collection">Collection</a>
             </div>
-            <div class="nav-right" style="display: flex; gap: 1.5rem; align-items: center;">
-                <div class="profile-trigger" id="profile-trigger" data-link="profile">
-                    <i class='bx bx-user'></i>
+            <div class="nav-right">
+                <div class="nav-search-bar">
+                    <input type="text" id="global-search-input" placeholder="">
+                    <i class='bx bx-search'></i>
                 </div>
                 <div class="cart-trigger" id="cart-trigger">
                     <i class='bx bx-shopping-bag'></i>
@@ -55,45 +53,35 @@
 
     <!-- Main SPA Container -->
     <main id="app-root" class="app-root">
-        <!-- Initial Content (Hydrated by JS) -->
-        <div class="section hero">
-            <div class="hero-content">
-                <h1>Elevate your daily <br><span>Experience.</span></h1>
-                <p>Discover the perfect intersection of minimalist design and high-end technology. Your next upgrade is
-                    here.</p>
-                <div style="display: flex; gap: 1rem;">
-                    <a href="#products-grid" class="btn">Explore Collection</a>
+        <!-- Initial Home Content (Hydrated by JS) -->
+        <div class="home-view-container">
+            <h1 class="home-title">Find your favourite style, all the fashion you need is here</h1>
+            
+            <div class="slider-wrapper">
+                <button class="slider-btn prev-btn" id="home-slider-prev"><i class='bx bx-chevron-left'></i></button>
+                <div class="slider-container" id="home-slider">
+                    <div class="slide-card placeholder-slide">
+                        <img src="assets/laance_placeholder.jpg" alt="Style Placeholder">
+                    </div>
+                    <div class="slide-card">
+                        <img src="assets/laance_beige_blazer.jpg" alt="Beige Blazer Style">
+                    </div>
+                    <div class="slide-card">
+                        <img src="assets/laance_white_blazer.jpg" alt="White Blazer Style">
+                    </div>
+                    <div class="slide-card">
+                        <img src="assets/laance_beige_knit.jpg" alt="Beige Knit Style">
+                    </div>
+                    <div class="slide-card">
+                        <img src="assets/laance_black_blazer.jpg" alt="Black Blazer Style">
+                    </div>
                 </div>
+                <button class="slider-btn next-btn" id="home-slider-next"><i class='bx bx-chevron-right'></i></button>
             </div>
-        </div>
 
-        <div class="section" id="products-grid">
-            <h2 class="section-title">Featured Innovation</h2>
-            <div class="products-grid" id="initial-load-grid">
-                <div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">
-                    <i class='bx bx-loader-alt bx-spin' style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <p>Loading the latest collection...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- About the Founder Section -->
-        <div class="section" id="about-founder-section" style="border-top: 1px solid var(--border-light); padding-top: 4rem; margin-top: 3rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; align-items: center;">
-                <div style="position: relative; max-width: 440px; margin: 0 auto;">
-                    <div style="position: absolute; width: 260px; height: 260px; background: var(--primary); border-radius: 50%; filter: blur(90px); opacity: 0.15; z-index: -1; top: 10%; left: 10%;"></div>
-                    <img src="assets/shibil_sha_2.jpg" alt="Shibil Sha M.P. - Founder of Laance" style="width: 100%; height: auto; max-height: 400px; object-fit: cover; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 15px 30px rgba(0,0,0,0.4);">
-                </div>
-                <div>
-                    <span style="color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">Meet the Visionary</span>
-                    <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 1.25rem; color: #fff; line-height: 1.2;">Shibil Sha M.P.</h2>
-                    <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
-                        Laance was founded, designed, and engineered by <strong>Shibil Sha M.P.</strong>, a professional software engineer and tech entrepreneur. By merging high-end tech innovations with minimalist aesthetics, Shibil has built the entire platform to offer an unmatched, premium shopping experience.
-                    </p>
-                    <a href="who-is-the-owner-of-laance.html" class="btn" style="padding: 0.8rem 1.6rem; font-size: 0.9rem; border-radius: 50px;">
-                        Read Full Story <i class='bx bx-right-arrow-alt'></i>
-                    </a>
-                </div>
+            <p class="home-promo-text">We have many promo for you everyday, don't miss out. Checkout now!</p>
+            <div class="home-cta-container">
+                <button class="btn btn-shop-now" data-link="shop">SHOP NOW</button>
             </div>
         </div>
     </main>
@@ -101,23 +89,15 @@
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <h2>LAANCE.</h2>
-            <p>The Future of Audio and Wearables.</p>
-            <div class="social-links">
-                <a href="https://www.facebook.com/profile.php?id=61584338561246&sk=map" target="_blank"
-                    rel="noopener noreferrer">
+            <div class="social-links-simple">
+                <a href="https://www.facebook.com/profile.php?id=61584338561246&sk=map" target="_blank" rel="noopener noreferrer">
                     <i class='bx bxl-facebook'></i>
                 </a>
-                <a href="#"><i class='bx bxl-instagram'></i></a>
                 <a href="#"><i class='bx bxl-twitter'></i></a>
-                <a href="#"><i class='bx bxl-youtube'></i></a>
-                <i class='bx bx-lock-alt' data-link="admin" style="margin-left: 2rem; opacity: 0.3;"
-                    title="Creator Access"></i>
+                <a href="#"><i class='bx bxl-instagram'></i></a>
             </div>
-            <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1.5rem; font-size: 0.9rem;">
-                <a href="who-is-the-owner-of-laance.html" style="color: var(--text-muted); text-decoration: none; transition: var(--transition);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'">
-                    Who is the Owner of Laance?
-                </a>
+            <div class="footer-copyright">
+                &copy; 2022 G&gt; LAANCE . All rights reserved.
             </div>
         </div>
     </footer>

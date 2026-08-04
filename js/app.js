@@ -6,11 +6,97 @@
 const defaultProducts = [
     {
         id: 1,
-        name: "Dummy Product",
-        price: 999,
-        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600",
-        desc: "This is a dummy product description. It acts as a placeholder for testing the e-commerce store functionality.",
-        category: "electronics"
+        name: "Oversized Blazer - Black",
+        price: 129.99,
+        image: "assets/laance_black_blazer.jpg,assets/laance_black_back.jpg",
+        desc: "A sophisticated, relaxed-fit blazer with a defined shoulder and a single-button closure. Crafted from a premium wool blend.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL", "XXL"],
+        colors: ["Black", "Beige", "Camel"],
+        reviews: [
+            { author: "Sara M.", rating: 5, text: "Love the fit! So comfortable and stylish. True to size." },
+            { author: "Priya K.", rating: 4, text: "Great quality blazer, very versatile. Just took a while to ship." },
+            { author: "Chloe L.", rating: 5, text: "Perfection! Exactly what I was looking for. Highly recommend!" }
+        ]
+    },
+    {
+        id: 2,
+        name: "High-Waist Trousers - Beige",
+        price: 89.50,
+        image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop",
+        desc: "Tailored high-waisted trousers with wide-leg styling. Minimalist and sleek styling perfect for professional wear.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Beige", "Light Beige"],
+        reviews: [
+            { author: "Emma S.", rating: 5, text: "Perfect length and drape! Will buy in other colors." }
+        ]
+    },
+    {
+        id: 3,
+        name: "Pleated Midi Skirt - Camel",
+        price: 75.00,
+        image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop",
+        desc: "Elegant pleated midi skirt with structured pleats and elastic waistband. Easy to dress up or down.",
+        category: "fashion",
+        sizes: ["S", "M", "L"],
+        colors: ["Beige", "Camel", "Tan"],
+        reviews: []
+    },
+    {
+        id: 4,
+        name: "Silk Blouse Silk Blouse",
+        price: 75.00,
+        image: "assets/laance_white_blazer.jpg",
+        desc: "Luxurious silk blouse featuring a clean buttonless look, relaxed drape, and breathable premium silk weave.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Beige", "Light Beige", "Camel"],
+        reviews: []
+    },
+    {
+        id: 5,
+        name: "Trench Cort Trench Cort",
+        price: 89.00,
+        image: "assets/laance_beige_blazer.jpg",
+        desc: "Classical double-breasted outerwear with structured storm flaps and button closures. Essential styling for cool days.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL", "XXL"],
+        colors: ["Black", "Light Beige", "Camel"],
+        reviews: []
+    },
+    {
+        id: 6,
+        name: "Trench Cort Trench Cort",
+        price: 89.00,
+        image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=600&auto=format&fit=crop",
+        desc: "Minimalist modern outerwear without front buttons, styled with clean waist belts and a relaxed long fit.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Gray", "Camel"],
+        reviews: []
+    },
+    {
+        id: 7,
+        name: "Knit Sweetr Knit Sweatey",
+        price: 75.00,
+        image: "assets/laance_beige_knit.jpg",
+        desc: "Ultra-soft knit sweater crafted with classic cable textures. Relaxed warmth for home or outdoor wear.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Beige", "Light Beige"],
+        reviews: []
+    },
+    {
+        id: 8,
+        name: "Oversle Midi Skirt - Dress",
+        price: 75.00,
+        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop",
+        desc: "Sophisticated midi-length knitted dress featuring side slits and a slim ribbed turtleneck fit.",
+        category: "fashion",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Gray", "Camel"],
+        reviews: []
     }
 ];
 
@@ -143,7 +229,7 @@ async function fetchProducts() {
         productMap.delete(Number(id));
     });
 
-    products = Array.from(productMap.values());
+    products = Array.from(productMap.values()).filter(p => p.category === 'fashion');
 }
 
 async function saveProducts(newItem) {
@@ -731,9 +817,31 @@ function renderView(viewName, params = {}) {
                 appRoot.innerHTML = renderHome();
                 bindHomeEvents();
                 break;
+            case 'shop':
+            case 'dress':
+            case 'collection':
+            case 'electronics':
+            case 'cars':
+            case 'realestate':
+            case 'kids':
+                appRoot.innerHTML = renderShopPage();
+                bindShopEvents();
+                break;
             case 'product':
                 appRoot.innerHTML = renderProductDetail(params.id);
                 bindProductEvents();
+                break;
+            case 'checkout':
+                appRoot.innerHTML = renderCheckoutPage();
+                bindCheckoutEvents();
+                break;
+            case 'payment':
+                appRoot.innerHTML = renderPaymentPage();
+                bindPaymentEvents();
+                break;
+            case 'about':
+                appRoot.innerHTML = renderAboutPage();
+                bindAboutEvents();
                 break;
             case 'orders':
                 appRoot.innerHTML = renderOrders();
@@ -756,26 +864,6 @@ function renderView(viewName, params = {}) {
             case 'tracking':
                 appRoot.innerHTML = renderTracking();
                 bindTrackingEvents();
-                break;
-            case 'electronics':
-                appRoot.innerHTML = renderElectronicsPage();
-                bindCategoryEvents();
-                break;
-            case 'dress':
-                appRoot.innerHTML = renderDressPage();
-                bindCategoryEvents();
-                break;
-            case 'cars':
-                appRoot.innerHTML = renderCarsPage();
-                bindCategoryEvents();
-                break;
-            case 'realestate':
-                appRoot.innerHTML = renderRealEstatePage();
-                bindCategoryEvents();
-                break;
-            case 'kids':
-                appRoot.innerHTML = renderKidsPage();
-                bindCategoryEvents();
                 break;
             case 'profile':
                 if (!state.user) {
@@ -803,317 +891,519 @@ function renderView(viewName, params = {}) {
 // =========================================================================
 
 function renderHome() {
-    const featuredProducts = products.slice(0, 6);
     return `
-        <div class="home-hero">
-            <div class="home-hero-overlay"></div>
-
-            <div class="hero-glass-card hero-desktop-only">
-                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" class="hero-logo-img">
-                <h1 class="hero-title">Everything you <br><span>In one place.</span></h1>
-                <p class="hero-description">From premium electronics to luxury real estate and fashion. Experience the Laance lifestyle.</p>
-                <div style="display:flex;gap:1rem;justify-content:center;">
-                    <a href="#" class="btn" style="padding:1rem 2.5rem;" onclick="document.getElementById('categories-section').scrollIntoView({behavior:'smooth'})">Explore Categories</a>
-                </div>
-            </div>
-
-            <div class="home-mobile-hero">
-                <img src="assets/laance_premium_logo.jpg" alt="LAANCE" class="mobile-hero-logo">
-                <h1 class="mobile-hero-title">Everything you<br><span>In one place.</span></h1>
-                <p class="mobile-hero-sub">Premium. Curated. Yours.</p>
-                <a href="#" class="btn mobile-hero-btn" onclick="document.getElementById('mobile-categories').scrollIntoView({behavior:'smooth'})">
-                    <i class='bx bx-store-alt'></i> Shop Now
-                </a>
-            </div>
-
-            <div class="home-glow home-glow-1"></div>
-            <div class="home-glow home-glow-2"></div>
-        </div>
-
-        <div class="mobile-cat-chips" id="mobile-categories">
-            <button class="cat-chip cat-chip-primary" onclick="renderView('electronics')"><i class='bx bx-devices'></i> Tech</button>
-            <button class="cat-chip cat-chip-cyan" onclick="renderView('dress')"><i class='bx bx-closet'></i> Fashion</button>
-            <button class="cat-chip cat-chip-green" onclick="renderView('realestate')"><i class='bx bx-building-house'></i> Homes</button>
-            <button class="cat-chip cat-chip-amber" onclick="renderView('cars')"><i class='bx bx-car'></i> Cars</button>
-            <button class="cat-chip cat-chip-pink" onclick="renderView('kids')"><i class='bx bx-child'></i> Kids</button>
-        </div>
-
-        <div class="section" id="categories-section">
-            <h2 class="section-title">Shop by Category</h2>
-            <div class="category-grid">
-                <div class="category-card home-cat-card" onclick="renderView('electronics')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('assets/electronics_bg.jpg') center/cover;">
-                    <div class="home-cat-info"><i class='bx bx-devices home-cat-icon'></i><h3>Electronics</h3><p>Next-gen tech & gadgets</p></div>
-                </div>
-                <div class="category-card home-cat-card" onclick="renderView('dress')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('https://images.unsplash.com/photo-1490481658042-3073a679df34?auto=format&fit=crop&q=80&w=600') center/cover;">
-                    <div class="home-cat-info"><i class='bx bx-closet home-cat-icon' style='color:#06b6d4'></i><h3>Fashion</h3><p>Premium style & design</p></div>
-                </div>
-                <div class="category-card home-cat-card" onclick="renderView('realestate')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('assets/realestate_bg.jpg') center/cover;">
-                    <div class="home-cat-info"><i class='bx bx-building-house home-cat-icon' style='color:#10b981'></i><h3>Real Estate</h3><p>Luxury homes & villas</p></div>
-                </div>
-                <div class="category-card home-cat-card" onclick="renderView('cars')" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.88)), url('assets/car_bg.jpg') center/cover;">
-                    <div class="home-cat-info"><i class='bx bx-car home-cat-icon' style='color:#f59e0b'></i><h3>Cars</h3><p>Italian passion in motion</p></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section" id="products-grid">
-            <h2 class="section-title">Trending Now</h2>
-            <div class="products-grid">
-                ${products.slice(0, 6).map(p => {
-                    const priceNum = Number(p.price);
-                    const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
-                    return `
-                        <div class="product-card" data-id="${p.id || 0}">
-                            <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
-                            <div class="product-info">
-                                <div>
-                                    <h3 class="product-title">${p.name || 'New Item'}</h3>
-                                    <div class="product-price">&#8377;${formattedPrice}</div>
-                                </div>
-                            </div>
-                            <div class="product-btn-row" onclick="event.stopPropagation()">
-                                <button class="btn add-to-cart-btn" data-id="${p.id || 0}"><i class='bx bx-cart-add'></i> Cart</button>
-                                <button class="btn order-now-btn" data-id="${p.id || 0}"><i class='bx bx-bolt-circle'></i> Order</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        </div>
-    `;
-}
-
-function renderElectronicsPage() {
-    return `
-        <!-- Header -->
-        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
-            <div class="hero-content" style="max-width: 100%;">
-                <h1>Dispositivi <br><span>Elettronici.</span></h1>
-                <p>Eccellenza in Innovazione & Engineering since 1974.</p>
-            </div>
-        </div>
-
-        <!-- Electronics Section with Custom Background -->
-        <div class="section" id="electronics-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/electronics_bg.jpg'); background-size: cover; background-position: center;">
-            <!-- Overlay for readability -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+        <div class="home-view-container">
+            <h1 class="home-title">Find your favourite style, all the fashion you need is here</h1>
             
-            <div style="position: relative; z-index: 2;">
-                <h2 class="section-title" style="color: var(--primary); border-bottom-color: var(--primary);">Tech Showcase</h2>
-                <div class="products-grid">
-                    ${products.filter(p => p.category === 'electronics').map(p => renderProductCard(p)).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function renderRealEstatePage() {
-    return `
-        <!-- Header -->
-        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
-            <div class="hero-content" style="max-width: 100%;">
-                <h1>Officio <br><span>Immobiliare.</span></h1>
-                <p>Eccellenza in Immobili & Luxury Living since 1974.</p>
-            </div>
-        </div>
-
-        <!-- Real Estate Section with Custom Background -->
-        <div class="section" id="realestate-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/realestate_bg.jpg'); background-size: cover; background-position: center;">
-            <!-- Overlay for readability -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
-            
-            <div style="position: relative; z-index: 2;">
-                <h2 class="section-title" style="color: #10b981; border-bottom-color: #10b981;">Exclusive Listings</h2>
-                <div class="products-grid">
-                    ${products.filter(p => p.category === 'realestate').map(p => renderProductCard(p)).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function renderCarsPage() {
-    return `
-        <!-- Header -->
-        <div class="section hero" style="min-height: 40vh; align-items: center; justify-content: center; text-align: center;">
-            <div class="hero-content" style="max-width: 100%;">
-                <h1>Italia <br><span>Milano.</span></h1>
-                <p>Passione in Miniatura & Excellence in Engineering.</p>
-            </div>
-        </div>
-
-        <!-- Cars Section with Custom Background -->
-        <div class="section" id="cars-section" style="padding: 8rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/car_bg.jpg'); background-size: cover; background-position: center;">
-            <!-- Overlay for readability -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
-            
-            <div style="position: relative; z-index: 2;">
-                <h2 class="section-title" style="color: #f59e0b; border-bottom-color: #f59e0b;">Exotic Collection</h2>
-                <div class="products-grid">
-                    ${products.filter(p => p.category === 'cars').map(p => renderProductCard(p)).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function renderDressPage() {
-    return `
-        <!-- Header -->
-        <div class="section hero" style="min-height: 60vh; align-items: center; justify-content: center; text-align: center; position: relative; background: url('assets/fashion_bg.png'); background-size: cover; background-position: center;">
-            <!-- Dark Overlay for readability -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>
-            <div class="hero-content" style="max-width: 100%; position: relative; z-index: 2;">
-                <h1 style="color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.8);">Fashion <br><span style="color: var(--primary);">Collection.</span></h1>
-                <p style="color: #ccc; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">Curated elegance for Men and Women.</p>
-            </div>
-        </div>
-
-        <!-- Men's Section with Custom Background -->
-        <div class="section" id="men-section" style="padding: 6rem 2rem; margin-top: 2rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/men_bg.jpg'); background-size: cover; background-position: center;">
-            <!-- Dark Overlay for readability -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>
-            
-            <div style="position: relative; z-index: 2;">
-                <h2 class="section-title" style="color: white; border-bottom-color: var(--primary);">Men's Essentials</h2>
-                <div class="products-grid">
-                    ${products.filter(p => p.category === 'men').map(p => renderProductCard(p)).join('')}
-                </div>
-            </div>
-        </div>
-
-        <!-- Women's Section with Custom Background -->
-        <div class="section" id="women-section" style="padding: 6rem 2rem; margin-top: 4rem; position: relative; border-radius: 40px; overflow: hidden; background: url('assets/women_bg.jpg'); background-size: cover; background-position: center;">
-            <!-- Overlay to ensure readability -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 1;"></div>
-            
-            <div style="position: relative; z-index: 2;">
-                <h2 class="section-title" style="color: #d63384; border-bottom-color: #d63384;">Women's Collection</h2>
-                <div class="products-grid">
-                    ${products.filter(p => p.category === 'women').map(p => renderProductCard(p)).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function renderKidsPage() {
-    return renderCategory('Kids', products.filter(p => p.category === 'kids'), 'assets/fashion_bg.png');
-}
-
-
-function renderProductCard(p) {
-    const formattedPrice = Number(p.price).toLocaleString('en-IN');
-    const isAdmin = safeStorage.get('localStorage', 'laance_device_trusted') === 'true';
-    
-    return `
-        <div class="product-card" data-id="${p.id || 0}">
-            ${isAdmin ? `<div class="admin-edit-badge" onclick="event.stopPropagation(); renderView('admin');"><i class='bx bx-edit-alt'></i></div>` : ''}
-            <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
-            <div class="product-info">
-                <div>
-                    <h3 class="product-title">${p.name || 'New Item'}</h3>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <div style="color: #f59e0b; font-size: 0.8rem;">
-                            <i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star-half'></i>
-                        </div>
-                        <span style="color: var(--text-muted); font-size: 0.75rem;">(12)</span>
+            <div class="slider-wrapper">
+                <button class="slider-btn prev-btn" id="home-slider-prev"><i class='bx bx-chevron-left'></i></button>
+                <div class="slider-container" id="home-slider">
+                    <div class="slide-card placeholder-slide" data-product-id="1">
+                        <img src="assets/laance_placeholder.jpg" alt="Style Placeholder">
                     </div>
-                    <div class="product-price">₹${formattedPrice}</div>
+                    <div class="slide-card" data-product-id="5">
+                        <img src="assets/laance_beige_blazer.jpg" alt="Beige Blazer Style">
+                    </div>
+                    <div class="slide-card" data-product-id="4">
+                        <img src="assets/laance_white_blazer.jpg" alt="White Blazer Style">
+                    </div>
+                    <div class="slide-card" data-product-id="7">
+                        <img src="assets/laance_beige_knit.jpg" alt="Beige Knit Style">
+                    </div>
+                    <div class="slide-card" data-product-id="1">
+                        <img src="assets/laance_black_blazer.jpg" alt="Black Blazer Style">
+                    </div>
                 </div>
+                <button class="slider-btn next-btn" id="home-slider-next"><i class='bx bx-chevron-right'></i></button>
             </div>
-            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;" onclick="event.stopPropagation()">
-                <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">Add to Cart</button>
-                <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">Order Now</button>
-            </div>
-        </div>
-    `;
-}
 
-function renderCategory(title, items, bgImage = null) {
-    const heroStyle = bgImage 
-        ? `min-height: 50vh; align-items: center; justify-content: center; text-align: center; position: relative; background: url('${bgImage}'); background-size: cover; background-position: center;`
-        : `min-height: 40vh; align-items: center; justify-content: center; text-align: center;`;
-
-    const overlay = bgImage 
-        ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1;"></div>`
-        : ``;
-
-    return `
-        <div class="section hero" style="${heroStyle}">
-            ${overlay}
-            <div class="hero-content" style="max-width: 100%; position: relative; z-index: 2;">
-                <h1 style="${bgImage ? 'color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.8);' : ''}">${title} <br><span style="${bgImage ? 'color: var(--primary);' : ''}">Collection.</span></h1>
-                <p style="${bgImage ? 'color: #ccc; text-shadow: 0 2px 10px rgba(0,0,0,0.8);' : ''}">Curated excellence for your refined lifestyle.</p>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2 class="section-title">${title} Showcase</h2>
-            <div class="products-grid">
-                ${items.map(p => {
-                    const priceNum = Number(p.price);
-                    const formattedPrice = Number.isFinite(priceNum) ? priceNum.toLocaleString('en-IN') : 'TBA';
-                    return `
-                        <div class="product-card" data-id="${p.id || 0}">
-                            <img src="${p.image || '#'}" alt="${p.name || 'Product'}" class="product-image">
-                            <div class="product-info">
-                                <div>
-                                    <h3 class="product-title">${p.name || 'New Item'}</h3>
-                                    <div class="product-price">${title === 'Real Estate' ? '₹' : '₹'}${formattedPrice}</div>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;" onclick="event.stopPropagation()">
-                                <button class="btn add-to-cart-btn" data-id="${p.id || 0}" style="flex: 1;">${title === 'Real Estate' ? 'Enquire' : 'Add to Cart'}</button>
-                                <button class="btn btn-secondary order-now-btn" data-id="${p.id || 0}" style="flex: 1;">${title === 'Real Estate' ? 'Visit' : 'Order Now'}</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+            <p class="home-promo-text">We have many promo for you everyday, don't miss out. Checkout now!</p>
+            <div class="home-cta-container">
+                <button class="btn btn-shop-now">SHOP NOW</button>
             </div>
         </div>
     `;
-}
-
-function bindCategoryEvents() {
-    // We can reuse the same event binding logic
-    bindHomeEvents();
 }
 
 function bindHomeEvents() {
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            // Use closest() to check if click was on/inside a button — works even on text nodes
-            if (e.target.closest('.add-to-cart-btn') || e.target.closest('.order-now-btn')) return;
+    const slider = document.getElementById('home-slider');
+    const prevBtn = document.getElementById('home-slider-prev');
+    const nextBtn = document.getElementById('home-slider-next');
+    if (slider && prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+            slider.scrollBy({ left: -260, behavior: 'smooth' });
+        });
+        nextBtn.addEventListener('click', () => {
+            slider.scrollBy({ left: 260, behavior: 'smooth' });
+        });
+    }
+
+    document.querySelectorAll('.slide-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const pid = card.getAttribute('data-product-id');
+            if (pid) {
+                renderView('product', { id: pid });
+            }
+        });
+    });
+
+    const shopNowBtn = document.querySelector('.btn-shop-now');
+    if (shopNowBtn) {
+        shopNowBtn.addEventListener('click', () => {
+            renderView('shop');
+        });
+    }
+}
+
+function renderShopPage() {
+    return `
+        <div class="shop-view-container">
+            <div class="breadcrumbs">
+                <a href="#" onclick="renderView('home')">Home</a> <span>&gt;</span> <a href="#" onclick="renderView('shop')">Shop</a> <span>&gt;</span> All Products
+            </div>
+            
+            <div class="shop-header">
+                <h1 class="shop-title">Shop All Fashion</h1>
+                <button class="filter-sort-btn">Filter & Sort <i class='bx bx-chevron-down'></i></button>
+            </div>
+            
+            <div class="products-grid-new">
+                ${products.map(p => {
+                    const firstImage = getProductImages(p)[0] || 'assets/laance_placeholder.jpg';
+                    const colorDots = (p.colors || []).map(color => {
+                        let hex = '#cccccc';
+                        if (color.toLowerCase() === 'black') hex = '#000000';
+                        else if (color.toLowerCase() === 'beige') hex = '#ecd2b1';
+                        else if (color.toLowerCase() === 'light beige') hex = '#f7ebda';
+                        else if (color.toLowerCase() === 'camel') hex = '#c49a79';
+                        else if (color.toLowerCase() === 'gray') hex = '#a0a0a0';
+                        return `<span class="color-dot" style="background-color: ${hex};"></span>`;
+                    }).join('');
+                    
+                    return `
+                        <div class="product-card-new" data-id="${p.id}">
+                            <div class="product-card-img-container">
+                                <img src="${firstImage}" alt="${p.name}">
+                            </div>
+                            <div class="product-card-details">
+                                <div class="product-card-name-row">
+                                    <div class="product-card-name">${p.name}</div>
+                                    <button class="product-card-bag-btn" data-id="${p.id}"><i class='bx bx-shopping-bag'></i></button>
+                                </div>
+                                <div class="product-card-price">$${p.price.toFixed(2)}</div>
+                                <div class="product-card-colors">
+                                    ${colorDots}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            
+            <div class="pagination-container">
+                <span class="pagination-link active">1</span>
+                <span class="pagination-link">2</span>
+                <span class="pagination-link">3</span>
+            </div>
+        </div>
+    `;
+}
+
+function bindShopEvents() {
+    document.querySelectorAll('.product-card-new').forEach(card => {
+        card.querySelector('.product-card-img-container').addEventListener('click', () => {
+            const id = card.getAttribute('data-id');
+            renderView('product', { id });
+        });
+        card.querySelector('.product-card-name').addEventListener('click', () => {
             const id = card.getAttribute('data-id');
             renderView('product', { id });
         });
     });
 
-    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    document.querySelectorAll('.product-card-bag-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Use currentTarget (the button) not target (which may be a child text node)
-            const id = e.currentTarget.getAttribute('data-id');
+            const id = btn.getAttribute('data-id');
             addToCart(id);
         });
     });
+}
 
-    document.querySelectorAll('.order-now-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = e.currentTarget.getAttribute('data-id');
-            startOrderNowFlow(id);
+function renderCheckoutPage() {
+    const item = state.orderNowData ? state.orderNowData.item : (state.cart[0] || products[0]);
+    const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
+    
+    const subtotal = item.price;
+    let subtotalStr = "$119.00";
+    let shippingStr = "$25.09";
+    let taxesStr = "$6.00";
+    let totalStr = "$129.99";
+    
+    if (item.id === 1) {
+        subtotalStr = "$119.00";
+        shippingStr = "$25.09";
+        taxesStr = "$6.00";
+        totalStr = "$129.99";
+    } else {
+        subtotalStr = `$${(subtotal * 0.9).toFixed(2)}`;
+        shippingStr = `$${(subtotal * 0.1).toFixed(2)}`;
+        taxesStr = `$${(subtotal * 0.05).toFixed(2)}`;
+        totalStr = `$${subtotal.toFixed(2)}`;
+    }
+
+    return `
+        <div class="checkout-container">
+            <div class="breadcrumbs">
+                <a href="#" onclick="renderView('home')">Home</a> <span>&gt;</span> <a href="#" onclick="renderView('shop')">Shop</a> <span>&gt;</span> <a href="#" onclick="renderView('product', {id: ${item.id}})">${item.name}</a> <span>&gt;</span> Checkout
+            </div>
+            
+            <div class="checkout-grid">
+                <div class="checkout-left-col">
+                    <h2 class="checkout-header-title">Shipping Address</h2>
+                    <form id="shipping-address-form" class="checkout-form-group">
+                        <div class="checkout-input-wrapper">
+                            <i class='bx bx-user'></i>
+                            <input type="text" id="ship-name" class="checkout-input" placeholder="Full Name" required>
+                        </div>
+                        <div class="checkout-input-wrapper">
+                            <i class='bx bx-envelope'></i>
+                            <input type="email" id="ship-email" class="checkout-input" placeholder="Email Address" value="${state.user ? state.user.email : ''}" required>
+                        </div>
+                        <div class="checkout-input-wrapper">
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" id="ship-phone" class="checkout-input" placeholder="Phone Number" required>
+                        </div>
+                        <div class="checkout-input-wrapper">
+                            <input type="text" id="ship-address1" class="checkout-input" style="padding-left: 1rem;" placeholder="Address Line 1 (Street address, P.O. Box, etc.)" required>
+                        </div>
+                        <div class="checkout-input-wrapper">
+                            <input type="text" id="ship-address2" class="checkout-input" style="padding-left: 1rem;" placeholder="Address Line 2 (Apartment, suite, unit, building, floor, etc.)">
+                        </div>
+                        
+                        <div class="form-row-2">
+                            <div class="checkout-input-wrapper">
+                                <i class='bx bx-map-pin'></i>
+                                <input type="text" id="ship-city" class="checkout-input" placeholder="City" required>
+                            </div>
+                            <div class="checkout-input-wrapper">
+                                <input type="text" id="ship-state" class="checkout-input" style="padding-left: 1rem;" placeholder="State / Province / Region" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row-2">
+                            <div class="checkout-input-wrapper">
+                                <input type="text" id="ship-zip1" class="checkout-input" style="padding-left: 1rem;" placeholder="ZIP / Postal Code" required>
+                            </div>
+                            <div class="checkout-input-wrapper">
+                                <input type="text" id="ship-zip2" class="checkout-input" style="padding-left: 1rem;" placeholder="ZIP / Postal Code">
+                            </div>
+                        </div>
+                        
+                        <div class="checkout-input-wrapper">
+                            <select id="ship-country" class="checkout-select">
+                                <option value="United States">United States</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="India">India</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                            </select>
+                        </div>
+                        
+                        <div class="checkout-input-wrapper">
+                            <i class='bx bx-star'></i>
+                            <input type="text" id="ship-landmark" class="checkout-input" placeholder="Landmark (Optional)">
+                        </div>
+                        
+                        <button type="submit" class="btn-continue-checkout">CONTINUE TO PAYMENT</button>
+                    </form>
+                </div>
+                
+                <div class="checkout-right-col">
+                    <div class="order-summary-box">
+                        <h2 class="checkout-header-title">Order Summary</h2>
+                        <div class="summary-item-row">
+                            <div class="summary-item-img">
+                                <img src="${firstImage}" alt="${item.name}">
+                            </div>
+                            <div class="summary-item-info">
+                                <div class="summary-item-name">${item.name}</div>
+                                <div class="summary-item-price">$${item.price.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pricing-row">
+                            <span>Subtotal</span>
+                            <span>${subtotalStr}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Estimated Shipping</span>
+                            <span>${shippingStr}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Taxes</span>
+                            <span>${taxesStr}</span>
+                        </div>
+                        <div class="pricing-row total">
+                            <span>Grand Total</span>
+                            <span>${totalStr}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-method-box">
+                        <h2 class="checkout-header-title">Payment Method</h2>
+                        <div class="payment-method-option">
+                            <input type="radio" name="checkout_payment_method" value="card" checked>
+                            <label><i class='bx bx-credit-card'></i> Credit/Debit Card</label>
+                        </div>
+                        <div class="payment-method-option">
+                            <input type="radio" name="checkout_payment_method" value="paypal">
+                            <label><i class='bx bxl-paypal'></i> PayPal</label>
+                        </div>
+                        <div class="payment-method-option">
+                            <input type="radio" name="checkout_payment_method" value="netbanking">
+                            <label><i class='bx bx-wallet'></i> Net Banking</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function bindCheckoutEvents() {
+    const form = document.getElementById('shipping-address-form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const paymentMethod = document.querySelector('input[name="checkout_payment_method"]:checked').value;
+            
+            if (!state.orderNowData) {
+                state.orderNowData = {
+                    item: state.cart[0] || products[0],
+                    quantity: 1
+                };
+            }
+            
+            state.orderNowData.shippingAddress = {
+                name: document.getElementById('ship-name').value,
+                email: document.getElementById('ship-email').value,
+                phone: document.getElementById('ship-phone').value,
+                line1: document.getElementById('ship-address1').value,
+                line2: document.getElementById('ship-address2').value,
+                city: document.getElementById('ship-city').value,
+                state: document.getElementById('ship-state').value,
+                zip: document.getElementById('ship-zip1').value,
+                country: document.getElementById('ship-country').value,
+                method: paymentMethod
+            };
+            
+            renderView('payment');
         });
-    });
+    }
+}
+
+function renderPaymentPage() {
+    const item = state.orderNowData ? state.orderNowData.item : (state.cart[0] || products[0]);
+    const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
+    
+    const subtotal = item.price;
+    let subtotalStr = "$119.00";
+    let shippingStr = "$25.09";
+    let taxesStr = "$6.00";
+    let totalStr = "$129.99";
+    
+    if (item.id === 1) {
+        subtotalStr = "$119.00";
+        shippingStr = "$25.09";
+        taxesStr = "$6.00";
+        totalStr = "$129.99";
+    } else {
+        subtotalStr = `$${(subtotal * 0.9).toFixed(2)}`;
+        shippingStr = `$${(subtotal * 0.1).toFixed(2)}`;
+        taxesStr = `$${(subtotal * 0.05).toFixed(2)}`;
+        totalStr = `$${subtotal.toFixed(2)}`;
+    }
+
+    return `
+        <div class="checkout-container">
+            <div class="breadcrumbs">
+                <a href="#" onclick="renderView('home')">Home</a> <span>&gt;</span> <a href="#" onclick="renderView('shop')">Shop</a> <span>&gt;</span> <a href="#" onclick="renderView('product', {id: ${item.id}})">${item.name}</a> <span>&gt;</span> <a href="#" onclick="renderView('checkout')">Checkout</a> <span>&gt;</span> Payment
+            </div>
+            
+            <div class="checkout-grid">
+                <div class="checkout-left-col">
+                    <h2 class="checkout-header-title">Payment Details</h2>
+                    <form id="payment-details-form" class="checkout-form-group">
+                        <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Credit / Debit Card</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <img src="https://img.icons8.com/color/32/000000/visa.png" style="height: 20px;"/>
+                                <img src="https://img.icons8.com/color/32/000000/mastercard.png" style="height: 20px;"/>
+                                <img src="https://img.icons8.com/color/32/000000/amex.png" style="height: 20px;"/>
+                            </div>
+                        </div>
+                        
+                        <div class="checkout-input-wrapper">
+                            <i class='bx bx-credit-card'></i>
+                            <input type="text" id="pay-card-number" class="checkout-input" placeholder="Card Number" required>
+                        </div>
+                        
+                        <div class="form-row-2">
+                            <div class="checkout-input-wrapper">
+                                <input type="text" id="pay-expiry" class="checkout-input" style="padding-left: 1rem;" placeholder="Expiry Date (MM/YY)" required>
+                            </div>
+                            <div class="checkout-input-wrapper">
+                                <input type="password" id="pay-cvv" class="checkout-input" style="padding-left: 1rem;" placeholder="CVV" required>
+                                <i class='bx bx-help-circle' style="left: auto; right: 1rem; cursor: pointer;" title="3-digit security code on the back of your card"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="checkout-input-wrapper">
+                            <input type="text" id="pay-name" class="checkout-input" style="padding-left: 1rem;" placeholder="Cardholder Name" required>
+                        </div>
+                        
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer;">
+                            <input type="checkbox" id="pay-save-card" style="accent-color: #111111;"> Save card for future use
+                        </label>
+                        
+                        <div style="margin-top: 2rem;">
+                            <div style="font-weight: 600; font-size: 0.95rem;">Digital Wallets</div>
+                            <div class="digital-wallets-row">
+                                <button type="button" class="wallet-btn" id="pay-gpay"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="Google Pay"></button>
+                                <button type="button" class="wallet-btn" id="pay-applepay"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay"></button>
+                                <button type="button" class="wallet-btn" id="pay-amazonpay"><img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Amazon_Pay_logo.svg" alt="Amazon Pay"></button>
+                                <button type="button" class="wallet-btn" id="pay-paypal"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal"></button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem;">Net Banking</div>
+                            <select id="pay-netbanking" class="checkout-select">
+                                <option value="">Select Bank</option>
+                                <option value="SBI">SBI, HDFC, ICICI, Bank</option>
+                                <option value="HDFC">HDFC Bank</option>
+                                <option value="ICICI">ICICI Bank</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn-continue-checkout" style="margin-top: 2.5rem; max-width: 100%;">CONFIRM PAYMENT & PLACE ORDER</button>
+                    </form>
+                </div>
+                
+                <div class="checkout-right-col">
+                    <div class="order-summary-box">
+                        <h2 class="checkout-header-title">Order Summary</h2>
+                        <div class="summary-item-row">
+                            <div class="summary-item-img">
+                                <img src="${firstImage}" alt="${item.name}">
+                            </div>
+                            <div class="summary-item-info">
+                                <div class="summary-item-name">${item.name}</div>
+                                <div class="summary-item-price">$${item.price.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pricing-row">
+                            <span>Subtotal</span>
+                            <span>${subtotalStr}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Estimated Shipping</span>
+                            <span>${shippingStr}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Taxes</span>
+                            <span>${taxesStr}</span>
+                        </div>
+                        <div class="pricing-row total">
+                            <span>Grand Total</span>
+                            <span>${totalStr}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="secure-checkout-box">
+                        <i class='bx bx-lock-alt'></i>
+                        <div class="secure-checkout-text">
+                            <strong>Secure Checkout</strong><br>
+                            Secure Checkout how to data secure all you security security in this security.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function bindPaymentEvents() {
+    const form = document.getElementById('payment-details-form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = form.querySelector('button[type="submit"]');
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processing Payment...";
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const item = state.orderNowData ? state.orderNowData.item : (state.cart[0] || products[0]);
+                const shipping = state.orderNowData ? state.orderNowData.shippingAddress : { line1: "N/A", city: "N/A" };
+                
+                const orderId = "ORD-" + Math.floor(Math.random() * 90000 + 10000);
+                const newOrder = {
+                    id: orderId,
+                    date: new Date().toLocaleDateString(),
+                    item: item.name,
+                    price: item.price,
+                    status: "Delivered",
+                    shippingAddress: shipping.line1 + ", " + shipping.city
+                };
+                
+                let orders = [];
+                try {
+                    orders = JSON.parse(localStorage.getItem('laance_orders') || '[]');
+                } catch(e) {}
+                orders.push(newOrder);
+                localStorage.setItem('laance_orders', JSON.stringify(orders));
+                
+                state.orderNowData = null;
+                state.cart = [];
+                updateCartIcon();
+                
+                showToast("Order Placed Successfully!");
+                renderView('home');
+            }, 1800);
+        });
+    }
+}
+
+function renderAboutPage() {
+    return `
+        <div class="checkout-container" style="max-width: 800px; text-align: center; margin: 8rem auto 5rem auto;">
+            <h1 style="font-size: 2.3rem; margin-bottom: 2rem; font-weight: 500;">About LAANCE</h1>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: #333333; margin-bottom: 3rem; font-weight: 350;">
+                Founded on the principles of minimalist design, top-tier craftsmanship, and modern aesthetics, 
+                LAANCE represents the pinnacle of contemporary style. We curate and design luxury fashion 
+                staples that are tailored to the modern lifestyle.
+            </p>
+            <div style="position: relative; max-width: 440px; margin: 0 auto 2rem auto;">
+                <img src="assets/shibil_sha_2.jpg" alt="Founder" style="width: 100%; border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.08);">
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 600; margin-bottom: 0.5rem; color: #111111;">Shibil Sha M.P.</h2>
+            <p style="color: #666666; font-style: italic; font-size: 0.95rem;">Founder & Visionary</p>
+        </div>
+    `;
+}
+function bindAboutEvents() {}
+
+function bindCategoryEvents() {
+    bindHomeEvents();
 }
 
 function renderProductDetail(id) {
     const product = products.find(p => String(p.id) === String(id));
     if (!product) return renderHome();
 
-    // Trigger async review fetch in background without blocking
     if (!state.reviews[id]) {
         fetchReviews(id).then(() => {
             if (state.currentView === 'product' && state.currentProductId === id) {
@@ -1124,106 +1414,124 @@ function renderProductDetail(id) {
 
     state.currentProductId = id;
 
-    // Log product click to Google Sheets
     const userName = state.profile?.full_name || state.user?.email?.split('@')[0] || 'Guest';
     const userEmail = state.user?.email || 'N/A';
     saveToGoogleSheets(userName, userEmail, 'N/A', 'Product Clicked', 'N/A', `View: ${product.name}`, 'N/A');
 
     const productReviews = state.reviews[id] || [];
+    const allReviews = [...(product.reviews || []), ...productReviews];
+
     const images = getProductImages(product);
-    const mainImage = images[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
+    const mainImage = images[0] || 'assets/laance_placeholder.jpg';
+
+    // Generate thumbnails. If there are no secondary images, we'll generate mock ones for Blazer or reuse main images
+    let thumbnailsHTML = '';
+    if (product.id === 1) {
+        // Blazer thumbnails
+        const blazerThumbs = ['assets/laance_black_blazer.jpg', 'assets/laance_black_back.jpg', 'assets/laance_black_blazer.jpg'];
+        thumbnailsHTML = blazerThumbs.map((img, idx) => `
+            <div class="thumbnail-item ${idx === 0 ? 'active' : ''}">
+                <img src="${img}" alt="Blazer Thumbnail ${idx + 1}">
+            </div>
+        `).join('');
+    } else {
+        // Generic thumbnails using main image
+        const placeholderThumbs = [mainImage, mainImage, mainImage];
+        thumbnailsHTML = placeholderThumbs.map((img, idx) => `
+            <div class="thumbnail-item ${idx === 0 ? 'active' : ''}">
+                <img src="${img}" alt="Thumbnail ${idx + 1}">
+            </div>
+        `).join('');
+    }
+
+    const sizesHTML = (product.sizes || ["S", "M", "L", "XL", "XXL"]).map((sz, idx) => `
+        <button class="size-btn ${sz === 'M' ? 'active' : ''}" data-size="${sz}">${sz}</button>
+    `).join('');
+
+    const colorsHTML = (product.colors || ["Black", "Beige", "Camel"]).map((col, idx) => {
+        let hex = '#cccccc';
+        if (col.toLowerCase() === 'black') hex = '#000000';
+        else if (col.toLowerCase() === 'beige') hex = '#ecd2b1';
+        else if (col.toLowerCase() === 'light beige') hex = '#f7ebda';
+        else if (col.toLowerCase() === 'camel') hex = '#c49a79';
+        else if (col.toLowerCase() === 'gray') hex = '#a0a0a0';
+        return `
+            <button class="color-pill ${idx === 0 ? 'active' : ''}" data-color="${col}">
+                <span class="color-pill-dot" style="background-color: ${hex};"></span>
+                ${col}
+            </button>
+        `;
+    }).join('');
 
     return `
-        <div class="section">
-            <div class="product-detail-view">
-                <div class="detail-image" style="display: flex; flex-direction: column;">
-                    <div style="width: 100%; aspect-ratio: 1.2; overflow: hidden; border-radius: 20px; border: 1px solid var(--border-light); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); background: rgba(255,255,255,0.01);">
-                        <img id="product-detail-main-img" src="${mainImage}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="product-detail-container">
+            <div class="breadcrumbs">
+                <a href="#" onclick="renderView('home')">Home</a> <span>&gt;</span> <a href="#" onclick="renderView('shop')">Shop</a> <span>&gt;</span> ${product.name}
+            </div>
+            
+            <div class="product-detail-grid">
+                <!-- Left column: Gallery -->
+                <div class="product-gallery">
+                    <div class="main-product-img">
+                        <img id="product-detail-main-img" src="${mainImage}" alt="${product.name}">
                     </div>
-                    ${images.length > 1 ? `
-                        <div class="product-thumbnails">
-                            ${images.map((img, idx) => `
-                                <div class="thumb-img-wrap ${idx === 0 ? 'active' : ''}" data-index="${idx}">
-                                    <img src="${img}" alt="${product.name} gallery image ${idx + 1}">
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
+                    <div class="thumbnail-list">
+                        ${thumbnailsHTML}
+                    </div>
                 </div>
-                <div class="detail-info">
-                    <div style="color: var(--primary); font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; text-transform: uppercase;">Premium Series</div>
-                    <h1>${product.name}</h1>
-                    <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
-                    <p class="desc">${product.desc}</p>
-                    <div class="detail-actions">
-                        <button class="btn add-to-cart-btn-main" data-id="${product.id}" style="width: auto; padding: 1rem 3rem;">
-                            <i class='bx bx-shopping-bag'></i> Add to Cart
-                        </button>
-                        <button class="btn btn-secondary order-now-btn-main" data-id="${product.id}">Order Now</button>
+                
+                <!-- Right column: Product Info -->
+                <div class="product-info-panel">
+                    <h1 class="product-detail-title">${product.name}</h1>
+                    <div class="product-detail-price">$${product.price.toFixed(2)}</div>
+                    
+                    <p class="product-detail-desc">${product.desc}</p>
+                    
+                    <div class="option-section">
+                        <span class="option-label">Size</span>
+                        <div class="sizes-container">
+                            ${sizesHTML}
+                        </div>
                     </div>
                     
-                    <div style="margin-top: 3rem; border-top: 1px solid var(--border-light); padding-top: 2rem;">
-                        <div style="display: flex; gap: 2rem; color: var(--text-muted);">
-                            <div><i class='bx bx-check-shield'></i> 1 Year Warranty</div>
-                            <div><i class='bx bx-package'></i> Free Global Shipping</div>
-                            <div><i class='bx bx-reset'></i> 30-Day Returns</div>
+                    <div class="option-section">
+                        <span class="option-label">Color</span>
+                        <div class="colors-container-new">
+                            ${colorsHTML}
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Reviews Section -->
-            <div style="margin-top: 5rem; max-width: 800px;">
-                <h2 style="font-size: 2rem; margin-bottom: 2rem;">Customer Reviews</h2>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
-                    <!-- Review List -->
-                    <div>
-                        ${productReviews.length === 0 ? `
-                            <div style="padding: 2rem; background: var(--bg-surface); border-radius: 20px; text-align: center; color: var(--text-muted);">
-                                No reviews yet. Be the first to share your experience!
-                            </div>
-                        ` : productReviews.map(r => `
-                            <div style="padding: 1.5rem; background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px; margin-bottom: 1.5rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <div style="font-weight: 600; color: var(--text-main);">${r.user_name}</div>
-                                    <div style="color: #fbbf24;">
-                                        ${Array(5).fill(0).map((_, i) => `<i class='bx ${i < r.rating ? 'bxs-star' : 'bx-star'}'></i>`).join('')}
-                                    </div>
-                                </div>
-                                <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">${r.comment}</p>
-                            </div>
-                        `).join('')}
+                    
+                    <div class="purchase-row">
+                        <div class="quantity-selector">
+                            <button class="quantity-btn dec-qty">-</button>
+                            <span class="quantity-value">1</span>
+                            <button class="quantity-btn inc-qty">+</button>
+                        </div>
+                        <button class="btn-add-to-cart" data-id="${product.id}">ADD TO CART</button>
                     </div>
-
-                    <!-- Add Review Form -->
-                    <div>
-                        <div style="padding: 2rem; background: var(--bg-surface); border: 1px solid var(--primary); border-radius: 24px; box-shadow: 0 0 20px var(--primary-glow);">
-                            <h3 style="margin-bottom: 1.5rem;">Write a Review</h3>
-                            <form id="add-review-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Your Name</label>
-                                    <input type="text" id="review-user-name" class="input-field" placeholder="Enter your name" required style="width: 100%;">
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Rating</label>
-                                    <div id="rating-stars" style="color: #fbbf24; font-size: 1.5rem; cursor: pointer; display: flex; gap: 0.5rem;">
-                                        <i class='bx bxs-star star' data-rating="1"></i>
-                                        <i class='bx bxs-star star' data-rating="2"></i>
-                                        <i class='bx bxs-star star' data-rating="3"></i>
-                                        <i class='bx bxs-star star' data-rating="4"></i>
-                                        <i class='bx bxs-star star' data-rating="5"></i>
+                    
+                    <div class="detail-links">
+                        <a class="detail-link-item"><i class='bx bx-notepad'></i> Size Guide</a>
+                        <a class="detail-link-item"><i class='bx bx-transfer-alt'></i> Shipping & Returns</a>
+                    </div>
+                    
+                    <!-- Customer Reviews -->
+                    <div class="reviews-section">
+                        <h2 class="reviews-title">Customer Reviews</h2>
+                        <div class="reviews-list">
+                            ${allReviews.length === 0 ? `
+                                <p style="color: #666666; font-size: 0.9rem;">No reviews yet. Be the first to write a review!</p>
+                            ` : allReviews.map(r => `
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <span class="review-author">${r.author || r.user_name}</span>
+                                        <span class="review-stars">
+                                            ${Array(5).fill(0).map((_, i) => `<i class='bx ${i < (r.rating || 5) ? 'bxs-star' : 'bx-star'}'></i>`).join('')}
+                                        </span>
                                     </div>
-                                    <input type="hidden" id="review-rating" value="5">
+                                    <p class="review-text">${r.text || r.comment}</p>
                                 </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted);">Feedback</label>
-                                    <textarea id="review-comment" class="input-field" rows="4" placeholder="Share your experience with this product..." required style="width: 100%; border-radius: 15px; resize: none;"></textarea>
-                                </div>
-                                <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 1rem;">
-                                    Submit Review
-                                </button>
-                            </form>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
@@ -1233,26 +1541,71 @@ function renderProductDetail(id) {
 }
 
 function bindProductEvents() {
-    const addBtn = document.querySelector('.add-to-cart-btn-main');
+    const addBtn = document.querySelector('.btn-add-to-cart');
     if (addBtn) {
         addBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const id = e.currentTarget.getAttribute('data-id');
-            addToCart(id);
+            const id = addBtn.getAttribute('data-id');
+            
+            const sizeBtn = document.querySelector('.size-btn.active');
+            const colorPill = document.querySelector('.color-pill.active');
+            const qtyVal = document.querySelector('.quantity-value');
+            
+            const selectedSize = sizeBtn ? sizeBtn.getAttribute('data-size') : 'M';
+            const selectedColor = colorPill ? colorPill.getAttribute('data-color') : 'Black';
+            const quantity = qtyVal ? parseInt(qtyVal.textContent) : 1;
+            
+            // Add custom props
+            const product = products.find(p => String(p.id) === String(id));
+            if (product) {
+                for (let i = 0; i < quantity; i++) {
+                    state.cart.push({ ...product, size: selectedSize, color: selectedColor });
+                }
+                updateCartIcon();
+                showToast(`${product.name} added to cart!`);
+                
+                const userName = state.profile?.full_name || state.user?.email?.split('@')[0] || 'Guest';
+                const userEmail = state.user?.email || 'N/A';
+                saveToGoogleSheets(userName, userEmail, 'N/A', 'Add to Cart', 'N/A', `Cart: ${product.name} (${selectedSize})`, 'N/A');
+            }
         });
     }
 
-    const buyBtn = document.querySelector('.order-now-btn-main');
-    if (buyBtn) {
-        buyBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = e.currentTarget.getAttribute('data-id');
-            startOrderNowFlow(id);
+    // Size button selection
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // Color pill selection
+    document.querySelectorAll('.color-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            document.querySelectorAll('.color-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+        });
+    });
+
+    // Quantity selectors
+    const decBtn = document.querySelector('.dec-qty');
+    const incBtn = document.querySelector('.inc-qty');
+    const qtyVal = document.querySelector('.quantity-value');
+    if (decBtn && incBtn && qtyVal) {
+        decBtn.addEventListener('click', () => {
+            let val = parseInt(qtyVal.textContent);
+            if (val > 1) {
+                qtyVal.textContent = val - 1;
+            }
+        });
+        incBtn.addEventListener('click', () => {
+            let val = parseInt(qtyVal.textContent);
+            qtyVal.textContent = val + 1;
         });
     }
 
-    // Product Gallery Switching
-    const thumbnails = document.querySelectorAll('.thumb-img-wrap');
+    // Product Gallery switching
+    const thumbnails = document.querySelectorAll('.thumbnail-item');
     const mainImg = document.getElementById('product-detail-main-img');
     if (mainImg) {
         thumbnails.forEach(thumb => {
@@ -1266,50 +1619,6 @@ function bindProductEvents() {
                     mainImg.style.opacity = '1';
                 }, 150);
             });
-        });
-    }
-
-    // Rating Star Logic
-    const stars = document.querySelectorAll('#rating-stars .star');
-    const ratingInput = document.getElementById('review-rating');
-    stars.forEach(star => {
-        star.addEventListener('click', () => {
-            const rating = star.getAttribute('data-rating');
-            ratingInput.value = rating;
-            stars.forEach((s, i) => {
-                if (i < rating) {
-                    s.classList.replace('bx-star', 'bxs-star');
-                } else {
-                    s.classList.replace('bxs-star', 'bx-star');
-                }
-            });
-        });
-    });
-
-    // Review Form Submission
-    const reviewForm = document.getElementById('add-review-form');
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = reviewForm.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Submitting...";
-            btn.disabled = true;
-
-            const reviewData = {
-                productId: state.currentProductId,
-                userName: document.getElementById('review-user-name').value,
-                rating: document.getElementById('review-rating').value,
-                comment: document.getElementById('review-comment').value
-            };
-
-            const success = await saveReview(reviewData);
-            if (success) {
-                renderView('product', { id: state.currentProductId }); // Refresh view
-            } else {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
         });
     }
 }
@@ -1937,16 +2246,19 @@ function renderCartContent() {
     modalContent.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">Your Cart</h2>
         <div style="max-height: 50vh; overflow-y: auto; padding-right: 1rem; margin-bottom: 1.5rem;">
-            ${groupedCart.map(item => `
-                <div class="cart-item">
-                    <img src="${item.image}" alt="${item.name}">
-                    <div class="cart-item-info flex" style="flex:1;">
-                        <h4>${item.name}</h4>
-                        <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
+            ${groupedCart.map(item => {
+                const firstImage = getProductImages(item)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
+                return `
+                    <div class="cart-item">
+                        <img src="${firstImage}" alt="${item.name}">
+                        <div class="cart-item-info flex" style="flex:1;">
+                            <h4>${item.name}</h4>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toLocaleString('en-IN')}</div>
+                        </div>
+                        <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                     </div>
-                    <div class="price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-                </div>
-            `).join('')}
+                `;
+            }).join('')}
         </div>
         
         <div class="cart-total">
@@ -2132,10 +2444,11 @@ function startOrderNowFlow(productId) {
 }
 
 function renderOrderNowAddressForm() {
+    const firstImage = getProductImages(state.orderNowData.item)[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop';
     modalContent.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">Fast Checkout</h2>
         <div class="cart-item" style="margin-bottom: 2rem; border: none; padding: 0;">
-            <img src="${state.orderNowData.item.image}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
+            <img src="${firstImage}" alt="${state.orderNowData.item.name}" style="width: 60px; height: 60px;">
             <div class="cart-item-info flex" style="flex:1;">
                 <h4 style="margin:0;">${state.orderNowData.item.name}</h4>
                 <div style="color: var(--text-muted); font-size: 0.875rem;">Total: ₹${state.orderNowData.item.price.toLocaleString('en-IN')}</div>
