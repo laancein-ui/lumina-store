@@ -710,7 +710,7 @@ function setupAIChat() {
     function addAIMessage(text) {
         const msg = document.createElement('div');
         msg.className = 'ai-message';
-        msg.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        msg.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>₹1</strong>');
         messages.appendChild(msg);
         messages.scrollTop = messages.scrollHeight;
     }
@@ -994,7 +994,7 @@ function renderShopPage() {
                                     <div class="product-card-name">${p.name}</div>
                                     <button class="product-card-bag-btn" data-id="${p.id}"><i class='bx bx-shopping-bag'></i></button>
                                 </div>
-                                <div class="product-card-price">$${p.price.toFixed(2)}</div>
+                                <div class="product-card-price">₹${p.price.toFixed(2)}</div>
                                 <div class="product-card-colors">
                                     ${colorDots}
                                 </div>
@@ -1039,21 +1039,21 @@ function renderCheckoutPage() {
     const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
     
     const subtotal = item.price;
-    let subtotalStr = "$119.00";
-    let shippingStr = "$25.09";
-    let taxesStr = "$6.00";
-    let totalStr = "$129.99";
+    let subtotalStr = "₹119.00";
+    let shippingStr = "₹25.09";
+    let taxesStr = "₹6.00";
+    let totalStr = "₹129.99";
     
     if (item.id === 1) {
-        subtotalStr = "$119.00";
-        shippingStr = "$25.09";
-        taxesStr = "$6.00";
-        totalStr = "$129.99";
+        subtotalStr = "₹119.00";
+        shippingStr = "₹25.09";
+        taxesStr = "₹6.00";
+        totalStr = "₹129.99";
     } else {
-        subtotalStr = `$${(subtotal * 0.9).toFixed(2)}`;
-        shippingStr = `$${(subtotal * 0.1).toFixed(2)}`;
-        taxesStr = `$${(subtotal * 0.05).toFixed(2)}`;
-        totalStr = `$${subtotal.toFixed(2)}`;
+        subtotalStr = `₹${(subtotal * 0.9).toFixed(2)}`;
+        shippingStr = `₹${(subtotal * 0.1).toFixed(2)}`;
+        taxesStr = `₹${(subtotal * 0.05).toFixed(2)}`;
+        totalStr = `₹${subtotal.toFixed(2)}`;
     }
 
     return `
@@ -1132,7 +1132,7 @@ function renderCheckoutPage() {
                             </div>
                             <div class="summary-item-info">
                                 <div class="summary-item-name">${item.name}</div>
-                                <div class="summary-item-price">$${item.price.toFixed(2)}</div>
+                                <div class="summary-item-price">₹${item.price.toFixed(2)}</div>
                             </div>
                         </div>
                         
@@ -1178,10 +1178,14 @@ function renderCheckoutPage() {
 function bindCheckoutEvents() {
     const form = document.getElementById('shipping-address-form');
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const paymentMethod = document.querySelector('input[name="checkout_payment_method"]:checked').value;
+            const btn = form.querySelector('button[type="submit"]');
+            btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Securing Session...";
+            btn.disabled = true;
+            
+            const paymentMethod = document.querySelector('input[name="checkout_payment_method"]:checked')?.value || 'card';
             
             if (!state.orderNowData) {
                 state.orderNowData = {
@@ -1190,7 +1194,12 @@ function bindCheckoutEvents() {
                 };
             }
             
-            state.orderNowData.shippingAddress = {
+            const item = state.orderNowData.item;
+            const subtotal = item.price;
+            let total = subtotal;
+            if (item.id === 1) total = 129.99;
+            
+            const shipping = {
                 name: document.getElementById('ship-name').value,
                 email: document.getElementById('ship-email').value,
                 phone: document.getElementById('ship-phone').value,
@@ -1202,8 +1211,87 @@ function bindCheckoutEvents() {
                 country: document.getElementById('ship-country').value,
                 method: paymentMethod
             };
+            state.orderNowData.shippingAddress = shipping;
             
-            renderView('payment');
+            const fullAddress = `${shipping.line1}, ${shipping.line2}, ${shipping.city}, ${shipping.state}, ${shipping.zip}, ${shipping.country}`;
+
+            try {
+                // Call backend for Cashfree Order
+                const response = await fetch('https://lumina-store-i5tc.onrender.com/api/create-cashfree-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: total,
+                        customer_email: shipping.email || 'customer@example.com',
+                        customer_phone: shipping.phone || '9999999999',
+                        customer_id: "cust_" + Date.now()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.payment_session_id) {
+                    let cashfree = null;
+                    try { cashfree = Cashfree({ mode: "production" }); } catch (err) { console.warn(err); }
+                    if (!cashfree) throw new Error('Payment gateway unavailable.');
+                    
+                    cashfree.checkout({
+                        paymentSessionId: data.payment_session_id,
+                        redirectTarget: "_modal"
+                    }).then((result) => {
+                        if (result.error) {
+                            showToast("Payment Failed: " + result.error.message);
+                            btn.innerHTML = "CONTINUE TO PAYMENT";
+                            btn.disabled = false;
+                            return;
+                        }
+                        
+                        // Payment Successful
+                        const orderId = Math.floor(Math.random() * 90000 + 10000);
+                        const deliveryDate = new Date();
+                        deliveryDate.setDate(deliveryDate.getDate() + 4);
+                        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                        const deliveryStr = `${dayNames[deliveryDate.getDay()]}, ${monthNames[deliveryDate.getMonth()]} ${deliveryDate.getDate()}${deliveryDate.getDate() === 1 ? 'st' : deliveryDate.getDate() === 2 ? 'nd' : deliveryDate.getDate() === 3 ? 'rd' : 'th'}.`;
+                        
+                        state.lastOrder = {
+                            id: orderId,
+                            item,
+                            shipping,
+                            customerName: shipping.name || 'Guest',
+                            last4: '1234',
+                            deliveryStr
+                        };
+                        
+                        let orders = [];
+                        try { orders = JSON.parse(localStorage.getItem('laance_orders') || '[]'); } catch(e) {}
+                        orders.push({ id: 'ORD-' + orderId, date: new Date().toLocaleDateString(), item: item.name, price: item.price, status: 'Processing' });
+                        localStorage.setItem('laance_orders', JSON.stringify(orders));
+                        
+                        state.cart = [];
+                        updateCartIcon();
+                        
+                        saveToGoogleSheets(
+                            shipping.name || 'Guest', 
+                            shipping.email || '', 
+                            shipping.phone || '', 
+                            fullAddress, 
+                            shipping.zip || '', 
+                            item.name || '', 
+                            'Cashfree'
+                        );
+                        
+                        renderView('confirmation');
+                    });
+                } else {
+                    throw new Error(data.message || "Failed to create payment session");
+                }
+            } catch (err) {
+                console.error("Checkout Error:", err);
+                showToast("Error: " + err.message);
+                btn.innerHTML = "CONTINUE TO PAYMENT";
+                btn.disabled = false;
+            }
         });
     }
 }
@@ -1213,21 +1301,21 @@ function renderPaymentPage() {
     const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
     
     const subtotal = item.price;
-    let subtotalStr = "$119.00";
-    let shippingStr = "$25.09";
-    let taxesStr = "$6.00";
-    let totalStr = "$129.99";
+    let subtotalStr = "₹119.00";
+    let shippingStr = "₹25.09";
+    let taxesStr = "₹6.00";
+    let totalStr = "₹129.99";
     
     if (item.id === 1) {
-        subtotalStr = "$119.00";
-        shippingStr = "$25.09";
-        taxesStr = "$6.00";
-        totalStr = "$129.99";
+        subtotalStr = "₹119.00";
+        shippingStr = "₹25.09";
+        taxesStr = "₹6.00";
+        totalStr = "₹129.99";
     } else {
-        subtotalStr = `$${(subtotal * 0.9).toFixed(2)}`;
-        shippingStr = `$${(subtotal * 0.1).toFixed(2)}`;
-        taxesStr = `$${(subtotal * 0.05).toFixed(2)}`;
-        totalStr = `$${subtotal.toFixed(2)}`;
+        subtotalStr = `₹${(subtotal * 0.9).toFixed(2)}`;
+        shippingStr = `₹${(subtotal * 0.1).toFixed(2)}`;
+        taxesStr = `₹${(subtotal * 0.05).toFixed(2)}`;
+        totalStr = `₹${subtotal.toFixed(2)}`;
     }
 
     return `
@@ -1305,7 +1393,7 @@ function renderPaymentPage() {
                             </div>
                             <div class="summary-item-info">
                                 <div class="summary-item-name">${item.name}</div>
-                                <div class="summary-item-price">$${item.price.toFixed(2)}</div>
+                                <div class="summary-item-price">₹${item.price.toFixed(2)}</div>
                             </div>
                         </div>
                         
@@ -1408,10 +1496,10 @@ function renderOrderConfirmation() {
     const firstImage = getProductImages(item)[0] || 'assets/laance_placeholder.jpg';
     
     const subtotal = item.price;
-    const subtotalStr = `$${(subtotal * 0.9).toFixed(2)}`;
-    const shippingStr = `$${(subtotal * 0.1 * 0.95).toFixed(2)}`;
-    const taxesStr = `$${(subtotal * 0.05).toFixed(2)}`;
-    const totalStr = `$${subtotal.toFixed(2)}`;
+    const subtotalStr = `₹${(subtotal * 0.9).toFixed(2)}`;
+    const shippingStr = `₹${(subtotal * 0.1 * 0.95).toFixed(2)}`;
+    const taxesStr = `₹${(subtotal * 0.05).toFixed(2)}`;
+    const totalStr = `₹${subtotal.toFixed(2)}`;
     
     return `
         <div class="checkout-container">
@@ -1597,7 +1685,7 @@ function renderProductDetail(id) {
                 <!-- Right column: Product Info -->
                 <div class="product-info-panel">
                     <h1 class="product-detail-title">${product.name}</h1>
-                    <div class="product-detail-price">$${product.price.toFixed(2)}</div>
+                    <div class="product-detail-price">₹${product.price.toFixed(2)}</div>
                     
                     <p class="product-detail-desc">${product.desc}</p>
                     
@@ -2367,9 +2455,9 @@ function renderCartContent() {
                         <img src="${firstImage}" alt="${item.name}">
                         <div class="cart-item-info flex" style="flex:1;">
                             <h4>${item.name}</h4>
-                            <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × $${item.price.toFixed(2)}</div>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">Qty: ${item.quantity} × ₹${item.price.toFixed(2)}</div>
                         </div>
-                        <div class="price">$${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="price">₹${(item.price * item.quantity).toFixed(2)}</div>
                     </div>
                 `;
             }).join('')}
@@ -2377,7 +2465,7 @@ function renderCartContent() {
         
         <div class="cart-total">
             <span>Total</span>
-            <span style="font-weight: 700;">$${total.toFixed(2)}</span>
+            <span style="font-weight: 700;">₹${total.toFixed(2)}</span>
         </div>
         
         <button id="cart-checkout-btn" style="
