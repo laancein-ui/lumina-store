@@ -1154,21 +1154,7 @@ function renderCheckoutPage() {
                         </div>
                     </div>
                     
-                    <div class="payment-method-box">
-                        <h2 class="checkout-header-title">Payment Method</h2>
-                        <div class="payment-method-option">
-                            <input type="radio" name="checkout_payment_method" value="card" checked>
-                            <label><i class='bx bx-credit-card'></i> Credit/Debit Card</label>
-                        </div>
-                        <div class="payment-method-option">
-                            <input type="radio" name="checkout_payment_method" value="paypal">
-                            <label><i class='bx bxl-paypal'></i> PayPal</label>
-                        </div>
-                        <div class="payment-method-option">
-                            <input type="radio" name="checkout_payment_method" value="netbanking">
-                            <label><i class='bx bx-wallet'></i> Net Banking</label>
-                        </div>
-                    </div>
+                    <!-- Payment Method box removed as Cashfree handles it -->
                 </div>
             </div>
         </div>
