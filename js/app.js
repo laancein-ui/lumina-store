@@ -7,7 +7,7 @@ const defaultProducts = [
     {
         id: 1,
         name: "Oversized Blazer - Black",
-        price: 129.99,
+        price: 10789,
         image: "assets/laance_black_blazer.jpg,assets/laance_black_back.jpg",
         desc: "A sophisticated, relaxed-fit blazer with a defined shoulder and a single-button closure. Crafted from a premium wool blend.",
         category: "fashion",
@@ -22,7 +22,7 @@ const defaultProducts = [
     {
         id: 2,
         name: "High-Waist Trousers - Beige",
-        price: 89.50,
+        price: 7428,
         image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop",
         desc: "Tailored high-waisted trousers with wide-leg styling. Minimalist and sleek styling perfect for professional wear.",
         category: "fashion",
@@ -35,7 +35,7 @@ const defaultProducts = [
     {
         id: 3,
         name: "Pleated Midi Skirt - Camel",
-        price: 75.00,
+        price: 6225,
         image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop",
         desc: "Elegant pleated midi skirt with structured pleats and elastic waistband. Easy to dress up or down.",
         category: "fashion",
@@ -46,7 +46,7 @@ const defaultProducts = [
     {
         id: 4,
         name: "Silk Blouse Silk Blouse",
-        price: 75.00,
+        price: 6225,
         image: "assets/laance_white_blazer.jpg",
         desc: "Luxurious silk blouse featuring a clean buttonless look, relaxed drape, and breathable premium silk weave.",
         category: "fashion",
@@ -57,7 +57,7 @@ const defaultProducts = [
     {
         id: 5,
         name: "Trench Cort Trench Cort",
-        price: 89.00,
+        price: 7387,
         image: "assets/laance_beige_blazer.jpg",
         desc: "Classical double-breasted outerwear with structured storm flaps and button closures. Essential styling for cool days.",
         category: "fashion",
@@ -68,7 +68,7 @@ const defaultProducts = [
     {
         id: 6,
         name: "Trench Cort Trench Cort",
-        price: 89.00,
+        price: 7387,
         image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=600&auto=format&fit=crop",
         desc: "Minimalist modern outerwear without front buttons, styled with clean waist belts and a relaxed long fit.",
         category: "fashion",
@@ -79,7 +79,7 @@ const defaultProducts = [
     {
         id: 7,
         name: "Knit Sweetr Knit Sweatey",
-        price: 75.00,
+        price: 6225,
         image: "assets/laance_beige_knit.jpg",
         desc: "Ultra-soft knit sweater crafted with classic cable textures. Relaxed warmth for home or outdoor wear.",
         category: "fashion",
@@ -90,7 +90,7 @@ const defaultProducts = [
     {
         id: 8,
         name: "Oversle Midi Skirt - Dress",
-        price: 75.00,
+        price: 6225,
         image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop",
         desc: "Sophisticated midi-length knitted dress featuring side slits and a slim ribbed turtleneck fit.",
         category: "fashion",
@@ -500,8 +500,8 @@ const state = {
         try {
             return raw ? JSON.parse(raw) : {
                 'LUM-84920': {
-                    items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
-                    total: 349,
+                    items: [{ name: 'Laance Pro X ANC', price: 28967, quantity: 1 }],
+                    total: 28967,
                     shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
                     timeline: [
                         { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },

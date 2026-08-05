@@ -7,7 +7,7 @@ const defaultProducts = [
     {
         id: 1,
         name: "Dummy Product",
-        price: 999,
+        price: 82917,
         image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600",
         desc: "This is a dummy product description. It acts as a placeholder for testing the e-commerce store functionality."
     }
@@ -265,8 +265,8 @@ const state = {
         try {
             return raw ? JSON.parse(raw) : {
                 'LUM-84920': {
-                    items: [{ name: 'Laance Pro X ANC', price: 349, quantity: 1 }],
-                    total: 349,
+                    items: [{ name: 'Laance Pro X ANC', price: 28967, quantity: 1 }],
+                    total: 28967,
                     shipping: { address: '123 Fake St, NY', date: '2023-11-01' },
                     timeline: [
                         { date: 'Oct 24, 09:00 AM', title: 'Order Placed', completed: true },
